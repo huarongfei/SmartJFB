@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业体育比分系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 50px;
+            opacity: 0.9;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .card-description {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .card-features {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+        .status {
+            margin-top: 50px;
+            padding: 20px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status-item {
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .status-dot.connected {
+            background: #28a745;
+            box-shadow: 0 0 10px #28a745;
+        }
+        .status-dot.disconnected {
+            background: #dc3545;
+            box-shadow: 0 0 10px #dc3545;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 专业体育比分系统</h1>
+        <p class="subtitle">Professional Sports Scoreboard System</p>
+
+        <div class="cards">
+            <a href="/scoreboard.html" class="card">
+                <div class="card-icon">📊</div>
+                <div class="card-title">主记分牌</div>
+                <div class="card-description">
+                    面向观众的核心显示界面<br>
+                    时间、比分、节次、犯规数
+                </div>
+                <div class="card-features">
+                    • 毫秒级计时<br>
+                    • 大屏幕优化<br>
+                    • 自动数据同步
+                </div>
+            </a>
+
+            <a href="/admin.html" class="card">
+                <div class="card-icon">🎮</div>
+                <div class="card-title">管理面板</div>
+                <div class="card-description">
+                    技术台操作界面<br>
+                    比赛控制、事件记录、数据录入
+                </div>
+                <div class="card-features">
+                    • 比赛控制<br>
+                    • 事件记录<br>
+                    • 队员管理
+                </div>
+            </a>
+
+            <a href="/statistics.html" class="card">
+                <div class="card-icon">📈</div>
+                <div class="card-title">实时统计</div>
+                <div class="card-description">
+                    实时数据统计面板<br>
+                    供教练/技术台查看
+                </div>
+                <div class="card-features">
+                    • 对比统计<br>
+                    • 球员榜单<br>
+                    • 实时更新
+                </div>
+            </a>
+
+            <a href="/monitor.html" class="card">
+                <div class="card-icon">👁️</div>
+                <div class="card-title">技术台监控</div>
+                <div class="card-description">
+                    详细操作界面<br>
+                    为记录员、统计员提供数据视图
+                </div>
+                <div class="card-features">
+                    • 详细数据<br>
+                    • 多视图<br>
+                    • 快速操作
+                </div>
+            </a>
+
+            <a href="/stadium-screen.html" class="card">
+                <div class="card-icon">🏟️</div>
+                <div class="card-title">现场大屏</div>
+                <div class="card-description">
+                    场馆中央大屏控制<br>
+                    支持动画、视频、特写镜头
+                </div>
+                <div class="card-features">
+                    • 大屏控制<br>
+                    • 动画效果<br>
+                    • 视频支持
+                </div>
+            </a>
+
+            <a href="/export.html" class="card">
+                <div class="card-icon">📊</div>
+                <div class="card-title">数据导出</div>
+                <div class="card-description">
+                    导出比赛数据到多种格式<br>
+                    Excel、CSV、PDF
+                </div>
+                <div class="card-features">
+                    • 比赛摘要<br>
+                    • 技术统计<br>
+                    • Play-by-Play
+                </div>
+            </a>
+
+            <a href="/ad-manager.html" class="card">
+                <div class="card-icon">📢</div>
+                <div class="card-title">广告位管理</div>
+                <div class="card-description">
+                    管理比赛广告位<br>
+                    定时播放、统计追踪
+                </div>
+                <div class="card-features">
+                    • 多位置广告<br>
+                    • 定时播放<br>
+                    • 播放统计
+                </div>
+            </a>
+
+            <a href="/layout-editor.html" class="card">
+                <div class="card-icon">🎨</div>
+                <div class="card-title">布局编辑器</div>
+                <div class="card-description">
+                    自定义显示布局<br>
+                    拖拽式可视化编辑
+                </div>
+                <div class="card-features">
+                    • 拖拽组件<br>
+                    • 多种布局<br>
+                    • 实时预览
+                </div>
+            </a>
+        </div>
+
+        <div class="status">
+            <div class="status-item">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">正在连接服务器...</span>
+            </div>
+            <div class="status-item" style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+                系统功能：篮球/足球双模式 • 毫秒级计时 • WebSocket实时同步 • 多屏幕支持 • Play-by-Play记录 • 数据导出
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/socket-client.js"></script>
+    <script>
+        // 检查连接状态
+        socket.on('connect', () => {
+            document.getElementById('statusDot').className = 'status-dot connected';
+            document.getElementById('statusText').textContent = '服务器已连接';
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('statusDot').className = 'status-dot disconnected';
+            document.getElementById('statusText').textContent = '服务器已断开';
+        });
+    </script>
+</body>
+</html>

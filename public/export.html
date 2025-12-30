@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据导出 - Data Export | 专业体育比分系统</title>
+  <link rel="stylesheet" href="css/export.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 头部 -->
+    <header class="header">
+      <h1>📊 数据导出中心</h1>
+      <p>Data Export Center</p>
+      <button id="backBtn" class="btn-back">← 返回</button>
+    </header>
+
+    <!-- 导出选项 -->
+    <div class="export-sections">
+      <!-- 比赛摘要 -->
+      <div class="export-card">
+        <div class="card-header">
+          <h2>📋 比赛摘要</h2>
+          <p>Match Summary</p>
+        </div>
+        <div class="card-body">
+          <p class="description">导出比赛的基本信息、最终比分、最佳球员等摘要数据</p>
+          <div class="format-options">
+            <button class="format-btn excel" data-type="summary" data-format="excel">
+              <span class="icon">📗</span>
+              <span class="label">Excel</span>
+            </button>
+            <button class="format-btn csv" data-type="summary" data-format="csv">
+              <span class="icon">📄</span>
+              <span class="label">CSV</span>
+            </button>
+            <button class="format-btn pdf" data-type="summary" data-format="pdf">
+              <span class="icon">📕</span>
+              <span class="label">PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 球队统计 -->
+      <div class="export-card">
+        <div class="card-header">
+          <h2>🏆 球队技术统计</h2>
+          <p>Team Statistics</p>
+        </div>
+        <div class="card-body">
+          <p class="description">导出主客队的技术统计对比数据（得分、命中率、助攻、篮板等）</p>
+          <div class="format-options">
+            <button class="format-btn excel" data-type="team-stats" data-format="excel">
+              <span class="icon">📗</span>
+              <span class="label">Excel</span>
+            </button>
+            <button class="format-btn csv" data-type="team-stats" data-format="csv">
+              <span class="icon">📄</span>
+              <span class="label">CSV</span>
+            </button>
+            <button class="format-btn pdf" data-type="team-stats" data-format="pdf">
+              <span class="icon">📕</span>
+              <span class="label">PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 球员统计 -->
+      <div class="export-card">
+        <div class="card-header">
+          <h2>👥 球员个人数据</h2>
+          <p>Player Statistics</p>
+        </div>
+        <div class="card-body">
+          <p class="description">导出所有球员的详细个人数据（得分、助攻、犯规等）</p>
+          <div class="format-options">
+            <button class="format-btn excel" data-type="player-stats" data-format="excel">
+              <span class="icon">📗</span>
+              <span class="label">Excel</span>
+            </button>
+            <button class="format-btn csv" data-type="player-stats" data-format="csv">
+              <span class="icon">📄</span>
+              <span class="label">CSV</span>
+            </button>
+            <button class="format-btn pdf" data-type="player-stats" data-format="pdf">
+              <span class="icon">📕</span>
+              <span class="label">PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Play-by-Play -->
+      <div class="export-card">
+        <div class="card-header">
+          <h2>📝 比赛事件序列</h2>
+          <p>Play-by-Play</p>
+        </div>
+        <div class="card-body">
+          <p class="description">导出完整的比赛事件时间轴（每一秒发生的所有事件）</p>
+          <div class="format-options">
+            <button class="format-btn excel" data-type="playbyplay" data-format="excel">
+              <span class="icon">📗</span>
+              <span class="label">Excel</span>
+            </button>
+            <button class="format-btn csv" data-type="playbyplay" data-format="csv">
+              <span class="icon">📄</span>
+              <span class="label">CSV</span>
+            </button>
+            <button class="format-btn pdf" data-type="playbyplay" data-format="pdf">
+              <span class="icon">📕</span>
+              <span class="label">PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 完整数据 -->
+      <div class="export-card full-width">
+        <div class="card-header">
+          <h2>📦 完整比赛数据</h2>
+          <p>Full Match Data</p>
+        </div>
+        <div class="card-body">
+          <p class="description">导出所有数据到一个文件，包含比赛摘要、球队统计、球员数据、事件序列</p>
+          <div class="format-options">
+            <button class="format-btn excel large" data-type="all" data-format="excel">
+              <span class="icon">📗</span>
+              <span class="label">导出完整 Excel</span>
+            </button>
+            <button class="format-btn csv large" data-type="all" data-format="csv">
+              <span class="icon">📄</span>
+              <span class="label">导出完整 CSV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 批量导出 -->
+    <div class="batch-export">
+      <h3>⚡ 批量导出</h3>
+      <p>一次性导出所有可用格式</p>
+      <button id="batchExportBtn" class="btn-batch">
+        <span class="icon">📦</span>
+        批量导出所有格式
+      </button>
+    </div>
+
+    <!-- 导出历史 -->
+    <div class="export-history">
+      <h3>📜 导出历史</h3>
+      <div id="exportHistory" class="history-list">
+        <p class="empty">暂无导出记录</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出进度模态框 -->
+  <div id="exportModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>导出中...</h3>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <p class="progress-text">准备中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/socket-client.js"></script>
+  <script src="js/export.js"></script>
+</body>
+</html>
