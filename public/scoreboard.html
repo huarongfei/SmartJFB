@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主记分牌 - SmartJFB</title>
+    <link rel="stylesheet" href="/css/scoreboard.css">
+</head>
+<body>
+    <div class="scoreboard">
+        <div class="header">
+            <h1>主记分牌</h1>
+        </div>
+
+        <div class="match-info">
+            <div class="match-status">
+                <span id="matchStatus">准备就绪</span>
+            </div>
+            <div class="match-type">
+                <span id="matchType">篮球</span>
+            </div>
+        </div>
+
+        <div class="teams">
+            <div class="team home">
+                <div class="team-info">
+                    <img id="homeTeamLogo" src="/images/default-logo.png" alt="主队队徽" class="team-logo">
+                    <div class="team-name">
+                        <h2 id="homeTeamName">主队</h2>
+                        <span id="homeTeamScore">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="score-display">
+                <div class="score">
+                    <span id="homeScore">0</span>
+                    <span class="separator">-</span>
+                    <span id="awayScore">0</span>
+                </div>
+                <div class="time">
+                    <span id="gameTime">12:00</span>
+                </div>
+                <div class="period">
+                    <span>第</span>
+                    <span id="currentPeriod">1</span>
+                    <span>节</span>
+                </div>
+            </div>
+
+            <div class="team away">
+                <div class="team-info">
+                    <img id="awayTeamLogo" src="/images/default-logo.png" alt="客队队徽" class="team-logo">
+                    <div class="team-name">
+                        <h2 id="awayTeamName">客队</h2>
+                        <span id="awayTeamScore">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shot-clock" id="shotClockContainer">
+            <div class="shot-clock-label">进攻时钟</div>
+            <div class="shot-clock-time" id="shotClock">24</div>
+        </div>
+
+        <div class="footer">
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">已连接</span>
+            </div>
+            <button onclick="window.location.href='/'" class="btn-back">返回主页</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/socket-client.js"></script>
+    <script>
+        // 初始化Socket连接
+        const socket = initSocket('scoreboard');
+
+        // 监听初始数据
+        socket.on('initial_data', (data) => {
+            updateMatchInfo(data);
+        });
+
+        // 监听数据更新
+        socket.on('update', (data) => {
+            if (data.matchInfo) {
+                updateMatchInfo(data.matchInfo);
+            }
+        });
+
+        // 监听计时器更新
+        socket.on('timer_update', (data) => {
+            updateTimer(data);
+        });
+
+        // 更新比赛信息
+        function updateMatchInfo(data) {
+            if (!data) return;
+
+            // 更新队伍信息
+            if (data.homeTeam) {
+                document.getElementById('homeTeamName').textContent = data.homeTeam.name || '主队';
+                document.getElementById('homeTeamScore').textContent = data.homeTeam.score || 0;
+                document.getElementById('homeScore').textContent = data.homeTeam.score || 0;
+                if (data.homeTeam.logo) {
+                    document.getElementById('homeTeamLogo').src = data.homeTeam.logo;
+                }
+            }
+
+            if (data.awayTeam) {
+                document.getElementById('awayTeamName').textContent = data.awayTeam.name || '客队';
+                document.getElementById('awayTeamScore').textContent = data.awayTeam.score || 0;
+                document.getElementById('awayScore').textContent = data.awayTeam.score || 0;
+                if (data.awayTeam.logo) {
+                    document.getElementById('awayTeamLogo').src = data.awayTeam.logo;
+                }
+            }
+
+            // 更新比赛状态
+            if (data.status) {
+                const statusMap = {
+                    'not_started': '未开始',
+                    'in_progress': '进行中',
+                    'paused': '暂停',
+                    'completed': '已结束'
+                };
+                document.getElementById('matchStatus').textContent = statusMap[data.status] || '未知';
+            }
+
+            // 更新比赛类型
+            if (data.sportType) {
+                const typeMap = {
+                    'basketball': '篮球',
+                    'football': '足球'
+                };
+                document.getElementById('matchType').textContent = typeMap[data.sportType] || '未知';
+            }
+
+            // 更新当前节次
+            if (data.currentPeriod !== undefined) {
+                document.getElementById('currentPeriod').textContent = data.currentPeriod + 1;
+            }
+        }
+
+        // 更新计时器
+        function updateTimer(data) {
+            if (!data) return;
+
+            // 更新比赛时间
+            if (data.gameTime !== undefined) {
+                const minutes = Math.floor(data.gameTime / 60000);
+                const seconds = Math.floor((data.gameTime % 60000) / 1000);
+                document.getElementById('gameTime').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // 更新进攻时钟
+            if (data.shotClock !== undefined) {
+                document.getElementById('shotClock').textContent = data.shotClock;
+            }
+        }
+    </script>
+</body>
+</html>

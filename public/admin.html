@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理面板 - SmartJFB</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏀 SmartJFB 管理面板</h1>
+            <div class="header-controls">
+                <div id="connectionStatus" class="connection-status disconnected">
+                    <span class="status-dot"></span>
+                    <span class="status-text">未连接</span>
+                </div>
+                <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- 比赛信息 -->
+            <section class="section">
+                <h2>📋 比赛信息</h2>
+                <div class="match-info-grid">
+                    <div class="info-item">
+                        <span class="label">比赛状态</span>
+                        <select id="matchStatus" class="select-small">
+                            <option value="未开始">未开始</option>
+                            <option value="进行中">进行中</option>
+                            <option value="暂停">暂停</option>
+                            <option value="已结束">已结束</option>
+                        </select>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">当前节数</span>
+                        <select id="currentQuarter" class="select-small">
+                            <option value="1">第1节</option>
+                            <option value="2">第2节</option>
+                            <option value="3">第3节</option>
+                            <option value="4">第4节</option>
+                            <option value="OT">加时赛</option>
+                        </select>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">比赛时间</span>
+                        <span id="gameTimeDisplay" class="value">12:00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 队伍管理与球员 -->
+            <section class="section">
+                <h2>👥 队伍与球员管理</h2>
+                <div class="teams-section">
+                    <!-- 主队 -->
+                    <div class="team-section">
+                        <div class="team-header">
+                            <h3>主队</h3>
+                            <input type="text" id="homeTeamNameInput" class="input-text" placeholder="输入队名">
+                            <button id="btnUpdateHomeName" class="btn btn-small btn-info">更新队名</button>
+                            <button id="btnAddHomePlayer" class="btn btn-small btn-success">添加球员</button>
+                        </div>
+                        <div id="homePlayerList" class="player-list">
+                            <div class="no-players">暂无球员</div>
+                        </div>
+                    </div>
+
+                    <!-- 客队 -->
+                    <div class="team-section">
+                        <div class="team-header">
+                            <h3>客队</h3>
+                            <input type="text" id="awayTeamNameInput" class="input-text" placeholder="输入队名">
+                            <button id="btnUpdateAwayName" class="btn btn-small btn-info">更新队名</button>
+                            <button id="btnAddAwayPlayer" class="btn btn-small btn-success">添加球员</button>
+                        </div>
+                        <div id="awayPlayerList" class="player-list">
+                            <div class="no-players">暂无球员</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 记分操作 -->
+            <section class="section">
+                <h2>📝 记分操作</h2>
+                <div class="scoring-section">
+                    <!-- 选择队伍 -->
+                    <div class="scoring-header">
+                        <select id="scoringTeam" class="select-small">
+                            <option value="">选择队伍</option>
+                            <option value="home">主队</option>
+                            <option value="away">客队</option>
+                        </select>
+                        <select id="scoringPlayer" class="select-small">
+                            <option value="">选择球员</option>
+                        </select>
+                    </div>
+
+                    <!-- 得分按钮 -->
+                    <div class="score-buttons-large">
+                        <div class="score-type-section">
+                            <h4>投篮得分</h4>
+                            <div class="score-grid">
+                                <button id="btnScore1" class="btn btn-score btn-1pt">1分（罚球）</button>
+                                <button id="btnScore2" class="btn btn-score btn-2pt">2分（中投）</button>
+                                <button id="btnScore3" class="btn btn-score btn-3pt">3分（三分）</button>
+                            </div>
+                        </div>
+
+                        <div class="score-type-section">
+                            <h4>其他事件</h4>
+                            <div class="score-grid">
+                                <button id="btnFoul" class="btn btn-score">犯规</button>
+                                <button id="btnTimeout" class="btn btn-score">暂停</button>
+                                <button id="btnSubtract" class="btn btn-score btn-subtract">-1分（修正）</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 计时控制 -->
+            <section class="section">
+                <h2>⏱️ 计时控制</h2>
+                <div class="timer-section">
+                    <div class="timer-display-large" id="timerDisplay">12:00</div>
+                    <div class="timer-buttons">
+                        <button id="btnStart" class="btn btn-success">开始</button>
+                        <button id="btnPause" class="btn btn-info">暂停</button>
+                        <button id="btnContinue" class="btn">继续</button>
+                        <button id="btnReset" class="btn">重置</button>
+                    </div>
+                    <div class="quick-timer-controls">
+                        <button id="btnAddMinute" class="btn btn-small">+1分钟</button>
+                        <button id="btnSubMinute" class="btn btn-small">-1分钟</button>
+                        <button id="btnSetTime" class="btn btn-small">设置时间</button>
+                        <button id="btnEndQuarter" class="btn btn-small">本节结束</button>
+                    </div>
+                </div>
+
+                <!-- 进攻时钟 -->
+                <div class="shot-clock-section">
+                    <h3>⚡ 进攻时钟</h3>
+                    <div class="shot-clock-display" id="shotClockDisplay">24</div>
+                    <div class="shot-clock-controls">
+                        <button id="btnStartShotClock" class="btn btn-small">开始</button>
+                        <button id="btnResetShotClock" class="btn btn-small">重置</button>
+                        <button id="btnPauseShotClock" class="btn btn-small">暂停</button>
+                        <button id="btnShotClock24" class="btn btn-small btn-success">24秒</button>
+                        <button id="btnShotClock14" class="btn btn-small btn-success">14秒</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 比分显示 -->
+            <section class="section">
+                <h2>🏆 实时比分</h2>
+                <div class="score-display-section">
+                    <div class="team-score-card">
+                        <h3 id="homeTeamDisplay" class="team-name-display">主队</h3>
+                        <div class="score-value-large" id="homeScore">0</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="team-score-card">
+                        <h3 id="awayTeamDisplay" class="team-name-display">客队</h3>
+                        <div class="score-value-large" id="awayScore">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 事件记录 -->
+            <section class="section">
+                <h2>📊 事件记录</h2>
+                <div class="events-section">
+                    <div class="events-controls">
+                        <button id="btnClearEvents" class="btn btn-small btn-subtract">清空所有事件</button>
+                    </div>
+                    <div id="eventsList" class="events-list">
+                        <div class="no-events">暂无事件记录</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast提示 -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <!-- 设置时间弹窗 -->
+    <div id="setTimeModal" class="modal">
+        <div class="modal-content">
+            <h3>设置比赛时间</h3>
+            <div class="time-inputs">
+                <input type="number" id="inputMinutes" placeholder="分钟" min="0" max="60">
+                <span>:</span>
+                <input type="number" id="inputSeconds" placeholder="秒数" min="0" max="59">
+            </div>
+            <div class="preset-times">
+                <button class="btn-preset" data-minutes="12">12分钟</button>
+                <button class="btn-preset" data-minutes="10">10分钟</button>
+                <button class="btn-preset" data-minutes="8">8分钟</button>
+                <button class="btn-preset" data-minutes="5">5分钟</button>
+            </div>
+            <div class="modal-actions">
+                <button id="btnConfirmTime" class="btn btn-success">确认</button>
+                <button id="btnCancelTime" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加球员弹窗 -->
+    <div id="addPlayerModal" class="modal">
+        <div class="modal-content">
+            <h3>添加球员</h3>
+            <div class="player-inputs">
+                <input type="text" id="playerNumberInput" class="input-text" placeholder="球衣号码" maxlength="3">
+                <input type="text" id="playerNameInput" class="input-text" placeholder="球员姓名">
+            </div>
+            <div class="modal-actions">
+                <button id="btnConfirmPlayer" class="btn btn-success">确认添加</button>
+                <button id="btnCancelPlayer" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Socket.IO连接
+        const socket = io('http://localhost:3001');
+
+        // 当前选择的队伍
+        let currentAddTeam = 'home';
+
+        // 连接状态更新
+        socket.on('connect', () => {
+            updateConnectionStatus(true);
+            console.log('Socket.IO已连接');
+            socket.emit('register_client', 'admin');
+        });
+
+        socket.on('disconnect', () => {
+            updateConnectionStatus(false);
+            console.log('Socket.IO已断开');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Socket.IO错误:', error);
+            updateConnectionStatus(false);
+        });
+
+        socket.on('initial_data', (data) => {
+            handleUpdate({ matchInfo: data });
+        });
+
+        socket.on('data_update', (data) => {
+            handleUpdate(data);
+        });
+
+        socket.on('timer_update', (data) => {
+            handleUpdate({ timerStatus: data });
+        });
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.classList.remove('disconnected');
+                status.classList.add('connected');
+                status.querySelector('.status-text').textContent = '已连接';
+            } else {
+                status.classList.remove('connected');
+                status.classList.add('disconnected');
+                status.querySelector('.status-text').textContent = '未连接';
+            }
+        }
+
+        function handleUpdate(data) {
+            if (data.matchInfo) {
+                updateMatchInfo(data.matchInfo);
+            }
+            if (data.timerStatus) {
+                updateTimerStatus(data.timerStatus);
+            }
+            if (data.events) {
+                updateEventsList(data.events);
+            }
+        }
+
+        function updateMatchInfo(matchInfo) {
+            // 更新队伍名称和比分
+            document.getElementById('homeTeamDisplay').textContent = matchInfo.homeTeam?.name || '主队';
+            document.getElementById('awayTeamDisplay').textContent = matchInfo.awayTeam?.name || '客队';
+            document.getElementById('homeScore').textContent = matchInfo.homeTeam?.score || 0;
+            document.getElementById('awayScore').textContent = matchInfo.awayTeam?.score || 0;
+            document.getElementById('homeTeamNameInput').value = matchInfo.homeTeam?.name || '';
+            document.getElementById('awayTeamNameInput').value = matchInfo.awayTeam?.name || '';
+
+            // 更新球员列表
+            if (matchInfo.homeTeam?.players) {
+                displayPlayerList('homePlayerList', matchInfo.homeTeam.players, 'home');
+            }
+            if (matchInfo.awayTeam?.players) {
+                displayPlayerList('awayPlayerList', matchInfo.awayTeam.players, 'away');
+            }
+
+            // 更新球员选择下拉框
+            updatePlayerSelect(matchInfo);
+        }
+
+        function displayPlayerList(containerId, players, team) {
+            const container = document.getElementById(containerId);
+            if (!players || players.length === 0) {
+                container.innerHTML = '<div class="no-players">暂无球员</div>';
+                return;
+            }
+
+            container.innerHTML = players.map((player, index) => `
+                <div class="player-card">
+                    <div class="player-number">#${player.number || '-'}</div>
+                    <div class="player-name">${player.name || '未知'}</div>
+                    <div class="player-stats">
+                        <span class="stat-item">${player.statistics?.points || 0}分</span>
+                        <span class="stat-item">${player.statistics?.fouls || 0}犯</span>
+                    </div>
+                    <button class="btn-remove-player" data-team="${team}" data-index="${index}">删除</button>
+                </div>
+            `).join('');
+
+            // 绑定删除按钮事件
+            container.querySelectorAll('.btn-remove-player').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const team = e.target.dataset.team;
+                    const index = parseInt(e.target.dataset.index);
+                    removePlayer(team, index);
+                });
+            });
+        }
+
+        function updatePlayerSelect(matchInfo) {
+            const select = document.getElementById('scoringPlayer');
+            const selectedTeam = document.getElementById('scoringTeam').value;
+            
+            select.innerHTML = '<option value="">选择球员</option>';
+            
+            if (selectedTeam) {
+                const teamData = selectedTeam === 'home' ? matchInfo.homeTeam : matchInfo.awayTeam;
+                if (teamData && teamData.players) {
+                    teamData.players.forEach((player, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `#${player.number || '-'} ${player.name || '未知'}`;
+                        select.appendChild(option);
+                    });
+                }
+            }
+        }
+
+        function updateTimerStatus(timerStatus) {
+            // 更新比赛时钟
+            const gameMinutes = Math.floor(timerStatus.gameClock / 60);
+            const gameSeconds = timerStatus.gameClock % 60;
+            const gameTimeStr = `${String(gameMinutes).padStart(2, '0')}:${String(gameSeconds).padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = gameTimeStr;
+            document.getElementById('gameTimeDisplay').textContent = gameTimeStr;
+
+            // 更新进攻时钟
+            document.getElementById('shotClockDisplay').textContent = timerStatus.shotClock || 0;
+        }
+
+        function updateEventsList(events) {
+            const container = document.getElementById('eventsList');
+            if (!events || events.length === 0) {
+                container.innerHTML = '<div class="no-events">暂无事件记录</div>';
+                return;
+            }
+
+            container.innerHTML = events.slice().reverse().map((event, index) => {
+                const actualIndex = events.length - 1 - index;
+                const eventIcon = getEventIcon(event.type);
+                const teamName = event.team === 'home' ? 
+                    (document.getElementById('homeTeamDisplay').textContent) : 
+                    (document.getElementById('awayTeamDisplay').textContent);
+                
+                let description = getEventDescription(event);
+                
+                return `
+                    <div class="event-item">
+                        <div class="event-icon">${eventIcon}</div>
+                        <div class="event-details">
+                            <div class="event-team">${teamName}</div>
+                            <div class="event-desc">${description}</div>
+                            <div class="event-time">${event.quarter}节 ${formatEventTime(event.gameTime)}</div>
+                        </div>
+                        <button class="btn-delete-event" data-index="${actualIndex}">删除</button>
+                    </div>
+                `;
+            }).join('');
+
+            // 绑定删除事件按钮
+            container.querySelectorAll('.btn-delete-event').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    deleteEvent(index);
+                });
+            });
+        }
+
+        function getEventIcon(type) {
+            const icons = {
+                'score': '🏀',
+                'foul': '⚠️',
+                'timeout': '⏸️',
+                'quarter': '📋'
+            };
+            return icons[type] || '📌';
+        }
+
+        function getEventDescription(event) {
+            switch (event.type) {
+                case 'score':
+                    const player = event.playerName || `#${event.playerNumber || '?'}`;
+                    const points = event.points === 1 ? '罚球' : event.points === 2 ? '2分' : '3分';
+                    return `${player} 投中 ${points}`;
+                case 'foul':
+                    const foulPlayer = event.playerName || `#${event.playerNumber || '?'}`;
+                    const foulType = event.foulType || '普通犯规';
+                    return `${foulPlayer} ${foulType}`;
+                case 'timeout':
+                    return '请求暂停';
+                case 'quarter':
+                    return `进入${event.quarter}节`;
+                default:
+                    return event.description || '未知事件';
+            }
+        }
+
+        function formatEventTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // API调用函数
+        async function addEvent(eventData) {
+            try {
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(eventData)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('事件已记录', 'success');
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('记录事件失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        async function deleteEvent(index) {
+            try {
+                const response = await fetch(`/api/events/${index}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('事件已删除', 'success');
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除事件失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        async function addPlayer(team, number, name) {
+            try {
+                const response = await fetch(`/api/teams/${team}/players`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ number, name })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('球员已添加', 'success');
+                    document.getElementById('addPlayerModal').style.display = 'none';
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('添加球员失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        async function removePlayer(team, index) {
+            if (!confirm('确定要删除该球员吗？')) return;
+            
+            try {
+                const response = await fetch(`/api/teams/${team}/players/${index}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('球员已删除', 'success');
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除球员失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // 初始化事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            // 更新队名
+            document.getElementById('btnUpdateHomeName').addEventListener('click', async () => {
+                const name = document.getElementById('homeTeamNameInput').value;
+                if (name) {
+                    try {
+                        const response = await fetch('/api/teams/home', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            showMessage('主队名称已更新', 'success');
+                        } else {
+                            showMessage(data.message || '操作失败', 'error');
+                        }
+                    } catch (error) {
+                        showMessage('操作失败', 'error');
+                    }
+                }
+            });
+
+            document.getElementById('btnUpdateAwayName').addEventListener('click', async () => {
+                const name = document.getElementById('awayTeamNameInput').value;
+                if (name) {
+                    try {
+                        const response = await fetch('/api/teams/away', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            showMessage('客队名称已更新', 'success');
+                        } else {
+                            showMessage(data.message || '操作失败', 'error');
+                        }
+                    } catch (error) {
+                        showMessage('操作失败', 'error');
+                    }
+                }
+            });
+
+            // 添加球员按钮
+            document.getElementById('btnAddHomePlayer').addEventListener('click', () => {
+                currentAddTeam = 'home';
+                document.getElementById('addPlayerModal').style.display = 'block';
+            });
+
+            document.getElementById('btnAddAwayPlayer').addEventListener('click', () => {
+                currentAddTeam = 'away';
+                document.getElementById('addPlayerModal').style.display = 'block';
+            });
+
+            // 确认添加球员
+            document.getElementById('btnConfirmPlayer').addEventListener('click', () => {
+                const number = document.getElementById('playerNumberInput').value;
+                const name = document.getElementById('playerNameInput').value;
+                
+                if (number && name) {
+                    addPlayer(currentAddTeam, number, name);
+                    document.getElementById('playerNumberInput').value = '';
+                    document.getElementById('playerNameInput').value = '';
+                } else {
+                    showMessage('请填写完整信息', 'error');
+                }
+            });
+
+            // 取消添加球员
+            document.getElementById('btnCancelPlayer').addEventListener('click', () => {
+                document.getElementById('addPlayerModal').style.display = 'none';
+            });
+
+            // 队伍选择变化时更新球员下拉框
+            document.getElementById('scoringTeam').addEventListener('change', async () => {
+                try {
+                    const response = await fetch('/api/match-info');
+                    const data = await response.json();
+                    if (data.success) {
+                        updatePlayerSelect(data.data);
+                    }
+                } catch (error) {
+                    console.error('获取比赛信息失败:', error);
+                }
+            });
+
+            // 得分按钮
+            document.getElementById('btnScore1').addEventListener('click', () => recordScore(1));
+            document.getElementById('btnScore2').addEventListener('click', () => recordScore(2));
+            document.getElementById('btnScore3').addEventListener('click', () => recordScore(3));
+            document.getElementById('btnFoul').addEventListener('click', recordFoul);
+            document.getElementById('btnTimeout').addEventListener('click', recordTimeout);
+            document.getElementById('btnSubtract').addEventListener('click', subtractScore);
+
+            function recordScore(points) {
+                const team = document.getElementById('scoringTeam').value;
+                const playerIndex = document.getElementById('scoringPlayer').value;
+                
+                if (!team) {
+                    showMessage('请选择队伍', 'error');
+                    return;
+                }
+                
+                let eventData = {
+                    type: 'score',
+                    team,
+                    points,
+                    gameTime: 0, // 从服务器获取
+                    quarter: document.getElementById('currentQuarter').value
+                };
+
+                // 如果选择了球员，添加球员信息
+                if (playerIndex !== '') {
+                    const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+                    eventData.playerIndex = parseInt(playerIndex);
+                    // 从DOM获取球员信息
+                    const playerCard = document.querySelector(`#${team}PlayerList .player-card:nth-child(${parseInt(playerIndex) + 1})`);
+                    if (playerCard) {
+                        eventData.playerNumber = playerCard.querySelector('.player-number').textContent.replace('#', '');
+                        eventData.playerName = playerCard.querySelector('.player-name').textContent;
+                    }
+                }
+
+                addEvent(eventData);
+            }
+
+            function recordFoul() {
+                const team = document.getElementById('scoringTeam').value;
+                const playerIndex = document.getElementById('scoringPlayer').value;
+                
+                if (!team) {
+                    showMessage('请选择队伍', 'error');
+                    return;
+                }
+                
+                let eventData = {
+                    type: 'foul',
+                    team,
+                    foulType: '普通犯规',
+                    gameTime: 0,
+                    quarter: document.getElementById('currentQuarter').value
+                };
+
+                if (playerIndex !== '') {
+                    const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+                    eventData.playerIndex = parseInt(playerIndex);
+                    const playerCard = document.querySelector(`#${team}PlayerList .player-card:nth-child(${parseInt(playerIndex) + 1})`);
+                    if (playerCard) {
+                        eventData.playerNumber = playerCard.querySelector('.player-number').textContent.replace('#', '');
+                        eventData.playerName = playerCard.querySelector('.player-name').textContent;
+                    }
+                }
+
+                addEvent(eventData);
+            }
+
+            function recordTimeout() {
+                const team = document.getElementById('scoringTeam').value;
+                if (!team) {
+                    showMessage('请选择队伍', 'error');
+                    return;
+                }
+                
+                addEvent({
+                    type: 'timeout',
+                    team,
+                    gameTime: 0,
+                    quarter: document.getElementById('currentQuarter').value
+                });
+            }
+
+            function subtractScore() {
+                const team = document.getElementById('scoringTeam').value;
+                if (!team) {
+                    showMessage('请选择队伍', 'error');
+                    return;
+                }
+                
+                // 调用API减分
+                fetch('/api/teams/score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team, points: -1 })
+                }).then(() => {
+                    showMessage('已减1分', 'success');
+                }).catch(() => {
+                    showMessage('操作失败', 'error');
+                });
+            }
+
+            // 计时控制
+            document.getElementById('btnStart').addEventListener('click', () => {
+                fetch('/api/timer/start', { method: 'POST' })
+                    .then(() => showMessage('比赛已开始', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnPause').addEventListener('click', () => {
+                fetch('/api/timer/pause', { method: 'POST' })
+                    .then(() => showMessage('比赛已暂停', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnContinue').addEventListener('click', () => {
+                fetch('/api/timer/start', { method: 'POST' })
+                    .then(() => showMessage('比赛已继续', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnReset').addEventListener('click', () => {
+                if (confirm('确定要重置比赛吗？')) {
+                    fetch('/api/timer/reset', { method: 'POST' })
+                        .then(() => showMessage('比赛已重置', 'success'))
+                        .catch(() => showMessage('操作失败', 'error'));
+                }
+            });
+
+            document.getElementById('btnAddMinute').addEventListener('click', () => {
+                fetch('/api/timer/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds: 60 })
+                }).then(() => showMessage('已增加1分钟', 'success'))
+                  .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnSubMinute').addEventListener('click', () => {
+                fetch('/api/timer/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds: -60 })
+                }).then(() => showMessage('已减少1分钟', 'success'))
+                  .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnEndQuarter').addEventListener('click', () => {
+                fetch('/api/timer/end-quarter', { method: 'POST' })
+                    .then(() => showMessage('本节已结束', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            // 进攻时钟控制
+            document.getElementById('btnStartShotClock').addEventListener('click', () => {
+                fetch('/api/shot-clock/start', { method: 'POST' })
+                    .then(() => showMessage('进攻时钟已开始', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnResetShotClock').addEventListener('click', () => {
+                fetch('/api/shot-clock/reset', { method: 'POST' })
+                    .then(() => showMessage('进攻时钟已重置', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnPauseShotClock').addEventListener('click', () => {
+                fetch('/api/shot-clock/pause', { method: 'POST' })
+                    .then(() => showMessage('进攻时钟已暂停', 'success'))
+                    .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnShotClock24').addEventListener('click', () => {
+                fetch('/api/shot-clock/set', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds: 24 })
+                }).then(() => showMessage('进攻时钟设为24秒', 'success'))
+                  .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            document.getElementById('btnShotClock14').addEventListener('click', () => {
+                fetch('/api/shot-clock/set', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds: 14 })
+                }).then(() => showMessage('进攻时钟设为14秒', 'success'))
+                  .catch(() => showMessage('操作失败', 'error'));
+            });
+
+            // 设置时间
+            document.getElementById('btnSetTime').addEventListener('click', () => {
+                document.getElementById('setTimeModal').style.display = 'block';
+            });
+
+            document.getElementById('btnConfirmTime').addEventListener('click', async () => {
+                const minutes = parseInt(document.getElementById('inputMinutes').value);
+                const seconds = parseInt(document.getElementById('inputSeconds').value);
+                const timeMs = (minutes * 60 + seconds) * 1000;
+
+                try {
+                    const response = await fetch('/api/timer/set-time', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ seconds: timeMs / 1000 })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showMessage('时间已设置', 'success');
+                        document.getElementById('setTimeModal').style.display = 'none';
+                    } else {
+                        showMessage(data.message || '操作失败', 'error');
+                    }
+                } catch (error) {
+                    showMessage('操作失败', 'error');
+                }
+            });
+
+            document.getElementById('btnCancelTime').addEventListener('click', () => {
+                document.getElementById('setTimeModal').style.display = 'none';
+            });
+
+            // 预设时间按钮
+            document.querySelectorAll('.btn-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const minutes = parseInt(btn.dataset.minutes);
+                    document.getElementById('inputMinutes').value = minutes;
+                    document.getElementById('inputSeconds').value = 0;
+                });
+            });
+
+            // 清空事件
+            document.getElementById('btnClearEvents').addEventListener('click', () => {
+                if (confirm('确定要清空所有事件记录吗？')) {
+                    fetch('/api/events', { method: 'DELETE' })
+                        .then(() => showMessage('所有事件已清空', 'success'))
+                        .catch(() => showMessage('操作失败', 'error'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

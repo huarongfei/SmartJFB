@@ -200,6 +200,14 @@ class TimerController {
     this.dataStore.lastUpdate = Date.now();
   }
 
+  // 添加时间（秒）
+  addTime(seconds) {
+    this.dataStore.gameClock.currentTime = Math.max(0,
+      this.dataStore.gameClock.currentTime + seconds
+    );
+    this.dataStore.lastUpdate = Date.now();
+  }
+
   // 设置伤停补时（足球）
   setInjuryTime(seconds) {
     if (this.dataStore.sportType === 'football') {
@@ -271,6 +279,13 @@ class TimerController {
   resetShotClock() {
     this.pauseShotClock();
     this.dataStore.shotClock.currentTime = this.dataStore.shotClock.maxTime;
+    this.dataStore.lastUpdate = Date.now();
+  }
+
+  // 设置进攻时钟时间（秒）
+  setShotClockTime(seconds) {
+    this.pauseShotClock();
+    this.dataStore.shotClock.currentTime = seconds;
     this.dataStore.lastUpdate = Date.now();
   }
 

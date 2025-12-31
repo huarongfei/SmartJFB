@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现场大屏控制 - SmartJFB</title>
+    <link rel="stylesheet" href="/css/stadium-screen.css">
+</head>
+<body>
+    <div class="stadium-control">
+        <div class="header">
+            <h1>现场大屏控制</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">已连接</span>
+            </div>
+            <button onclick="window.location.href='/'" class="btn-back">返回主页</button>
+        </div>
+
+        <div class="main-content">
+            <!-- 屏幕状态 -->
+            <div class="section">
+                <h2>屏幕状态</h2>
+                <div class="screen-controls">
+                    <button id="btnShowScoreboard" class="btn btn-primary">显示记分牌</button>
+                    <button id="btnShowStats" class="btn btn-secondary">显示统计</button>
+                    <button id="btnShowAds" class="btn btn-warning">播放广告</button>
+                    <button id="btnBlackScreen" class="btn btn-danger">黑屏</button>
+                </div>
+            </div>
+
+            <!-- 屏幕内容预览 -->
+            <div class="section">
+                <h2>内容预览</h2>
+                <div class="preview-container">
+                    <div class="preview-screen" id="previewScreen">
+                        <div class="preview-message">
+                            <p>选择要显示的内容</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 广告控制 -->
+            <div class="section">
+                <h2>广告控制</h2>
+                <div class="ad-controls">
+                    <button id="btnNextAd" class="btn btn-secondary">下一个广告</button>
+                    <button id="btnRandomAd" class="btn btn-secondary">随机广告</button>
+                    <select id="adPosition" class="select">
+                        <option value="full">全屏</option>
+                        <option value="top">顶部</option>
+                        <option value="bottom">底部</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 当前播放 -->
+            <div class="section">
+                <h2>当前播放</h2>
+                <div class="current-play">
+                    <div class="play-info">
+                        <span class="label">内容类型:</span>
+                        <span id="currentContentType">-</span>
+                    </div>
+                    <div class="play-info">
+                        <span class="label">播放时长:</span>
+                        <span id="currentDuration">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/socket-client.js"></script>
+    <script>
+        // 初始化Socket连接
+        const socket = initSocket('stadium');
+        let currentScreen = 'black';
+
+        // 屏幕控制
+        document.getElementById('btnShowScoreboard').addEventListener('click', () => {
+            showScreen('scoreboard');
+        });
+
+        document.getElementById('btnShowStats').addEventListener('click', () => {
+            showScreen('stats');
+        });
+
+        document.getElementById('btnShowAds').addEventListener('click', () => {
+            showScreen('ads');
+        });
+
+        document.getElementById('btnBlackScreen').addEventListener('click', () => {
+            showScreen('black');
+        });
+
+        function showScreen(screenType) {
+            currentScreen = screenType;
+            const preview = document.getElementById('previewScreen');
+
+            switch (screenType) {
+                case 'scoreboard':
+                    preview.innerHTML = `
+                        <div class="scoreboard-preview">
+                            <div class="team">主队</div>
+                            <div class="score">0 - 0</div>
+                            <div class="team">客队</div>
+                        </div>
+                    `;
+                    document.getElementById('currentContentType').textContent = '记分牌';
+                    break;
+                case 'stats':
+                    preview.innerHTML = `
+                        <div class="stats-preview">
+                            <h3>统计数据</h3>
+                            <div class="stat">得分: 0</div>
+                            <div class="stat">犯规: 0</div>
+                        </div>
+                    `;
+                    document.getElementById('currentContentType').textContent = '统计';
+                    break;
+                case 'ads':
+                    preview.innerHTML = `
+                        <div class="ads-preview">
+                            <h3>广告位</h3>
+                            <p>广告内容</p>
+                        </div>
+                    `;
+                    document.getElementById('currentContentType').textContent = '广告';
+                    break;
+                case 'black':
+                    preview.innerHTML = `
+                        <div class="black-screen">
+                            <p>黑屏</p>
+                        </div>
+                    `;
+                    document.getElementById('currentContentType').textContent = '黑屏';
+                    break;
+            }
+
+            // 发送命令到服务器
+            socket.emit('screen_control', { action: 'show_screen', screenType });
+        }
+
+        // 广告控制
+        document.getElementById('btnNextAd').addEventListener('click', async () => {
+            const position = document.getElementById('adPosition').value;
+            try {
+                const response = await fetch(`/api/ads/next/${position}`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    showScreen('ads');
+                    document.getElementById('currentDuration').textContent =
+                        `${data.data.duration || 0}秒`;
+                }
+            } catch (error) {
+                console.error('获取广告失败:', error);
+            }
+        });
+
+        document.getElementById('btnRandomAd').addEventListener('click', async () => {
+            const positions = ['full', 'top', 'bottom'];
+            const position = positions[Math.floor(Math.random() * positions.length)];
+            document.getElementById('adPosition').value = position;
+            document.getElementById('btnNextAd').click();
+        });
+
+        // 监听屏幕更新
+        socket.on('screen_update', (data) => {
+            console.log('屏幕更新:', data);
+        });
+
+        // 初始化
+        document.getElementById('currentContentType').textContent = '黑屏';
+    </script>
+</body>
+</html>

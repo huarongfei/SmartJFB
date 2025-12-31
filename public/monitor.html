@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术台监控器 - SmartJFB</title>
+    <link rel="stylesheet" href="/css/monitor.css">
+</head>
+<body>
+    <div class="monitor-panel">
+        <div class="header">
+            <h1>技术台监控器</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">已连接</span>
+            </div>
+            <button onclick="window.location.href='/'" class="btn-back">返回主页</button>
+        </div>
+
+        <div class="monitor-grid">
+            <!-- 系统状态 -->
+            <div class="monitor-card">
+                <h3>系统状态</h3>
+                <div class="status-item">
+                    <span class="label">服务器状态</span>
+                    <span class="value" id="serverStatus">运行中</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">连接客户端</span>
+                    <span class="value" id="connectedClients">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">比赛状态</span>
+                    <span class="value" id="matchStatus">未开始</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">数据版本</span>
+                    <span class="value" id="dataVersion">0</span>
+                </div>
+            </div>
+
+            <!-- 比赛概览 -->
+            <div class="monitor-card">
+                <h3>比赛概览</h3>
+                <div class="match-overview">
+                    <div class="team-info">
+                        <span>主队</span>
+                        <span id="homeTeamName">-</span>
+                        <span class="score" id="homeScore">0</span>
+                    </div>
+                    <div class="divider">:</div>
+                    <div class="team-info">
+                        <span>客队</span>
+                        <span id="awayTeamName">-</span>
+                        <span class="score" id="awayScore">0</span>
+                    </div>
+                </div>
+                <div class="time-info">
+                    <span class="label">比赛时间:</span>
+                    <span id="gameTime">12:00</span>
+                </div>
+                <div class="time-info">
+                    <span class="label">当前节次:</span>
+                    <span>第 <span id="currentPeriod">1</span> 节</span>
+                </div>
+            </div>
+
+            <!-- 队伍统计 -->
+            <div class="monitor-card">
+                <h3>队伍统计</h3>
+                <div class="team-stats home">
+                    <h4>主队</h4>
+                    <div class="stat-row">
+                        <span>得分:</span>
+                        <span id="homePoints">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>犯规:</span>
+                        <span id="homeFouls">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>投篮:</span>
+                        <span id="homeShots">0/0</span>
+                    </div>
+                </div>
+                <div class="team-stats away">
+                    <h4>客队</h4>
+                    <div class="stat-row">
+                        <span>得分:</span>
+                        <span id="awayPoints">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>犯规:</span>
+                        <span id="awayFouls">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>投篮:</span>
+                        <span id="awayShots">0/0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 事件监控 -->
+            <div class="monitor-card events">
+                <h3>事件监控</h3>
+                <div class="event-counter">
+                    <div class="counter-item">
+                        <span class="count" id="scoreCount">0</span>
+                        <span class="label">得分</span>
+                    </div>
+                    <div class="counter-item">
+                        <span class="count" id="foulCount">0</span>
+                        <span class="label">犯规</span>
+                    </div>
+                    <div class="counter-item">
+                        <span class="count" id="timeoutCount">0</span>
+                        <span class="label">暂停</span>
+                    </div>
+                    <div class="counter-item">
+                        <span class="count" id="totalCount">0</span>
+                        <span class="label">总计</span>
+                    </div>
+                </div>
+                <div class="recent-events" id="recentEvents">
+                    <div class="no-events">暂无事件</div>
+                </div>
+            </div>
+
+            <!-- 系统日志 -->
+            <div class="monitor-card logs">
+                <h3>系统日志</h3>
+                <div class="log-container" id="systemLogs">
+                    <div class="log-item info">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-message">系统初始化完成</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/socket-client.js"></script>
+    <script>
+        // 初始化Socket连接
+        const socket = initSocket('monitor');
+        let eventCounters = {
+            score: 0,
+            foul: 0,
+            timeout: 0,
+            total: 0
+        };
+
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('systemLogs');
+            const time = new Date().toLocaleTimeString();
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${type}`;
+            logItem.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-message">${message}</span>
+            `;
+            logContainer.insertBefore(logItem, logContainer.firstChild);
+
+            // 限制日志数量
+            while (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // 监听初始数据
+        socket.on('initial_data', (data) => {
+            addLog('接收到初始数据', 'info');
+            updateMonitor(data);
+        });
+
+        // 监听数据更新
+        socket.on('update', (data) => {
+            if (data.matchInfo) {
+                updateMonitor(data.matchInfo);
+            }
+        });
+
+        // 监听计时器更新
+        socket.on('timer_update', (data) => {
+            updateTimer(data);
+        });
+
+        // 监听新事件
+        socket.on('new_event', (event) => {
+            addLog(`新事件: ${event.eventType}`, 'info');
+            updateEventCounters(event);
+            updateRecentEvents(event);
+        });
+
+        // 更新监控面板
+        function updateMonitor(data) {
+            if (!data) return;
+
+            // 更新比赛状态
+            if (data.status) {
+                const statusMap = {
+                    'not_started': '未开始',
+                    'in_progress': '进行中',
+                    'paused': '暂停',
+                    'completed': '已结束'
+                };
+                document.getElementById('matchStatus').textContent = statusMap[data.status] || '未知';
+            }
+
+            // 更新数据版本
+            if (data.version) {
+                document.getElementById('dataVersion').textContent = data.version;
+            }
+
+            // 更新队伍信息
+            if (data.homeTeam) {
+                document.getElementById('homeTeamName').textContent = data.homeTeam.name || '-';
+                document.getElementById('homeScore').textContent = data.homeTeam.score || 0;
+                document.getElementById('homePoints').textContent = data.homeTeam.score || 0;
+                document.getElementById('homeFouls').textContent = data.homeTeam.fouls || 0;
+                const made = data.homeTeam.statistics?.shots?.made || 0;
+                const attempts = data.homeTeam.statistics?.shots?.attempts || 0;
+                document.getElementById('homeShots').textContent = `${made}/${attempts}`;
+            }
+
+            if (data.awayTeam) {
+                document.getElementById('awayTeamName').textContent = data.awayTeam.name || '-';
+                document.getElementById('awayScore').textContent = data.awayTeam.score || 0;
+                document.getElementById('awayPoints').textContent = data.awayTeam.score || 0;
+                document.getElementById('awayFouls').textContent = data.awayTeam.fouls || 0;
+                const made = data.awayTeam.statistics?.shots?.made || 0;
+                const attempts = data.awayTeam.statistics?.shots?.attempts || 0;
+                document.getElementById('awayShots').textContent = `${made}/${attempts}`;
+            }
+
+            // 更新节次
+            if (data.currentPeriod !== undefined) {
+                document.getElementById('currentPeriod').textContent = data.currentPeriod + 1;
+            }
+
+            // 更新事件统计
+            if (data.events) {
+                updateEventStats(data.events);
+            }
+        }
+
+        // 更新计时器
+        function updateTimer(data) {
+            if (!data) return;
+
+            if (data.gameTime !== undefined) {
+                const minutes = Math.floor(data.gameTime / 60000);
+                const seconds = Math.floor((data.gameTime % 60000) / 1000);
+                document.getElementById('gameTime').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // 更新事件统计
+        function updateEventStats(events) {
+            const scores = events.filter(e => e.eventType.includes('score')).length;
+            const fouls = events.filter(e => e.eventType === 'foul').length;
+            const timeouts = events.filter(e => e.eventType === 'timeout').length;
+
+            document.getElementById('scoreCount').textContent = scores;
+            document.getElementById('foulCount').textContent = fouls;
+            document.getElementById('timeoutCount').textContent = timeouts;
+            document.getElementById('totalCount').textContent = events.length;
+
+            eventCounters = { score: scores, foul: fouls, timeout: timeouts, total: events.length };
+        }
+
+        // 更新事件计数器
+        function updateEventCounters(event) {
+            if (event.eventType.includes('score')) {
+                eventCounters.score++;
+            } else if (event.eventType === 'foul') {
+                eventCounters.foul++;
+            } else if (event.eventType === 'timeout') {
+                eventCounters.timeout++;
+            }
+            eventCounters.total++;
+
+            document.getElementById('scoreCount').textContent = eventCounters.score;
+            document.getElementById('foulCount').textContent = eventCounters.foul;
+            document.getElementById('timeoutCount').textContent = eventCounters.timeout;
+            document.getElementById('totalCount').textContent = eventCounters.total;
+        }
+
+        // 更新最近事件
+        function updateRecentEvents(event) {
+            const container = document.getElementById('recentEvents');
+            const time = new Date(event.timestamp).toLocaleTimeString();
+            const teamName = event.team === 'home' ? '主队' : '客队';
+
+            const eventItem = document.createElement('div');
+            eventItem.className = 'recent-event-item';
+            eventItem.innerHTML = `
+                <span class="event-time">${time}</span>
+                <span class="event-type">${event.eventType}</span>
+                <span class="event-team">${teamName}</span>
+            `;
+
+            // 移除"暂无事件"提示
+            const noEvents = container.querySelector('.no-events');
+            if (noEvents) {
+                noEvents.remove();
+            }
+
+            container.insertBefore(eventItem, container.firstChild);
+
+            // 限制事件数量
+            while (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // 初始化
+        addLog('监控器已启动', 'success');
+
+        // 定期更新连接客户端数
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/clients');
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('connectedClients').textContent = data.data.count || 0;
+                }
+            } catch (error) {
+                console.error('获取客户端数量失败:', error);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

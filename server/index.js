@@ -266,6 +266,17 @@ app.post('/api/shot-clock/set-time', (req, res) => {
   res.json({ success: true, message: '进攻时钟已设置' });
 });
 
+// 设置进攻时钟（简化版）
+app.post('/api/shot-clock/set', (req, res) => {
+  const { seconds } = req.body;
+
+  timerController.setShotClockTime(seconds);
+  timerController.startShotClock();
+  broadcastTimerUpdate(timerController.getTimerStatus());
+
+  res.json({ success: true, message: '进攻时钟已设置' });
+});
+
 // ==================== 比分控制 API ====================
 
 // 更新比分
@@ -433,6 +444,170 @@ app.get('/api/events', (req, res) => {
   });
 });
 
+// 清空所有事件
+app.delete('/api/events', (req, res) => {
+  dataStore.events = [];
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    events: dataStore.events
+  });
+
+  res.json({ success: true, message: '事件已清空' });
+});
+
+// 更新队伍名称
+app.put('/api/teams/home', (req, res) => {
+  const { name } = req.body;
+  if (name) {
+    dataStore.homeTeam.name = name;
+    dataStore.lastUpdate = Date.now();
+
+    broadcastUpdate({
+      matchInfo: dataStore.getMatchInfo()
+    });
+
+    res.json({ success: true, message: '主队名称已更新', data: dataStore.homeTeam });
+  } else {
+    res.json({ success: false, message: '队名不能为空' });
+  }
+});
+
+app.put('/api/teams/away', (req, res) => {
+  const { name } = req.body;
+  if (name) {
+    dataStore.awayTeam.name = name;
+    dataStore.lastUpdate = Date.now();
+
+    broadcastUpdate({
+      matchInfo: dataStore.getMatchInfo()
+    });
+
+    res.json({ success: true, message: '客队名称已更新', data: dataStore.awayTeam });
+  } else {
+    res.json({ success: false, message: '队名不能为空' });
+  }
+});
+
+// 调整比分
+app.post('/api/teams/score', (req, res) => {
+  const { team, points } = req.body;
+  const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+
+  if (teamData) {
+    teamData.score = Math.max(0, teamData.score + points);
+    dataStore.lastUpdate = Date.now();
+
+    broadcastUpdate({
+      matchInfo: dataStore.getMatchInfo()
+    });
+
+    res.json({ success: true, message: '比分已调整' });
+  } else {
+    res.json({ success: false, message: '队伍未找到' });
+  }
+});
+
+// 添加/减少时间
+app.post('/api/timer/add', (req, res) => {
+  const { seconds } = req.body;
+  timerController.addTime(seconds);
+  broadcastTimerUpdate(timerController.getTimerStatus());
+
+  res.json({ success: true, message: '时间已调整' });
+});
+
+// 获取比赛信息
+app.get('/api/match-info', (req, res) => {
+  res.json({
+    success: true,
+    data: dataStore.getMatchInfo()
+  });
+});
+
+// 添加球员（新接口）
+app.post('/api/teams/:team/players', (req, res) => {
+  const { team } = req.params;
+  const { number, name } = req.body;
+
+  const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+
+  if (!teamData) {
+    return res.json({ success: false, message: '队伍未找到' });
+  }
+
+  const player = {
+    id: `player_${Date.now()}`,
+    number: number || '?',
+    name: name || '未知球员',
+    position: '',
+    statistics: {
+      points: 0,
+      fouls: 0,
+      assists: 0,
+      rebounds: 0,
+      steals: 0,
+      blocks: 0,
+      fieldGoals: { made: 0, attempts: 0 },
+      threePointers: { made: 0, attempts: 0 },
+      freeThrows: { made: 0, attempts: 0 }
+    }
+  };
+
+  teamData.players.push(player);
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  res.json({ success: true, message: '球员已添加', data: player });
+});
+
+// 删除球员（新接口）
+app.delete('/api/teams/:team/players/:index', (req, res) => {
+  const { team, index } = req.params;
+
+  const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+
+  if (!teamData) {
+    return res.json({ success: false, message: '队伍未找到' });
+  }
+
+  const playerIndex = parseInt(index);
+  if (playerIndex >= 0 && playerIndex < teamData.players.length) {
+    const removed = teamData.players.splice(playerIndex, 1);
+    dataStore.lastUpdate = Date.now();
+
+    broadcastUpdate({
+      matchInfo: dataStore.getMatchInfo()
+    });
+
+    res.json({ success: true, message: '球员已删除', data: removed[0] });
+  } else {
+    res.json({ success: false, message: '球员索引无效' });
+  }
+});
+
+// 按索引删除事件
+app.delete('/api/events/:index', (req, res) => {
+  const { index } = req.params;
+  const eventIndex = parseInt(index);
+
+  if (eventIndex >= 0 && eventIndex < dataStore.events.length) {
+    dataStore.events.splice(eventIndex, 1);
+    dataStore.lastUpdate = Date.now();
+
+    broadcastUpdate({
+      events: dataStore.events
+    });
+
+    res.json({ success: true, message: '事件已删除' });
+  } else {
+    res.json({ success: false, message: '事件索引无效' });
+  }
+});
+
 // 处理事件并更新数据
 function handleEvent(eventType, data) {
   switch (eventType) {
@@ -468,7 +643,7 @@ function handleEvent(eventType, data) {
 
     case 'foul':
       // 犯规
-      const { team: foulTeam, player: foulPlayer, type } = data;
+      const { team: foulTeam, player: foulPlayer, type: foulType } = data;
       const foulTeamData = foulTeam === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
       foulTeamData.fouls++;
 
