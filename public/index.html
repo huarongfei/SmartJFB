@@ -105,6 +105,80 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        /* 移动端响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .card-icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .card-title {
+                font-size: 1.3rem;
+            }
+
+            .card-description {
+                font-size: 0.9rem;
+            }
+
+            .card-features {
+                font-size: 0.8rem;
+            }
+
+            .status {
+                margin-top: 30px;
+                padding: 15px 20px;
+            }
+
+            .status-item {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* 小屏幕手机优化 */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .card-icon {
+                font-size: 2.5rem;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            .status-item {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -127,17 +201,46 @@
                 </div>
             </a>
 
-            <a href="/admin.html" class="card">
-                <div class="card-icon">🎮</div>
-                <div class="card-title">管理面板</div>
+            <a href="/admin1.html" class="card">
+                <div class="card-icon">👥</div>
+                <div class="card-title">管理面板1 - 队伍与计时</div>
                 <div class="card-description">
-                    技术台操作界面<br>
-                    比赛控制、事件记录、数据录入
+                    队伍管理与计时控制<br>
+                    队徽、队员、计时、球权
                 </div>
                 <div class="card-features">
-                    • 比赛控制<br>
-                    • 事件记录<br>
-                    • 队员管理
+                    • 队伍管理<br>
+                    • 球员管理<br>
+                    • 计时控制<br>
+                    • 球权切换
+                </div>
+            </a>
+
+            <a href="/admin2.html" class="card">
+                <div class="card-icon">📝</div>
+                <div class="card-title">管理面板2 - 球员计分</div>
+                <div class="card-description">
+                    专门记录得分<br>
+                    快速选择球员并记录得分
+                </div>
+                <div class="card-features">
+                    • 球员选择<br>
+                    • 快速计分<br>
+                    • 1/2/3分按钮
+                </div>
+            </a>
+
+            <a href="/admin3.html" class="card">
+                <div class="card-icon">⚠️</div>
+                <div class="card-title">管理面板3 - 判罚管理</div>
+                <div class="card-description">
+                    犯规和暂停管理<br>
+                    记录各种犯规类型和暂停
+                </div>
+                <div class="card-features">
+                    • 犯规记录<br>
+                    • 暂停管理<br>
+                    • 事件查看
                 </div>
             </a>
 

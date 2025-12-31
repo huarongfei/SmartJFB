@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理面板2 - 球员计分 | SmartJFB</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .player-quick-list {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .player-quick-btn {
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid transparent;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .player-quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .player-quick-btn.selected {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+        
+        .player-quick-btn .number {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .player-quick-btn .name {
+            font-size: 11px;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .team-score-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .team-score-section h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #00ff88;
+        }
+
+        .score-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn-score {
+            padding: 20px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+        }
+
+        .btn-score:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-1pt {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-2pt {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-3pt {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .score-preview {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .score-preview .selected-player {
+            font-size: 20px;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .score-preview .hint {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 SmartJFB 管理面板 2</h1>
+            <div class="header-controls">
+                <div id="connectionStatus" class="connection-status disconnected">
+                    <span class="status-dot"></span>
+                    <span class="status-text">未连接</span>
+                </div>
+                <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
+            </div>
+        </header>
+
+        <nav class="admin-nav">
+            <a href="admin1.html" class="nav-link">队伍与计时</a>
+            <a href="admin2.html" class="nav-link active">球员计分</a>
+            <a href="admin3.html" class="nav-link">判罚管理</a>
+        </nav>
+
+        <main>
+            <!-- 主队计分 -->
+            <section class="section">
+                <div class="team-score-section">
+                    <h3 id="homeTeamName">主队</h3>
+                    <div id="homeQuickScoringList" class="player-quick-list"></div>
+                    <div class="score-preview">
+                        <div id="homeSelectedPlayer" class="selected-player">未选择球员</div>
+                        <div class="hint">请先选择球员，然后点击得分按钮</div>
+                    </div>
+                    <div class="score-buttons">
+                        <button class="btn btn-score btn-1pt" onclick="quickScore('home', 1)">1分</button>
+                        <button class="btn btn-score btn-2pt" onclick="quickScore('home', 2)">2分</button>
+                        <button class="btn btn-score btn-3pt" onclick="quickScore('home', 3)">3分</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 客队计分 -->
+            <section class="section">
+                <div class="team-score-section">
+                    <h3 id="awayTeamName">客队</h3>
+                    <div id="awayQuickScoringList" class="player-quick-list"></div>
+                    <div class="score-preview">
+                        <div id="awaySelectedPlayer" class="selected-player">未选择球员</div>
+                        <div class="hint">请先选择球员，然后点击得分按钮</div>
+                    </div>
+                    <div class="score-buttons">
+                        <button class="btn btn-score btn-1pt" onclick="quickScore('away', 1)">1分</button>
+                        <button class="btn btn-score btn-2pt" onclick="quickScore('away', 2)">2分</button>
+                        <button class="btn btn-score btn-3pt" onclick="quickScore('away', 3)">3分</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 实时比分显示 -->
+            <section class="section">
+                <h2>🏆 实时比分</h2>
+                <div class="score-display-section">
+                    <div class="team-score-card">
+                        <img id="homeLogoDisplay" class="team-logo-preview" style="width: 80px; height: 80px; margin-bottom: 15px;">
+                        <h3 id="homeTeamDisplay" class="team-name-display">主队</h3>
+                        <div class="score-value-large" id="homeScore">0</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="team-score-card">
+                        <img id="awayLogoDisplay" class="team-logo-preview" style="width: 80px; height: 80px; margin-bottom: 15px;">
+                        <h3 id="awayTeamDisplay" class="team-name-display">客队</h3>
+                        <div class="score-value-large" id="awayScore">0</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast提示 -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Socket.IO连接
+        const socket = io('http://localhost:3001');
+
+        // 当前选择
+        let selectedPlayer = { home: null, away: null };
+
+        // 连接状态更新
+        socket.on('connect', () => {
+            updateConnectionStatus(true);
+            console.log('Socket.IO已连接');
+            socket.emit('register_client', 'admin2');
+        });
+
+        socket.on('disconnect', () => {
+            updateConnectionStatus(false);
+            console.log('Socket.IO已断开');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Socket.IO错误:', error);
+            updateConnectionStatus(false);
+        });
+
+        socket.on('initial_data', (data) => {
+            handleUpdate({ matchInfo: data });
+        });
+
+        socket.on('data_update', (data) => {
+            handleUpdate(data);
+        });
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.classList.remove('disconnected');
+                status.classList.add('connected');
+                status.querySelector('.status-text').textContent = '已连接';
+            } else {
+                status.classList.remove('connected');
+                status.classList.add('disconnected');
+                status.querySelector('.status-text').textContent = '未连接';
+            }
+        }
+
+        function handleUpdate(data) {
+            if (data.matchInfo) {
+                updateMatchInfo(data.matchInfo);
+            }
+        }
+
+        function updateMatchInfo(matchInfo) {
+            // 更新队伍名称和比分
+            document.getElementById('homeTeamName').textContent = matchInfo.homeTeam?.name || '主队';
+            document.getElementById('awayTeamName').textContent = matchInfo.awayTeam?.name || '客队';
+            document.getElementById('homeTeamDisplay').textContent = matchInfo.homeTeam?.name || '主队';
+            document.getElementById('awayTeamDisplay').textContent = matchInfo.awayTeam?.name || '客队';
+            const homeScore = parseInt(matchInfo.homeTeam?.score) || 0;
+            const awayScore = parseInt(matchInfo.awayTeam?.score) || 0;
+            document.getElementById('homeScore').textContent = homeScore;
+            document.getElementById('awayScore').textContent = awayScore;
+
+            // 更新队徽
+            if (matchInfo.homeTeam?.logo) {
+                document.getElementById('homeLogoDisplay').src = matchInfo.homeTeam.logo;
+                document.getElementById('homeLogoDisplay').style.display = 'block';
+            }
+            if (matchInfo.awayTeam?.logo) {
+                document.getElementById('awayLogoDisplay').src = matchInfo.awayTeam.logo;
+                document.getElementById('awayLogoDisplay').style.display = 'block';
+            }
+
+            // 更新球员列表
+            if (matchInfo.homeTeam?.players && matchInfo.homeTeam.players.length > 0) {
+                displayQuickScoringList('homeQuickScoringList', matchInfo.homeTeam.players, 'home');
+            } else {
+                document.getElementById('homeQuickScoringList').innerHTML = '';
+            }
+            
+            if (matchInfo.awayTeam?.players && matchInfo.awayTeam.players.length > 0) {
+                displayQuickScoringList('awayQuickScoringList', matchInfo.awayTeam.players, 'away');
+            } else {
+                document.getElementById('awayQuickScoringList').innerHTML = '';
+            }
+        }
+
+        function displayQuickScoringList(containerId, players, team) {
+            const container = document.getElementById(containerId);
+            if (!players || players.length === 0) return;
+
+            container.innerHTML = players.map((player, index) => `
+                <button class="player-quick-btn" data-team="${team}" data-index="${index}"
+                        onclick="selectScoringPlayer('${team}', ${index})">
+                    <span class="number">#${player.number || '-'}</span>
+                    <span class="name">${player.name || '未知'}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectScoringPlayer(team, index) {
+            // 取消之前的选择
+            document.querySelectorAll(`#${team}QuickScoringList .player-quick-btn`).forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 选择新的
+            const selectedBtn = document.querySelector(`#${team}QuickScoringList .player-quick-btn[data-index="${index}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('selected');
+                selectedPlayer[team] = index;
+                
+                // 更新选中球员显示
+                fetch('/api/match-info').then(res => res.json()).then(response => {
+                    const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+                    const teamData = response.data[teamKey];
+                    if (teamData && teamData.players && teamData.players[index]) {
+                        const player = teamData.players[index];
+                        const displayId = team === 'home' ? 'homeSelectedPlayer' : 'awaySelectedPlayer';
+                        document.getElementById(displayId).textContent = `#${player.number} ${player.name}`;
+                    }
+                });
+            }
+        }
+
+        function quickScore(team, points) {
+            const playerIndex = selectedPlayer[team];
+            
+            // 检查是否选择了球员
+            if (playerIndex === null || playerIndex === undefined) {
+                showMessage('请先选择球员', 'error');
+                return;
+            }
+            
+            let eventData = {
+                type: 'score',
+                team,
+                points,
+                quarter: '1'
+            };
+
+            // 获取当前节数
+            fetch('/api/match-info').then(res => res.json()).then(response => {
+                if (response.data.currentQuarter) {
+                    eventData.quarter = response.data.currentQuarter;
+                }
+                
+                // 添加球员信息
+                const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+                const teamData = response.data[teamKey];
+                if (teamData && teamData.players && teamData.players[playerIndex]) {
+                    const player = teamData.players[playerIndex];
+                    eventData.playerIndex = playerIndex;
+                    eventData.playerNumber = player.number;
+                    eventData.playerName = player.name;
+                    addEvent(eventData);
+                }
+            });
+        }
+
+        async function addEvent(eventData) {
+            try {
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(eventData)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const pointsText = eventData.points === 1 ? '罚球' : eventData.points === 2 ? '2分' : '3分';
+                    showMessage(`${eventData.playerName} 投中 ${pointsText}`, 'success');
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('记录事件失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

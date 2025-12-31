@@ -301,17 +301,113 @@ body {
 }
 
 @media (max-width: 768px) {
+    .statistics-panel {
+        padding: 10px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 0;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
     .score-overview {
         flex-direction: column;
         gap: 20px;
+        padding: 20px;
+    }
+
+    .team-overview .score {
+        font-size: 48px;
+    }
+
+    .vs {
+        font-size: 24px;
     }
 
     .event-stats {
         grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
     }
 
     .player-item {
         flex-direction: column;
         text-align: center;
+        padding: 15px;
+    }
+
+    .rank {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .player-stat .stat-value {
+        font-size: 20px;
+    }
+
+    .section {
+        padding: 15px;
+    }
+
+    .section h2 {
+        font-size: 18px;
+    }
+}
+
+/* 小屏幕手机优化 */
+@media (max-width: 480px) {
+    .statistics-panel {
+        padding: 5px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .section {
+        padding: 12px;
+    }
+
+    .score-overview {
+        padding: 15px;
+    }
+
+    .team-overview .score {
+        font-size: 36px;
+    }
+
+    .vs {
+        font-size: 20px;
+    }
+
+    .event-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .event-stat-item {
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .player-item {
+        padding: 12px;
+    }
+
+    .rank {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .player-name {
+        font-size: 14px;
     }
 }

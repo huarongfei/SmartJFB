@@ -154,6 +154,7 @@ app.post('/api/sport', (req, res) => {
 app.post('/api/timer/start', (req, res) => {
   timerController.startGameClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   dataStore.addEvent('game_start', {
     sport: dataStore.sportType
@@ -166,6 +167,7 @@ app.post('/api/timer/start', (req, res) => {
 app.post('/api/timer/pause', (req, res) => {
   timerController.pauseGameClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   dataStore.addEvent('game_pause', {
     gameTime: dataStore.formatGameTime()
@@ -178,6 +180,7 @@ app.post('/api/timer/pause', (req, res) => {
 app.post('/api/timer/stop', (req, res) => {
   timerController.stopGameClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '比赛已停止' });
 });
@@ -186,6 +189,7 @@ app.post('/api/timer/stop', (req, res) => {
 app.post('/api/timer/reset', (req, res) => {
   timerController.resetGameClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '比赛时钟已复位' });
 });
@@ -194,6 +198,7 @@ app.post('/api/timer/reset', (req, res) => {
 app.post('/api/timer/end-quarter', (req, res) => {
   timerController.endQuarterOrHalf();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '节/半场已结束' });
 });
@@ -204,6 +209,7 @@ app.post('/api/timer/set-time', (req, res) => {
 
   timerController.setGameTime(seconds);
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '时间已设置' });
 });
@@ -212,6 +218,7 @@ app.post('/api/timer/set-time', (req, res) => {
 app.post('/api/timer/toggle-direction', (req, res) => {
   timerController.toggleCountDown();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({
     success: true,
@@ -226,6 +233,7 @@ app.post('/api/timer/set-precision', (req, res) => {
 
   dataStore.gameClock.precision = precision;
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '计时精度已设置' });
 });
@@ -236,6 +244,7 @@ app.post('/api/timer/set-precision', (req, res) => {
 app.post('/api/shot-clock/start', (req, res) => {
   timerController.startShotClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '进攻时钟已开始' });
 });
@@ -244,6 +253,7 @@ app.post('/api/shot-clock/start', (req, res) => {
 app.post('/api/shot-clock/pause', (req, res) => {
   timerController.pauseShotClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '进攻时钟已暂停' });
 });
@@ -252,6 +262,7 @@ app.post('/api/shot-clock/pause', (req, res) => {
 app.post('/api/shot-clock/reset', (req, res) => {
   timerController.resetShotClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '进攻时钟已复位' });
 });
@@ -262,6 +273,7 @@ app.post('/api/shot-clock/set-time', (req, res) => {
 
   timerController.setShotClockMaxTime(seconds);
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '进攻时钟已设置' });
 });
@@ -273,6 +285,7 @@ app.post('/api/shot-clock/set', (req, res) => {
   timerController.setShotClockTime(seconds);
   timerController.startShotClock();
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '进攻时钟已设置' });
 });
@@ -444,6 +457,82 @@ app.get('/api/events', (req, res) => {
   });
 });
 
+// 记录比赛事件（新版，用于管理面板）
+app.post('/api/events', (req, res) => {
+  const eventData = req.body;
+  const { type, team, points, playerIndex, playerNumber, playerName, foulType, quarter } = eventData;
+
+  // 获取当前比赛时间
+  const gameTime = timerController.dataStore.gameClock.currentTime;
+
+  // 创建事件对象
+  const event = {
+    id: `event_${Date.now()}`,
+    type,
+    team,
+    gameTime,
+    quarter,
+    timestamp: Date.now()
+  };
+
+  // 根据事件类型添加字段
+  if (type === 'score') {
+    event.points = points;
+    if (playerIndex !== undefined) {
+      event.playerIndex = playerIndex;
+      event.playerNumber = playerNumber;
+      event.playerName = playerName;
+    }
+  } else if (type === 'foul') {
+    event.foulType = foulType || '普通犯规';
+    if (playerIndex !== undefined) {
+      event.playerIndex = playerIndex;
+      event.playerNumber = playerNumber;
+      event.playerName = playerName;
+    }
+  }
+
+  // 处理事件并更新数据
+  if (type === 'score' && team) {
+    const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+    teamData.score += points;
+
+    // 更新球员统计
+    if (playerIndex !== undefined && teamData.players[playerIndex]) {
+      const player = teamData.players[playerIndex];
+      player.statistics.points += points;
+      player.statistics.shots.attempts++;
+      player.statistics.shots.made++;
+
+      if (points === 3) {
+        player.statistics.threePointers.attempts++;
+        player.statistics.threePointers.made++;
+      }
+    }
+  } else if (type === 'foul' && team) {
+    const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+    teamData.fouls++;
+
+    // 更新球员犯规统计
+    if (playerIndex !== undefined && teamData.players[playerIndex]) {
+      const player = teamData.players[playerIndex];
+      player.statistics.fouls++;
+    }
+  }
+
+  // 添加事件到数据存储
+  dataStore.events.push(event);
+  dataStore.lastUpdate = Date.now();
+
+  // 广播更新
+  broadcastUpdate({
+    events: dataStore.events,
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  res.json({ success: true, message: '事件已记录', data: event });
+});
+
 // 清空所有事件
 app.delete('/api/events', (req, res) => {
   dataStore.events = [];
@@ -513,6 +602,7 @@ app.post('/api/timer/add', (req, res) => {
   const { seconds } = req.body;
   timerController.addTime(seconds);
   broadcastTimerUpdate(timerController.getTimerStatus());
+  broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
   res.json({ success: true, message: '时间已调整' });
 });
@@ -562,6 +652,95 @@ app.post('/api/teams/:team/players', (req, res) => {
   });
 
   res.json({ success: true, message: '球员已添加', data: player });
+});
+
+// 删除所有球员
+app.delete('/api/teams/:team/players', (req, res) => {
+  const { team } = req.params;
+
+  const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+
+  if (!teamData) {
+    return res.json({ success: false, message: '队伍未找到' });
+  }
+
+  teamData.players = [];
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  res.json({ success: true, message: '球员名单已清空' });
+});
+
+// 上传队徽
+app.post('/api/teams/:team/logo', (req, res) => {
+  const { team } = req.params;
+  
+  // 简化处理：直接返回成功，实际应用中应该处理文件上传
+  const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+  
+  if (!teamData) {
+    return res.json({ success: false, message: '队伍未找到' });
+  }
+
+  // 模拟上传成功，实际应该保存文件
+  const logoUrl = `/uploads/logos/${team}_${Date.now()}.png`;
+  teamData.logo = logoUrl;
+  
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  res.json({ success: true, message: '队徽已上传', url: logoUrl });
+});
+
+// 删除队徽
+app.delete('/api/teams/:team/logo', (req, res) => {
+  const { team } = req.params;
+  
+  const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
+  
+  if (!teamData) {
+    return res.json({ success: false, message: '队伍未找到' });
+  }
+
+  teamData.logo = null;
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  res.json({ success: true, message: '队徽已删除' });
+});
+
+// 设置球权
+app.post('/api/ball-possession', (req, res) => {
+  const { team } = req.body;
+  
+  if (team !== 'home' && team !== 'away' && team !== null) {
+    return res.json({ success: false, message: '无效的球队' });
+  }
+
+  dataStore.ballPossession = team;
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    ballPossession: team,
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  const teamName = team === 'home' ? '主队' : team === 'away' ? '客队' : '无';
+  res.json({ success: true, message: `球权已设置为${teamName}`, team });
+});
+
+// 获取球权
+app.get('/api/ball-possession', (req, res) => {
+  res.json({ success: true, team: dataStore.ballPossession });
 });
 
 // 删除球员（新接口）

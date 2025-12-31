@@ -34,6 +34,41 @@ body {
     background-clip: text;
 }
 
+.admin-nav {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.admin-nav .nav-link {
+    padding: 12px 25px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.admin-nav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.admin-nav .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-weight: bold;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .connection-status {
     display: flex;
     align-items: center;
@@ -808,6 +843,42 @@ body {
 }
 
 @media (max-width: 768px) {
+    .admin-panel {
+        padding: 10px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 0;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .admin-nav {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .admin-nav .nav-link {
+        padding: 10px 20px;
+        text-align: center;
+    }
+
+    .match-info-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
     .teams-control {
         flex-direction: column;
     }
@@ -815,5 +886,140 @@ body {
     .event-controls {
         flex-direction: column;
     }
+
+    .control-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .timer-buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .time-display {
+        font-size: 48px;
+    }
+
+    .time-display-large {
+        font-size: 56px;
+    }
+
+    .teams-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .score-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .score-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .score-display-section {
+        flex-direction: column;
+        gap: 30px;
+        padding: 20px;
+    }
+
+    .team-score-card .score-value-large {
+        font-size: 64px;
+    }
+
+    .score-value {
+        font-size: 48px;
+    }
+
+    .foul-timeout-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .preset-times {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .team-info-inputs {
+        flex-direction: column;
+    }
+
+    .score-buttons-large {
+        gap: 15px;
+    }
+
+    .team-name-display {
+        font-size: 18px;
+    }
+
+    .shot-clock-display {
+        font-size: 56px;
+    }
+
+    .shot-clock-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-content {
+        min-width: 300px;
+        padding: 20px;
+        max-width: 95%;
+    }
+
+    .time-inputs input,
+    .player-inputs input {
+        padding: 10px;
+        font-size: 18px;
+    }
 }
-"" 
+
+/* 小屏幕手机优化 */
+@media (max-width: 480px) {
+    .admin-panel {
+        padding: 5px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .section {
+        padding: 15px;
+    }
+
+    .section h2 {
+        font-size: 18px;
+    }
+
+    .time-display {
+        font-size: 36px;
+    }
+
+    .time-display-large {
+        font-size: 42px;
+    }
+
+    .team-score-card .score-value-large {
+        font-size: 48px;
+    }
+
+    .score-value {
+        font-size: 36px;
+    }
+
+    .control-grid,
+    .timer-buttons-grid,
+    .score-grid,
+    .preset-times {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        padding: 15px;
+        min-width: 280px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}

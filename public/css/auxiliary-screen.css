@@ -249,8 +249,31 @@ body {
 }
 
 @media (max-width: 768px) {
+    .auxiliary-screen {
+        padding: 10px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 0;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
     .main-content {
         grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .section {
+        padding: 15px;
+    }
+
+    .section h2 {
+        font-size: 18px;
     }
 
     .section.full-width {
@@ -259,5 +282,62 @@ body {
 
     .ads-container {
         grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .player-item {
+        padding: 10px;
+    }
+
+    .player-number {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+
+    .player-stats-mini {
+        font-size: 12px;
+    }
+
+    .player-stat-item {
+        padding: 15px;
+    }
+
+    .player-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* 小屏幕手机优化 */
+@media (max-width: 480px) {
+    .auxiliary-screen {
+        padding: 5px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .section {
+        padding: 12px;
+    }
+
+    .ads-container {
+        grid-template-columns: 1fr;
+    }
+
+    .player-number {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .player-stat-item {
+        padding: 12px;
+    }
+
+    .stat-row {
+        font-size: 12px;
     }
 }

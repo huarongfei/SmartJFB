@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理面板3 - 判罚管理 | SmartJFB</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .foul-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .btn-foul {
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+        }
+
+        .btn-foul:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-personal {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-shooting {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-offensive {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-technical {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .btn-flagrant {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+        }
+
+        .player-quick-list {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .player-quick-btn {
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid transparent;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .player-quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .player-quick-btn.selected {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.2);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .player-quick-btn .number {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .player-quick-btn .name {
+            font-size: 11px;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .team-foul-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .team-foul-section h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+
+        .foul-preview {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .foul-preview .selected-player {
+            font-size: 20px;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .foul-preview .hint {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .timeout-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .timeout-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-timeout {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-timeout:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .events-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .events-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .event-icon {
+            font-size: 24px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-team {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .event-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3px;
+        }
+
+        .event-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-delete-event {
+            padding: 8px 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-delete-event:hover {
+            background: #ff4757;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚠️ SmartJFB 管理面板 3</h1>
+            <div class="header-controls">
+                <div id="connectionStatus" class="connection-status disconnected">
+                    <span class="status-dot"></span>
+                    <span class="status-text">未连接</span>
+                </div>
+                <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
+            </div>
+        </header>
+
+        <nav class="admin-nav">
+            <a href="admin1.html" class="nav-link">队伍与计时</a>
+            <a href="admin2.html" class="nav-link">球员计分</a>
+            <a href="admin3.html" class="nav-link active">判罚管理</a>
+        </nav>
+
+        <main>
+            <!-- 暂停管理 -->
+            <section class="section">
+                <div class="timeout-section">
+                    <h2>⏸️ 暂停管理</h2>
+                    <div class="timeout-buttons">
+                        <button class="btn btn-timeout" onclick="recordTimeout('home')">主队暂停</button>
+                        <button class="btn btn-timeout" onclick="recordTimeout('away')">客队暂停</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 主队犯规 -->
+            <section class="section">
+                <div class="team-foul-section">
+                    <h3 id="homeTeamName">主队</h3>
+                    <div id="homeQuickFoulList" class="player-quick-list"></div>
+                    <div class="foul-preview">
+                        <div id="homeSelectedPlayer" class="selected-player">未选择球员</div>
+                        <div class="hint">请先选择犯规球员，然后选择犯规类型</div>
+                    </div>
+                    <div class="foul-buttons">
+                        <button class="btn btn-foul btn-personal" onclick="recordFoul('home', 'personal')">普通犯规</button>
+                        <button class="btn btn-foul btn-shooting" onclick="recordFoul('home', 'shooting')">投篮犯规</button>
+                        <button class="btn btn-foul btn-offensive" onclick="recordFoul('home', 'offensive')">进攻犯规</button>
+                        <button class="btn btn-foul btn-technical" onclick="recordFoul('home', 'technical')">技术犯规</button>
+                        <button class="btn btn-foul btn-flagrant" onclick="recordFoul('home', 'flagrant')">违体犯规</button>
+                        <button class="btn btn-foul" onclick="recordFoul('home', 'double')">双发犯规</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 客队犯规 -->
+            <section class="section">
+                <div class="team-foul-section">
+                    <h3 id="awayTeamName">客队</h3>
+                    <div id="awayQuickFoulList" class="player-quick-list"></div>
+                    <div class="foul-preview">
+                        <div id="awaySelectedPlayer" class="selected-player">未选择球员</div>
+                        <div class="hint">请先选择犯规球员，然后选择犯规类型</div>
+                    </div>
+                    <div class="foul-buttons">
+                        <button class="btn btn-foul btn-personal" onclick="recordFoul('away', 'personal')">普通犯规</button>
+                        <button class="btn btn-foul btn-shooting" onclick="recordFoul('away', 'shooting')">投篮犯规</button>
+                        <button class="btn btn-foul btn-offensive" onclick="recordFoul('away', 'offensive')">进攻犯规</button>
+                        <button class="btn btn-foul btn-technical" onclick="recordFoul('away', 'technical')">技术犯规</button>
+                        <button class="btn btn-foul btn-flagrant" onclick="recordFoul('away', 'flagrant')">违体犯规</button>
+                        <button class="btn btn-foul" onclick="recordFoul('away', 'double')">双发犯规</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 事件记录 -->
+            <section class="section">
+                <div class="events-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>📊 事件记录</h2>
+                        <button id="btnClearEvents" class="btn btn-small" style="background: linear-gradient(135deg, #ff6b6b, #ff4757);">清空所有事件</button>
+                    </div>
+                    <div id="eventsList" class="events-list">
+                        <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px;">
+                            暂无事件记录
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast提示 -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Socket.IO连接
+        const socket = io('http://localhost:3001');
+
+        // 当前选择
+        let selectedFoulPlayer = { home: null, away: null };
+
+        // 连接状态更新
+        socket.on('connect', () => {
+            updateConnectionStatus(true);
+            console.log('Socket.IO已连接');
+            socket.emit('register_client', 'admin3');
+        });
+
+        socket.on('disconnect', () => {
+            updateConnectionStatus(false);
+            console.log('Socket.IO已断开');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Socket.IO错误:', error);
+            updateConnectionStatus(false);
+        });
+
+        socket.on('initial_data', (data) => {
+            handleUpdate({ matchInfo: data });
+        });
+
+        socket.on('data_update', (data) => {
+            handleUpdate(data);
+        });
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.classList.remove('disconnected');
+                status.classList.add('connected');
+                status.querySelector('.status-text').textContent = '已连接';
+            } else {
+                status.classList.remove('connected');
+                status.classList.add('disconnected');
+                status.querySelector('.status-text').textContent = '未连接';
+            }
+        }
+
+        function handleUpdate(data) {
+            if (data.matchInfo) {
+                updateMatchInfo(data.matchInfo);
+            }
+            if (data.events) {
+                updateEventsList(data.events);
+            }
+        }
+
+        function updateMatchInfo(matchInfo) {
+            // 更新队伍名称
+            document.getElementById('homeTeamName').textContent = matchInfo.homeTeam?.name || '主队';
+            document.getElementById('awayTeamName').textContent = matchInfo.awayTeam?.name || '客队';
+
+            // 更新球员列表
+            if (matchInfo.homeTeam?.players && matchInfo.homeTeam.players.length > 0) {
+                displayQuickFoulList('homeQuickFoulList', matchInfo.homeTeam.players, 'home');
+            } else {
+                document.getElementById('homeQuickFoulList').innerHTML = '';
+            }
+            
+            if (matchInfo.awayTeam?.players && matchInfo.awayTeam.players.length > 0) {
+                displayQuickFoulList('awayQuickFoulList', matchInfo.awayTeam.players, 'away');
+            } else {
+                document.getElementById('awayQuickFoulList').innerHTML = '';
+            }
+        }
+
+        function displayQuickFoulList(containerId, players, team) {
+            const container = document.getElementById(containerId);
+            if (!players || players.length === 0) return;
+
+            container.innerHTML = players.map((player, index) => `
+                <button class="player-quick-btn" data-team="${team}" data-index="${index}"
+                        onclick="selectFoulPlayer('${team}', ${index})">
+                    <span class="number">#${player.number || '-'}</span>
+                    <span class="name">${player.name || '未知'}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectFoulPlayer(team, index) {
+            // 取消之前的选择
+            document.querySelectorAll(`#${team}QuickFoulList .player-quick-btn`).forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 选择新的
+            const selectedBtn = document.querySelector(`#${team}QuickFoulList .player-quick-btn[data-index="${index}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('selected');
+                selectedFoulPlayer[team] = index;
+                
+                // 更新选中球员显示
+                fetch('/api/match-info').then(res => res.json()).then(response => {
+                    const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+                    const teamData = response.data[teamKey];
+                    if (teamData && teamData.players && teamData.players[index]) {
+                        const player = teamData.players[index];
+                        const displayId = team === 'home' ? 'homeSelectedPlayer' : 'awaySelectedPlayer';
+                        document.getElementById(displayId).textContent = `#${player.number} ${player.name}`;
+                    }
+                });
+            }
+        }
+
+        function recordFoul(team, foulType) {
+            const playerIndex = selectedFoulPlayer[team];
+            
+            // 检查是否选择了球员
+            if (playerIndex === null || playerIndex === undefined) {
+                showMessage('请先选择犯规球员', 'error');
+                return;
+            }
+            
+            let eventData = {
+                type: 'foul',
+                team,
+                foulType,
+                quarter: '1'
+            };
+
+            // 获取当前节数
+            fetch('/api/match-info').then(res => res.json()).then(response => {
+                if (response.data.currentQuarter) {
+                    eventData.quarter = response.data.currentQuarter;
+                }
+                
+                // 添加球员信息
+                const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
+                const teamData = response.data[teamKey];
+                if (teamData && teamData.players && teamData.players[playerIndex]) {
+                    const player = teamData.players[playerIndex];
+                    eventData.playerIndex = playerIndex;
+                    eventData.playerNumber = player.number;
+                    eventData.playerName = player.name;
+                    addEvent(eventData);
+                }
+            });
+        }
+
+        function recordTimeout(team) {
+            let eventData = {
+                type: 'timeout',
+                team,
+                quarter: '1'
+            };
+
+            // 获取当前节数
+            fetch('/api/match-info').then(res => res.json()).then(response => {
+                if (response.data.currentQuarter) {
+                    eventData.quarter = response.data.currentQuarter;
+                }
+                addEvent(eventData);
+            });
+        }
+
+        async function addEvent(eventData) {
+            try {
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(eventData)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    if (eventData.type === 'foul') {
+                        const foulTypeNames = {
+                            'personal': '普通犯规',
+                            'shooting': '投篮犯规',
+                            'offensive': '进攻犯规',
+                            'technical': '技术犯规',
+                            'flagrant': '违体犯规',
+                            'double': '双发犯规'
+                        };
+                        showMessage(`${eventData.playerName} ${foulTypeNames[eventData.foulType] || '犯规'}`, 'success');
+                    } else if (eventData.type === 'timeout') {
+                        const teamName = eventData.team === 'home' ? '主队' : '客队';
+                        showMessage(`${teamName}请求暂停`, 'success');
+                    }
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('记录事件失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        function updateEventsList(events) {
+            const container = document.getElementById('eventsList');
+            if (!events || events.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px;">暂无事件记录</div>';
+                return;
+            }
+
+            container.innerHTML = events.slice().reverse().map((event, index) => {
+                const actualIndex = events.length - 1 - index;
+                const eventIcon = getEventIcon(event.type);
+                const teamName = event.team === 'home' ? 
+                    (event.team === 'home' ? (document.getElementById('homeTeamName').textContent || '主队') : (document.getElementById('awayTeamName').textContent || '客队')) : '';
+                
+                let description = getEventDescription(event);
+                
+                return `
+                    <div class="event-item">
+                        <div class="event-icon">${eventIcon}</div>
+                        <div class="event-details">
+                            <div class="event-team">${teamName}</div>
+                            <div class="event-desc">${description}</div>
+                            <div class="event-time">${event.quarter}节 ${formatEventTime(event.gameTime)}</div>
+                        </div>
+                        <button class="btn-delete-event" data-index="${actualIndex}">删除</button>
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('.btn-delete-event').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    deleteEvent(index);
+                });
+            });
+        }
+
+        function getEventIcon(type) {
+            const icons = {
+                'score': '🏀',
+                'foul': '⚠️',
+                'timeout': '⏸️',
+                'quarter': '📋'
+            };
+            return icons[type] || '📌';
+        }
+
+        function getEventDescription(event) {
+            switch (event.type) {
+                case 'score':
+                    const player = event.playerName || `#${event.playerNumber || '?'}`;
+                    const points = event.points === 1 ? '罚球' : event.points === 2 ? '2分' : '3分';
+                    return `${player} 投中 ${points}`;
+                case 'foul':
+                    const foulPlayer = event.playerName || `#${event.playerNumber || '?'}`;
+                    const foulTypeNames = {
+                        'personal': '普通犯规',
+                        'shooting': '投篮犯规',
+                        'offensive': '进攻犯规',
+                        'technical': '技术犯规',
+                        'flagrant': '违体犯规',
+                        'double': '双发犯规'
+                    };
+                    const foulType = foulTypeNames[event.foulType] || '犯规';
+                    return `${foulPlayer} ${foulType}`;
+                case 'timeout':
+                    return '请求暂停';
+                case 'quarter':
+                    return `进入${event.quarter}节`;
+                default:
+                    return event.description || '未知事件';
+            }
+        }
+
+        function formatEventTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        async function deleteEvent(index) {
+            try {
+                const response = await fetch(`/api/events/${index}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('事件已删除', 'success');
+                } else {
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除事件失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 清空事件
+            document.getElementById('btnClearEvents').addEventListener('click', () => {
+                if (confirm('确定要清空所有事件记录吗？')) {
+                    fetch('/api/events', { method: 'DELETE' })
+                        .then(() => showMessage('所有事件已清空', 'success'))
+                        .catch(() => showMessage('操作失败', 'error'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

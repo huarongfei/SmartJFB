@@ -177,20 +177,113 @@ body {
 }
 
 @media (max-width: 768px) {
+    .scoreboard {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .header {
+        padding: 15px 0;
+    }
+
+    .match-info {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
     .teams {
         flex-direction: column;
         gap: 30px;
+        padding: 20px;
+    }
+
+    .team-logo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .team-name h2 {
+        font-size: 24px;
+    }
+
+    .team-name span {
+        font-size: 16px;
     }
 
     .score {
         font-size: 60px;
+        letter-spacing: 5px;
     }
 
     .time {
         font-size: 36px;
     }
 
+    .period {
+        font-size: 18px;
+    }
+
+    .shot-clock {
+        margin: 20px 0;
+        padding: 15px;
+    }
+
     .shot-clock-time {
         font-size: 48px;
+    }
+
+    .footer {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+}
+
+/* 小屏幕手机优化 */
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .teams {
+        padding: 15px;
+    }
+
+    .team-logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .team-name h2 {
+        font-size: 20px;
+    }
+
+    .team-name span {
+        font-size: 14px;
+    }
+
+    .score {
+        font-size: 48px;
+        letter-spacing: 3px;
+    }
+
+    .time {
+        font-size: 28px;
+    }
+
+    .period {
+        font-size: 16px;
+    }
+
+    .shot-clock-time {
+        font-size: 36px;
+    }
+
+    .separator {
+        font-size: 32px;
     }
 }

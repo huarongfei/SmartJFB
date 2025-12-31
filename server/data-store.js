@@ -81,6 +81,9 @@ class DataStore {
     this.homeTeam = this.createTeamData();
     this.awayTeam = this.createTeamData();
 
+    // 球权
+    this.ballPossession = null; // 'home', 'away', or null
+
     // 比赛事件记录
     this.events = [];
 
@@ -305,6 +308,7 @@ class DataStore {
       shotClock: this.shotClock,
       homeTeam: this.homeTeam,
       awayTeam: this.awayTeam,
+      ballPossession: this.ballPossession,
       events: this.events,
       statistics: this.statistics,
       lastUpdate: this.lastUpdate

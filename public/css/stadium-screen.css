@@ -244,11 +244,100 @@ body {
 }
 
 @media (max-width: 768px) {
+    .stadium-control {
+        padding: 10px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 0;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .section {
+        padding: 15px;
+    }
+
+    .section h2 {
+        font-size: 18px;
+    }
+
     .screen-controls {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .btn {
+        padding: 12px;
+        font-size: 13px;
     }
 
     .ad-controls {
         flex-direction: column;
+    }
+
+    .preview-container {
+        aspect-ratio: 4 / 3;
+    }
+
+    .preview-message p {
+        font-size: 18px;
+    }
+
+    .scoreboard-preview .team {
+        font-size: 24px;
+    }
+
+    .scoreboard-preview .score {
+        font-size: 36px;
+    }
+
+    .play-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* 小屏幕手机优化 */
+@media (max-width: 480px) {
+    .stadium-control {
+        padding: 5px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .section {
+        padding: 12px;
+    }
+
+    .screen-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .btn {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .preview-container {
+        aspect-ratio: 1 / 1;
+    }
+
+    .preview-message p {
+        font-size: 16px;
+    }
+
+    .scoreboard-preview .team {
+        font-size: 20px;
+    }
+
+    .scoreboard-preview .score {
+        font-size: 28px;
     }
 }

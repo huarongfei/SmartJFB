@@ -128,7 +128,7 @@
         });
 
         // 监听数据更新
-        socket.on('update', (data) => {
+        socket.on('data_update', (data) => {
             if (data.matchInfo) {
                 updateStatistics(data.matchInfo);
             }
@@ -150,23 +150,27 @@
 
             // 更新比分
             if (data.homeTeam) {
-                document.getElementById('homeTeamScore').textContent = data.homeTeam.score || 0;
-                document.getElementById('homePoints').textContent = data.homeTeam.score || 0;
-                document.getElementById('homeFouls').textContent = data.homeTeam.fouls || 0;
-                document.getElementById('homeShotsMade').textContent =
-                    data.homeTeam.statistics?.shots?.made || 0;
-                document.getElementById('homeShotsAttempts').textContent =
-                    data.homeTeam.statistics?.shots?.attempts || 0;
+                const homeScore = parseInt(data.homeTeam.score) || 0;
+                document.getElementById('homeTeamScore').textContent = homeScore;
+                document.getElementById('homePoints').textContent = homeScore;
+                const homeFouls = parseInt(data.homeTeam.fouls) || 0;
+                document.getElementById('homeFouls').textContent = homeFouls;
+                const made = data.homeTeam.statistics?.shots?.made || 0;
+                const attempts = data.homeTeam.statistics?.shots?.attempts || 0;
+                document.getElementById('homeShotsMade').textContent = made;
+                document.getElementById('homeShotsAttempts').textContent = attempts;
             }
 
             if (data.awayTeam) {
-                document.getElementById('awayTeamScore').textContent = data.awayTeam.score || 0;
-                document.getElementById('awayPoints').textContent = data.awayTeam.score || 0;
-                document.getElementById('awayFouls').textContent = data.awayTeam.fouls || 0;
-                document.getElementById('awayShotsMade').textContent =
-                    data.awayTeam.statistics?.shots?.made || 0;
-                document.getElementById('awayShotsAttempts').textContent =
-                    data.awayTeam.statistics?.shots?.attempts || 0;
+                const awayScore = parseInt(data.awayTeam.score) || 0;
+                document.getElementById('awayTeamScore').textContent = awayScore;
+                document.getElementById('awayPoints').textContent = awayScore;
+                const awayFouls = parseInt(data.awayTeam.fouls) || 0;
+                document.getElementById('awayFouls').textContent = awayFouls;
+                const made = data.awayTeam.statistics?.shots?.made || 0;
+                const attempts = data.awayTeam.statistics?.shots?.attempts || 0;
+                document.getElementById('awayShotsMade').textContent = made;
+                document.getElementById('awayShotsAttempts').textContent = attempts;
             }
 
             // 更新统计条

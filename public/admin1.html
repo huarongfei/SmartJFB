@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理面板 - SmartJFB</title>
+    <title>管理面板1 - 队伍与计时控制 | SmartJFB</title>
     <link rel="stylesheet" href="css/admin.css">
     <style>
         .team-logo-upload {
@@ -146,12 +146,49 @@
             border-radius: 3px;
             font-family: monospace;
         }
+
+        .ball-ownership {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .ball-indicator {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.3;
+        }
+
+        .ball-indicator.active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .ball-indicator.home {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .ball-indicator.away {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🏀 SmartJFB 管理面板</h1>
+            <h1>🏀 SmartJFB 管理面板 1</h1>
             <div class="header-controls">
                 <div id="connectionStatus" class="connection-status disconnected">
                     <span class="status-dot"></span>
@@ -160,6 +197,12 @@
                 <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
             </div>
         </header>
+
+        <nav class="admin-nav">
+            <a href="admin1.html" class="nav-link active">队伍与计时</a>
+            <a href="admin2.html" class="nav-link">球员计分</a>
+            <a href="admin3.html" class="nav-link">判罚管理</a>
+        </nav>
 
         <main>
             <!-- 比赛信息 -->
@@ -246,30 +289,19 @@
                 </div>
             </section>
 
-            <!-- 快速记分 -->
+            <!-- 球权控制 -->
             <section class="section">
-                <h2>📝 快速记分</h2>
-                <div class="scoring-section">
-                    <!-- 主队快速选择 -->
-                    <div class="team-score-section">
-                        <h3>主队</h3>
-                        <div id="homeQuickScoringList" class="player-quick-list" style="margin-bottom: 10px;"></div>
-                        <div class="score-buttons">
-                            <button class="btn btn-score btn-1pt" onclick="quickScore('home', 1)">1分</button>
-                            <button class="btn btn-score btn-2pt" onclick="quickScore('home', 2)">2分</button>
-                            <button class="btn btn-score btn-3pt" onclick="quickScore('home', 3)">3分</button>
-                        </div>
+                <h2>🏀 球权控制</h2>
+                <div class="ball-ownership">
+                    <div id="homeBall" class="ball-indicator home" onclick="setBallPossession('home')">
+                        🏀
                     </div>
-
-                    <!-- 客队快速选择 -->
-                    <div class="team-score-section">
-                        <h3>客队</h3>
-                        <div id="awayQuickScoringList" class="player-quick-list" style="margin-bottom: 10px;"></div>
-                        <div class="score-buttons">
-                            <button class="btn btn-score btn-1pt" onclick="quickScore('away', 1)">1分</button>
-                            <button class="btn btn-score btn-2pt" onclick="quickScore('away', 2)">2分</button>
-                            <button class="btn btn-score btn-3pt" onclick="quickScore('away', 3)">3分</button>
-                        </div>
+                    <div>
+                        <h3>当前球权</h3>
+                        <p id="ballPossessionText" style="text-align: center; color: rgba(255,255,255,0.6);">未设置</p>
+                    </div>
+                    <div id="awayBall" class="ball-indicator away" onclick="setBallPossession('away')">
+                        🏀
                     </div>
                 </div>
             </section>
@@ -321,19 +353,6 @@
                         <img id="awayLogoDisplay" class="team-logo-preview" style="width: 60px; height: 60px; margin-bottom: 10px;">
                         <h3 id="awayTeamDisplay" class="team-name-display">客队</h3>
                         <div class="score-value-large" id="awayScore">0</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 事件记录 -->
-            <section class="section">
-                <h2>📊 事件记录</h2>
-                <div class="events-section">
-                    <div class="events-controls">
-                        <button id="btnClearEvents" class="btn btn-small btn-subtract">清空所有事件</button>
-                    </div>
-                    <div id="eventsList" class="events-list">
-                        <div class="no-events">暂无事件记录</div>
                     </div>
                 </div>
             </section>
@@ -404,13 +423,12 @@
         // 当前选择
         let currentAddTeam = 'home';
         let currentImportTeam = 'home';
-        let selectedPlayer = { home: null, away: null };
 
         // 连接状态更新
         socket.on('connect', () => {
             updateConnectionStatus(true);
             console.log('Socket.IO已连接');
-            socket.emit('register_client', 'admin');
+            socket.emit('register_client', 'admin1');
         });
 
         socket.on('disconnect', () => {
@@ -435,6 +453,10 @@
             handleUpdate({ timerStatus: data });
         });
 
+        socket.on('ball_possession_update', (data) => {
+            updateBallPossession(data);
+        });
+
         function updateConnectionStatus(connected) {
             const status = document.getElementById('connectionStatus');
             if (connected) {
@@ -455,8 +477,8 @@
             if (data.timerStatus) {
                 updateTimerStatus(data.timerStatus);
             }
-            if (data.events) {
-                updateEventsList(data.events);
+            if (data.ballPossession) {
+                updateBallPossession(data.ballPossession);
             }
         }
 
@@ -483,21 +505,17 @@
             if (matchInfo.homeTeam?.players && matchInfo.homeTeam.players.length > 0) {
                 displayPlayerList('homePlayerList', matchInfo.homeTeam.players, 'home');
                 displayQuickList('homeQuickList', matchInfo.homeTeam.players, 'home');
-                displayQuickScoringList('homeQuickScoringList', matchInfo.homeTeam.players, 'home');
             } else {
                 document.getElementById('homePlayerList').innerHTML = '<div class="no-players">暂无球员</div>';
                 document.getElementById('homeQuickList').innerHTML = '';
-                document.getElementById('homeQuickScoringList').innerHTML = '';
             }
             
             if (matchInfo.awayTeam?.players && matchInfo.awayTeam.players.length > 0) {
                 displayPlayerList('awayPlayerList', matchInfo.awayTeam.players, 'away');
                 displayQuickList('awayQuickList', matchInfo.awayTeam.players, 'away');
-                displayQuickScoringList('awayQuickScoringList', matchInfo.awayTeam.players, 'away');
             } else {
                 document.getElementById('awayPlayerList').innerHTML = '<div class="no-players">暂无球员</div>';
                 document.getElementById('awayQuickList').innerHTML = '';
-                document.getElementById('awayQuickScoringList').innerHTML = '';
             }
         }
 
@@ -542,19 +560,6 @@
             `).join('');
         }
 
-        function displayQuickScoringList(containerId, players, team) {
-            const container = document.getElementById(containerId);
-            if (!players || players.length === 0) return;
-
-            container.innerHTML = players.map((player, index) => `
-                <button class="player-quick-btn" data-team="${team}" data-index="${index}"
-                        onclick="selectScoringPlayer('${team}', ${index})">
-                    <span class="number">#${player.number || '-'}</span>
-                    <span class="name">${player.name || '未知'}</span>
-                </button>
-            `).join('');
-        }
-
         function selectQuickPlayer(team, index) {
             // 取消之前的选择
             document.querySelectorAll(`#${team}QuickList .player-quick-btn`).forEach(btn => {
@@ -568,166 +573,57 @@
             }
         }
 
-        function selectScoringPlayer(team, index) {
-            // 取消之前的选择
-            document.querySelectorAll(`#${team}QuickScoringList .player-quick-btn`).forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // 选择新的
-            const selectedBtn = document.querySelector(`#${team}QuickScoringList .player-quick-btn[data-index="${index}"]`);
-            if (selectedBtn) {
-                selectedBtn.classList.add('selected');
-                selectedPlayer[team] = index;
-            }
-        }
-
         function updateTimerStatus(timerStatus) {
-            const gameMinutes = Math.floor(timerStatus.gameClock / 60);
-            const gameSeconds = timerStatus.gameClock % 60;
+            if (!timerStatus) return;
+
+            // gameClock 是一个对象，需要访问 currentTime 属性
+            const gameTime = timerStatus.gameClock?.currentTime || 0;
+            const gameMinutes = Math.floor(gameTime / 60);
+            const gameSeconds = Math.floor(gameTime % 60);
             const gameTimeStr = `${String(gameMinutes).padStart(2, '0')}:${String(gameSeconds).padStart(2, '0')}`;
             document.getElementById('timerDisplay').textContent = gameTimeStr;
             document.getElementById('gameTimeDisplay').textContent = gameTimeStr;
 
-            document.getElementById('shotClockDisplay').textContent = timerStatus.shotClock || 0;
+            // shotClock 也是一个对象
+            const shotTime = timerStatus.shotClock?.currentTime || 0;
+            document.getElementById('shotClockDisplay').textContent = Math.floor(shotTime);
         }
 
-        function updateEventsList(events) {
-            const container = document.getElementById('eventsList');
-            if (!events || events.length === 0) {
-                container.innerHTML = '<div class="no-events">暂无事件记录</div>';
-                return;
-            }
+        function updateBallPossession(possession) {
+            const homeBall = document.getElementById('homeBall');
+            const awayBall = document.getElementById('awayBall');
+            const text = document.getElementById('ballPossessionText');
 
-            container.innerHTML = events.slice().reverse().map((event, index) => {
-                const actualIndex = events.length - 1 - index;
-                const eventIcon = getEventIcon(event.type);
-                const teamName = event.team === 'home' ? 
-                    (document.getElementById('homeTeamDisplay').textContent) : 
-                    (document.getElementById('awayTeamDisplay').textContent);
-                
-                let description = getEventDescription(event);
-                
-                return `
-                    <div class="event-item">
-                        <div class="event-icon">${eventIcon}</div>
-                        <div class="event-details">
-                            <div class="event-team">${teamName}</div>
-                            <div class="event-desc">${description}</div>
-                            <div class="event-time">${event.quarter}节 ${formatEventTime(event.gameTime)}</div>
-                        </div>
-                        <button class="btn-delete-event" data-index="${actualIndex}">删除</button>
-                    </div>
-                `;
-            }).join('');
-
-            container.querySelectorAll('.btn-delete-event').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    deleteEvent(index);
-                });
-            });
-        }
-
-        function getEventIcon(type) {
-            const icons = {
-                'score': '🏀',
-                'foul': '⚠️',
-                'timeout': '⏸️',
-                'quarter': '📋'
-            };
-            return icons[type] || '📌';
-        }
-
-        function getEventDescription(event) {
-            switch (event.type) {
-                case 'score':
-                    const player = event.playerName || `#${event.playerNumber || '?'}`;
-                    const points = event.points === 1 ? '罚球' : event.points === 2 ? '2分' : '3分';
-                    return `${player} 投中 ${points}`;
-                case 'foul':
-                    const foulPlayer = event.playerName || `#${event.playerNumber || '?'}`;
-                    const foulType = event.foulType || '普通犯规';
-                    return `${foulPlayer} ${foulType}`;
-                case 'timeout':
-                    return '请求暂停';
-                case 'quarter':
-                    return `进入${event.quarter}节`;
-                default:
-                    return event.description || '未知事件';
+            if (possession === 'home') {
+                homeBall.classList.add('active');
+                awayBall.classList.remove('active');
+                text.textContent = '主队球权';
+            } else if (possession === 'away') {
+                awayBall.classList.add('active');
+                homeBall.classList.remove('active');
+                text.textContent = '客队球权';
+            } else {
+                homeBall.classList.remove('active');
+                awayBall.classList.remove('active');
+                text.textContent = '未设置';
             }
         }
 
-        function formatEventTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-
-        // 快速记分
-        function quickScore(team, points) {
-            const playerIndex = selectedPlayer[team];
-            
-            let eventData = {
-                type: 'score',
-                team,
-                points,
-                quarter: document.getElementById('currentQuarter').value
-            };
-
-            // 如果选择了球员，添加球员信息
-            if (playerIndex !== null && playerIndex !== undefined) {
-                const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
-                fetch('/api/match-info').then(res => res.json()).then(response => {
-                    const teamData = response.data[teamKey];
-                    if (teamData && teamData.players && teamData.players[playerIndex]) {
-                        const player = teamData.players[playerIndex];
-                        eventData.playerIndex = playerIndex;
-                        eventData.playerNumber = player.number;
-                        eventData.playerName = player.name;
-                        addEvent(eventData);
-                    }
-                });
-                return;
-            }
-
-            // 未选择球员，直接记录
-            addEvent(eventData);
-        }
-
-        // API调用
-        async function addEvent(eventData) {
+        async function setBallPossession(team) {
             try {
-                const response = await fetch('/api/events', {
+                const response = await fetch('/api/ball-possession', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(eventData)
+                    body: JSON.stringify({ team })
                 });
                 const data = await response.json();
                 if (data.success) {
-                    showMessage('得分已记录', 'success');
+                    showMessage(`球权已设置为${team === 'home' ? '主队' : '客队'}`, 'success');
                 } else {
                     showMessage(data.message || '操作失败', 'error');
                 }
             } catch (error) {
-                console.error('记录事件失败:', error);
-                showMessage('操作失败', 'error');
-            }
-        }
-
-        async function deleteEvent(index) {
-            try {
-                const response = await fetch(`/api/events/${index}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showMessage('事件已删除', 'success');
-                } else {
-                    showMessage(data.message || '操作失败', 'error');
-                }
-            } catch (error) {
-                console.error('删除事件失败:', error);
+                console.error('设置球权失败:', error);
                 showMessage('操作失败', 'error');
             }
         }
@@ -785,7 +681,6 @@
                 const data = await response.json();
                 if (data.success) {
                     showMessage('队徽已上传', 'success');
-                    // 显示预览
                     const previewId = team === 'home' ? 'homeLogoPreview' : 'awayLogoPreview';
                     const removeBtnId = team === 'home' ? 'btnRemoveHomeLogo' : 'btnRemoveAwayLogo';
                     
@@ -810,7 +705,6 @@
                 line = line.trim();
                 if (!line) return;
 
-                // 支持两种格式： "23, 张三" 或 "23 张三"
                 let parts = line.split(/[,\s]+/);
                 let number = parts[0]?.trim();
                 let name = parts[1]?.trim();
@@ -1108,15 +1002,6 @@
                     body: JSON.stringify({ seconds: 14 })
                 }).then(() => showMessage('进攻时钟设为14秒', 'success'))
                   .catch(() => showMessage('操作失败', 'error'));
-            });
-
-            // 清空事件
-            document.getElementById('btnClearEvents').addEventListener('click', () => {
-                if (confirm('确定要清空所有事件记录吗？')) {
-                    fetch('/api/events', { method: 'DELETE' })
-                        .then(() => showMessage('所有事件已清空', 'success'))
-                        .catch(() => showMessage('操作失败', 'error'));
-                }
             });
         });
     </script>

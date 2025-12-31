@@ -85,9 +85,15 @@
         });
 
         // 监听数据更新
-        socket.on('update', (data) => {
+        socket.on('data_update', (data) => {
             if (data.matchInfo) {
                 updateMatchInfo(data.matchInfo);
+            }
+            if (data.timerStatus) {
+                updateTimer(data.timerStatus);
+            }
+            if (data.events) {
+                // 处理事件更新（如果需要）
             }
         });
 
@@ -96,15 +102,16 @@
             updateTimer(data);
         });
 
-        // 更新比赛信息
+        // 更新比赛信息（不包含计时器数据）
         function updateMatchInfo(data) {
             if (!data) return;
 
             // 更新队伍信息
             if (data.homeTeam) {
                 document.getElementById('homeTeamName').textContent = data.homeTeam.name || '主队';
-                document.getElementById('homeTeamScore').textContent = data.homeTeam.score || 0;
-                document.getElementById('homeScore').textContent = data.homeTeam.score || 0;
+                const homeScore = parseInt(data.homeTeam.score) || 0;
+                document.getElementById('homeTeamScore').textContent = homeScore;
+                document.getElementById('homeScore').textContent = homeScore;
                 if (data.homeTeam.logo) {
                     document.getElementById('homeTeamLogo').src = data.homeTeam.logo;
                 }
@@ -112,8 +119,9 @@
 
             if (data.awayTeam) {
                 document.getElementById('awayTeamName').textContent = data.awayTeam.name || '客队';
-                document.getElementById('awayTeamScore').textContent = data.awayTeam.score || 0;
-                document.getElementById('awayScore').textContent = data.awayTeam.score || 0;
+                const awayScore = parseInt(data.awayTeam.score) || 0;
+                document.getElementById('awayTeamScore').textContent = awayScore;
+                document.getElementById('awayScore').textContent = awayScore;
                 if (data.awayTeam.logo) {
                     document.getElementById('awayTeamLogo').src = data.awayTeam.logo;
                 }
@@ -123,9 +131,9 @@
             if (data.status) {
                 const statusMap = {
                     'not_started': '未开始',
-                    'in_progress': '进行中',
+                    'live': '进行中',
                     'paused': '暂停',
-                    'completed': '已结束'
+                    'finished': '已结束'
                 };
                 document.getElementById('matchStatus').textContent = statusMap[data.status] || '未知';
             }
@@ -140,8 +148,8 @@
             }
 
             // 更新当前节次
-            if (data.currentPeriod !== undefined) {
-                document.getElementById('currentPeriod').textContent = data.currentPeriod + 1;
+            if (data.gameClock?.currentQuarter !== undefined) {
+                document.getElementById('currentPeriod').textContent = data.gameClock.currentQuarter;
             }
         }
 
@@ -150,16 +158,18 @@
             if (!data) return;
 
             // 更新比赛时间
-            if (data.gameTime !== undefined) {
-                const minutes = Math.floor(data.gameTime / 60000);
-                const seconds = Math.floor((data.gameTime % 60000) / 1000);
+            if (data.gameClock?.currentTime !== undefined) {
+                const gameTime = data.gameClock.currentTime;
+                const minutes = Math.floor(gameTime / 60);
+                const seconds = Math.floor(gameTime % 60);
                 document.getElementById('gameTime').textContent =
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
 
             // 更新进攻时钟
-            if (data.shotClock !== undefined) {
-                document.getElementById('shotClock').textContent = data.shotClock;
+            if (data.shotClock?.currentTime !== undefined) {
+                const shotTime = Math.floor(data.shotClock.currentTime);
+                document.getElementById('shotClock').textContent = shotTime;
             }
         }
     </script>

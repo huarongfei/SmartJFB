@@ -176,7 +176,7 @@
         });
 
         // 监听数据更新
-        socket.on('update', (data) => {
+        socket.on('data_update', (data) => {
             if (data.matchInfo) {
                 updateMonitor(data.matchInfo);
             }
@@ -202,24 +202,26 @@
             if (data.status) {
                 const statusMap = {
                     'not_started': '未开始',
-                    'in_progress': '进行中',
+                    'live': '进行中',
                     'paused': '暂停',
-                    'completed': '已结束'
+                    'finished': '已结束'
                 };
                 document.getElementById('matchStatus').textContent = statusMap[data.status] || '未知';
             }
 
             // 更新数据版本
-            if (data.version) {
-                document.getElementById('dataVersion').textContent = data.version;
+            if (data.lastUpdate) {
+                document.getElementById('dataVersion').textContent = new Date(data.lastUpdate).toLocaleTimeString();
             }
 
             // 更新队伍信息
             if (data.homeTeam) {
                 document.getElementById('homeTeamName').textContent = data.homeTeam.name || '-';
-                document.getElementById('homeScore').textContent = data.homeTeam.score || 0;
-                document.getElementById('homePoints').textContent = data.homeTeam.score || 0;
-                document.getElementById('homeFouls').textContent = data.homeTeam.fouls || 0;
+                const homeScore = parseInt(data.homeTeam.score) || 0;
+                document.getElementById('homeScore').textContent = homeScore;
+                document.getElementById('homePoints').textContent = homeScore;
+                const homeFouls = parseInt(data.homeTeam.fouls) || 0;
+                document.getElementById('homeFouls').textContent = homeFouls;
                 const made = data.homeTeam.statistics?.shots?.made || 0;
                 const attempts = data.homeTeam.statistics?.shots?.attempts || 0;
                 document.getElementById('homeShots').textContent = `${made}/${attempts}`;
@@ -227,17 +229,19 @@
 
             if (data.awayTeam) {
                 document.getElementById('awayTeamName').textContent = data.awayTeam.name || '-';
-                document.getElementById('awayScore').textContent = data.awayTeam.score || 0;
-                document.getElementById('awayPoints').textContent = data.awayTeam.score || 0;
-                document.getElementById('awayFouls').textContent = data.awayTeam.fouls || 0;
+                const awayScore = parseInt(data.awayTeam.score) || 0;
+                document.getElementById('awayScore').textContent = awayScore;
+                document.getElementById('awayPoints').textContent = awayScore;
+                const awayFouls = parseInt(data.awayTeam.fouls) || 0;
+                document.getElementById('awayFouls').textContent = awayFouls;
                 const made = data.awayTeam.statistics?.shots?.made || 0;
                 const attempts = data.awayTeam.statistics?.shots?.attempts || 0;
                 document.getElementById('awayShots').textContent = `${made}/${attempts}`;
             }
 
             // 更新节次
-            if (data.currentPeriod !== undefined) {
-                document.getElementById('currentPeriod').textContent = data.currentPeriod + 1;
+            if (data.gameClock?.currentQuarter !== undefined) {
+                document.getElementById('currentPeriod').textContent = data.gameClock.currentQuarter;
             }
 
             // 更新事件统计
@@ -250,9 +254,10 @@
         function updateTimer(data) {
             if (!data) return;
 
-            if (data.gameTime !== undefined) {
-                const minutes = Math.floor(data.gameTime / 60000);
-                const seconds = Math.floor((data.gameTime % 60000) / 1000);
+            if (data.gameClock?.currentTime !== undefined) {
+                const gameTime = data.gameClock.currentTime;
+                const minutes = Math.floor(gameTime / 60);
+                const seconds = Math.floor(gameTime % 60);
                 document.getElementById('gameTime').textContent =
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }

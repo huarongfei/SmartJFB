@@ -262,11 +262,106 @@ body {
 }
 
 @media (max-width: 768px) {
+    .monitor-panel {
+        padding: 10px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 0;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
     .monitor-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .monitor-card {
+        padding: 15px;
+    }
+
+    .monitor-card h3 {
+        font-size: 16px;
+    }
+
+    .match-overview {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .team-info span:nth-child(2) {
+        font-size: 16px;
+    }
+
+    .team-info .score {
+        font-size: 28px;
     }
 
     .event-counter {
         grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .counter-item {
+        padding: 10px;
+    }
+
+    .count {
+        font-size: 24px;
+    }
+
+    .recent-events {
+        max-height: 250px;
+    }
+
+    .recent-event-item {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .log-container {
+        max-height: 300px;
+        font-size: 10px;
+    }
+
+    .log-item {
+        padding: 6px;
+    }
+}
+
+/* 小屏幕手机优化 */
+@media (max-width: 480px) {
+    .monitor-panel {
+        padding: 5px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .monitor-card {
+        padding: 12px;
+    }
+
+    .team-info .score {
+        font-size: 24px;
+    }
+
+    .event-counter {
+        grid-template-columns: 1fr;
+    }
+
+    .count {
+        font-size: 20px;
+    }
+
+    .counter-item .label {
+        font-size: 10px;
     }
 }

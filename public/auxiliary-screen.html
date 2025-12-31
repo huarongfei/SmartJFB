@@ -84,7 +84,7 @@
         });
 
         // 监听数据更新
-        socket.on('update', (data) => {
+        socket.on('data_update', (data) => {
             if (data.matchInfo) {
                 updateAuxiliary(data.matchInfo);
             }
@@ -106,15 +106,15 @@
             if (data.status) {
                 const statusMap = {
                     'not_started': '未开始',
-                    'in_progress': '进行中',
+                    'live': '进行中',
                     'paused': '暂停',
-                    'completed': '已结束'
+                    'finished': '已结束'
                 };
                 document.getElementById('matchStatus').textContent = statusMap[data.status] || '未知';
             }
 
-            if (data.currentPeriod !== undefined) {
-                document.getElementById('currentPeriod').textContent = data.currentPeriod + 1;
+            if (data.gameClock?.currentQuarter !== undefined) {
+                document.getElementById('currentPeriod').textContent = data.gameClock.currentQuarter;
             }
 
             // 更新主队阵容
