@@ -267,7 +267,9 @@ npm run dev
 
 ## 📄 许可证
 
-MIT License
+Eclipse Public License - v 1.0
+
+本项目采用 Eclipse Public License 1.0 开源许可证。详见 [LICENSE](LICENSE) 文件。
 
 ## 👨‍💻 作者
 

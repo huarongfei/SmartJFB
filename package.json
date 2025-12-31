@@ -20,7 +20,7 @@
     "professional"
   ],
   "author": "SmartJFB Team",
-  "license": "MIT",
+  "license": "EPL-1.0",
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
