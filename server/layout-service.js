@@ -195,6 +195,11 @@ class LayoutService {
 
     this.currentLayout = layoutId;
     await this.saveLayouts();
+    
+    // 如果存在全局的broadcastLayoutUpdate函数，则广播布局更新
+    if (global.broadcastLayoutUpdate) {
+      global.broadcastLayoutUpdate(layout);
+    }
 
     return layout;
   }

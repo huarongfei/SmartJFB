@@ -19,7 +19,7 @@ class MatchController {
 
     logger.debug('Match info retrieved', {
       status: matchInfo.status,
-      sport: matchInfo.sport
+      sport: matchInfo.sportType
     });
 
     res.json({
@@ -32,7 +32,7 @@ class MatchController {
    * 重置比赛
    */
   resetMatch(req, res) {
-    this.dataStore.resetMatch();
+    this.dataStore.reset();
 
     logger.info('Match reset', {
       timestamp: new Date().toISOString(),
@@ -93,7 +93,7 @@ class MatchController {
       });
     }
 
-    this.dataStore.sport = sport;
+    this.dataStore.sportType = sport;
 
     logger.info('Match sport updated', {
       sport,

@@ -151,12 +151,16 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏀 SmartJFB 管理面板</h1>
+            <h1>🎮 SmartJFB 总控制面板</h1>
             <div class="header-controls">
                 <div id="connectionStatus" class="connection-status disconnected">
                     <span class="status-dot"></span>
                     <span class="status-text">未连接</span>
                 </div>
+                <button class="btn btn-small" onclick="location.href='admin1.html'">计分系统</button>
+                <button class="btn btn-small" onclick="location.href='admin2.html'">判罚记录</button>
+                <button class="btn btn-small" onclick="location.href='layout-editor.html'">布局编辑</button>
+                <button class="btn btn-small" onclick="location.href='admin4.html'">球员队徽</button>
                 <button class="btn btn-small" onclick="location.href='ball-possession.html'">球权管理</button>
                 <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
             </div>
@@ -294,18 +298,7 @@
                     </div>
                 </div>
 
-                <!-- 进攻时钟 -->
-                <div class="shot-clock-section">
-                    <h3>⚡ 进攻时钟</h3>
-                    <div class="shot-clock-display" id="shotClockDisplay">24</div>
-                    <div class="shot-clock-controls">
-                        <button id="btnStartShotClock" class="btn btn-small">开始</button>
-                        <button id="btnResetShotClock" class="btn btn-small">重置</button>
-                        <button id="btnPauseShotClock" class="btn btn-small">暂停</button>
-                        <button id="btnShotClock24" class="btn btn-small btn-success">24秒</button>
-                        <button id="btnShotClock14" class="btn btn-small btn-success">14秒</button>
-                    </div>
-                </div>
+
             </section>
 
             <!-- 比分显示 -->
@@ -517,15 +510,15 @@
                         <span class="stat-item">${player.statistics?.points || 0}分</span>
                         <span class="stat-item">${player.statistics?.fouls || 0}犯</span>
                     </div>
-                    <button class="btn-remove-player" data-team="${team}" data-index="${index}">删除</button>
+                    <button class="btn-remove-player" data-team="${team}" data-id="${player.id}">删除</button>
                 </div>
             `).join('');
 
             container.querySelectorAll('.btn-remove-player').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const team = e.target.dataset.team;
-                    const index = parseInt(e.target.dataset.index);
-                    removePlayer(team, index);
+                    const id = e.target.dataset.id;
+                    removePlayer(team, id);
                 });
             });
         }
@@ -593,10 +586,6 @@
             const gameTimeStr = `${String(gameMinutes).padStart(2, '0')}:${String(gameSeconds).padStart(2, '0')}`;
             document.getElementById('timerDisplay').textContent = gameTimeStr;
             document.getElementById('gameTimeDisplay').textContent = gameTimeStr;
-
-            // shotClock 也是一个对象
-            const shotTime = timerStatus.shotClock?.currentTime || 0;
-            document.getElementById('shotClockDisplay').textContent = Math.floor(shotTime);
         }
 
         function updateEventsList(events) {
@@ -607,7 +596,6 @@
             }
 
             container.innerHTML = events.slice().reverse().map((event, index) => {
-                const actualIndex = events.length - 1 - index;
                 const eventIcon = getEventIcon(event.type);
                 const teamName = event.team === 'home' ? 
                     (document.getElementById('homeTeamDisplay').textContent) : 
@@ -623,15 +611,15 @@
                             <div class="event-desc">${description}</div>
                             <div class="event-time">${event.quarter}节 ${formatEventTime(event.gameTime)}</div>
                         </div>
-                        <button class="btn-delete-event" data-index="${actualIndex}">删除</button>
+                        <button class="btn-delete-event" data-id="${event.id}">删除</button>
                     </div>
                 `;
             }).join('');
 
             container.querySelectorAll('.btn-delete-event').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    deleteEvent(index);
+                    const id = e.target.dataset.id;
+                    deleteEvent(id);
                 });
             });
         }
@@ -685,15 +673,34 @@
             // 如果选择了球员，添加球员信息
             if (playerIndex !== null && playerIndex !== undefined) {
                 const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
-                fetch('/api/match-info').then(res => res.json()).then(response => {
+                fetch('/api/match')
+                .then(res => {
+                    if (!res.ok) {
+                        showMessage('获取比赛信息失败', 'error');
+                        return;
+                    }
+                    return res.json();
+                })
+                .then(response => {
+                    if (!response || !response.data) {
+                        showMessage('无效的比赛信息响应', 'error');
+                        return;
+                    }
+                    
                     const teamData = response.data[teamKey];
                     if (teamData && teamData.players && teamData.players[playerIndex]) {
                         const player = teamData.players[playerIndex];
-                        eventData.playerIndex = playerIndex;
+                        eventData.playerId = player.id;
                         eventData.playerNumber = player.number;
                         eventData.playerName = player.name;
                         addEvent(eventData);
+                    } else {
+                        showMessage('球员信息不存在', 'error');
                     }
+                })
+                .catch(error => {
+                    console.error('获取比赛信息失败:', error);
+                    showMessage('获取比赛信息失败: ' + error.message, 'error');
                 });
                 return;
             }
@@ -710,23 +717,35 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(eventData)
                 });
+                
+                if (!response.ok) {
+                    showMessage('网络请求失败', 'error');
+                    return;
+                }
+                
                 const data = await response.json();
                 if (data.success) {
-                    showMessage('得分已记录', 'success');
+                    showMessage('事件已记录', 'success');
                 } else {
                     showMessage(data.message || '操作失败', 'error');
                 }
             } catch (error) {
                 console.error('记录事件失败:', error);
-                showMessage('操作失败', 'error');
+                showMessage('操作失败: ' + error.message, 'error');
             }
         }
 
-        async function deleteEvent(index) {
+        async function deleteEvent(id) {
             try {
-                const response = await fetch(`/api/events/${index}`, {
+                const response = await fetch(`/api/events/${id}`, {
                     method: 'DELETE'
                 });
+                
+                if (!response.ok) {
+                    showMessage('网络请求失败', 'error');
+                    return;
+                }
+                
                 const data = await response.json();
                 if (data.success) {
                     showMessage('事件已删除', 'success');
@@ -735,7 +754,7 @@
                 }
             } catch (error) {
                 console.error('删除事件失败:', error);
-                showMessage('操作失败', 'error');
+                showMessage('操作失败: ' + error.message, 'error');
             }
         }
 
@@ -746,6 +765,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ number, name })
                 });
+                
+                if (!response.ok) {
+                    showMessage('网络请求失败', 'error');
+                    return;
+                }
+                
                 const data = await response.json();
                 if (data.success) {
                     showMessage('球员已添加', 'success');
@@ -755,17 +780,23 @@
                 }
             } catch (error) {
                 console.error('添加球员失败:', error);
-                showMessage('操作失败', 'error');
+                showMessage('操作失败: ' + error.message, 'error');
             }
         }
 
-        async function removePlayer(team, index) {
+        async function removePlayer(team, id) {
             if (!confirm('确定要删除该球员吗？')) return;
             
             try {
-                const response = await fetch(`/api/teams/${team}/players/${index}`, {
+                const response = await fetch(`/api/teams/${team}/players/${id}`, {
                     method: 'DELETE'
                 });
+                
+                if (!response.ok) {
+                    showMessage('网络请求失败', 'error');
+                    return;
+                }
+                
                 const data = await response.json();
                 if (data.success) {
                     showMessage('球员已删除', 'success');
@@ -774,7 +805,7 @@
                 }
             } catch (error) {
                 console.error('删除球员失败:', error);
-                showMessage('操作失败', 'error');
+                showMessage('操作失败: ' + error.message, 'error');
             }
         }
 
@@ -789,6 +820,12 @@
                     method: 'POST',
                     body: formData
                 });
+                
+                if (!response.ok) {
+                    showMessage('网络请求失败', 'error');
+                    return;
+                }
+                
                 const data = await response.json();
                 if (data.success) {
                     showMessage('队徽已上传', 'success');
@@ -804,7 +841,7 @@
                 }
             } catch (error) {
                 console.error('上传队徽失败:', error);
-                showMessage('操作失败', 'error');
+                showMessage('操作失败: ' + error.message, 'error');
             }
         }
 
@@ -952,16 +989,34 @@
             document.getElementById('btnClearHome').addEventListener('click', () => {
                 if (confirm('确定要清空主队所有球员吗？')) {
                     fetch('/api/teams/home/players', { method: 'DELETE' })
-                        .then(() => showMessage('主队名单已清空', 'success'))
-                        .catch(() => showMessage('操作失败', 'error'));
+                    .then(res => {
+                        if (!res.ok) {
+                            showMessage('网络请求失败', 'error');
+                            return;
+                        }
+                        showMessage('主队名单已清空', 'success');
+                    })
+                    .catch(error => {
+                        console.error('清空主队名单失败:', error);
+                        showMessage('操作失败: ' + error.message, 'error');
+                    });
                 }
             });
 
             document.getElementById('btnClearAway').addEventListener('click', () => {
                 if (confirm('确定要清空客队所有球员吗？')) {
                     fetch('/api/teams/away/players', { method: 'DELETE' })
-                        .then(() => showMessage('客队名单已清空', 'success'))
-                        .catch(() => showMessage('操作失败', 'error'));
+                    .then(res => {
+                        if (!res.ok) {
+                            showMessage('网络请求失败', 'error');
+                            return;
+                        }
+                        showMessage('客队名单已清空', 'success');
+                    })
+                    .catch(error => {
+                        console.error('清空客队名单失败:', error);
+                        showMessage('操作失败: ' + error.message, 'error');
+                    });
                 }
             });
 
@@ -976,69 +1031,151 @@
 
             document.getElementById('btnRemoveHomeLogo').addEventListener('click', async () => {
                 try {
-                    await fetch('/api/teams/home/logo', { method: 'DELETE' });
+                    const response = await fetch('/api/teams/home/logo', { method: 'DELETE' });
+                    
+                    if (!response.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    
                     document.getElementById('homeLogoPreview').style.display = 'none';
                     document.getElementById('btnRemoveHomeLogo').style.display = 'none';
                     showMessage('队徽已删除', 'success');
                 } catch (error) {
-                    showMessage('操作失败', 'error');
+                    console.error('删除队徽失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
                 }
             });
 
             document.getElementById('btnRemoveAwayLogo').addEventListener('click', async () => {
                 try {
-                    await fetch('/api/teams/away/logo', { method: 'DELETE' });
+                    const response = await fetch('/api/teams/away/logo', { method: 'DELETE' });
+                    
+                    if (!response.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    
                     document.getElementById('awayLogoPreview').style.display = 'none';
                     document.getElementById('btnRemoveAwayLogo').style.display = 'none';
                     showMessage('队徽已删除', 'success');
                 } catch (error) {
-                    showMessage('操作失败', 'error');
+                    console.error('删除队徽失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
                 }
             });
 
             // 计时控制
             document.getElementById('btnStart').addEventListener('click', () => {
                 fetch('/api/timer/start', { method: 'POST' })
-                    .then(() => showMessage('比赛已开始', 'success'))
-                    .catch(() => showMessage('操作失败', 'error'));
+                .then(res => {
+                    if (!res.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    showMessage('比赛已开始', 'success');
+                })
+                .catch(error => {
+                    console.error('开始比赛失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
+                });
             });
 
             document.getElementById('btnPause').addEventListener('click', () => {
                 fetch('/api/timer/pause', { method: 'POST' })
-                    .then(() => showMessage('比赛已暂停', 'success'))
-                    .catch(() => showMessage('操作失败', 'error'));
+                .then(res => {
+                    if (!res.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    showMessage('比赛已暂停', 'success');
+                })
+                .catch(error => {
+                    console.error('暂停比赛失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
+                });
             });
 
             document.getElementById('btnContinue').addEventListener('click', () => {
                 fetch('/api/timer/start', { method: 'POST' })
-                    .then(() => showMessage('比赛已继续', 'success'))
-                    .catch(() => showMessage('操作失败', 'error'));
+                .then(res => {
+                    if (!res.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    showMessage('比赛已继续', 'success');
+                })
+                .catch(error => {
+                    console.error('继续比赛失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
+                });
             });
 
             document.getElementById('btnReset').addEventListener('click', () => {
                 if (confirm('确定要重置比赛吗？')) {
                     fetch('/api/timer/reset', { method: 'POST' })
-                        .then(() => showMessage('比赛已重置', 'success'))
-                        .catch(() => showMessage('操作失败', 'error'));
+                    .then(res => {
+                        if (!res.ok) {
+                            showMessage('网络请求失败', 'error');
+                            return;
+                        }
+                        showMessage('比赛已重置', 'success');
+                    })
+                    .catch(error => {
+                        console.error('重置比赛失败:', error);
+                        showMessage('操作失败: ' + error.message, 'error');
+                    });
                 }
             });
 
-            document.getElementById('btnAddMinute').addEventListener('click', () => {
-                fetch('/api/timer/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seconds: 60 })
-                }).then(() => showMessage('已增加1分钟', 'success'))
-                  .catch(() => showMessage('操作失败', 'error'));
+            document.getElementById('btnAddMinute').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/timer/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ seconds: 60 })
+                    });
+                    
+                    if (!response.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        showMessage('已增加1分钟', 'success');
+                    } else {
+                        showMessage(data.message || '操作失败', 'error');
+                    }
+                } catch (error) {
+                    console.error('增加时间失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
+                }
             });
 
-            document.getElementById('btnSubMinute').addEventListener('click', () => {
-                fetch('/api/timer/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seconds: -60 })
-                }).then(() => showMessage('已减少1分钟', 'success'))
-                  .catch(() => showMessage('操作失败', 'error'));
+            document.getElementById('btnSubMinute').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/timer/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ seconds: -60 })
+                    });
+                    
+                    if (!response.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        showMessage('已减少1分钟', 'success');
+                    } else {
+                        showMessage(data.message || '操作失败', 'error');
+                    }
+                } catch (error) {
+                    console.error('减少时间失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
+                }
             });
 
             document.getElementById('btnSetTime').addEventListener('click', () => {
@@ -1048,14 +1185,27 @@
             document.getElementById('btnConfirmTime').addEventListener('click', async () => {
                 const minutes = parseInt(document.getElementById('inputMinutes').value);
                 const seconds = parseInt(document.getElementById('inputSeconds').value);
-                const timeMs = (minutes * 60 + seconds) * 1000;
+                
+                // 验证输入
+                if (isNaN(minutes) || isNaN(seconds) || minutes < 0 || seconds < 0 || seconds >= 60) {
+                    showMessage('请输入有效的时间', 'error');
+                    return;
+                }
+                
+                const totalSeconds = minutes * 60 + seconds;
 
                 try {
                     const response = await fetch('/api/timer/set-time', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ seconds: timeMs / 1000 })
+                        body: JSON.stringify({ seconds: totalSeconds })
                     });
+                    
+                    if (!response.ok) {
+                        showMessage('网络请求失败', 'error');
+                        return;
+                    }
+                    
                     const data = await response.json();
                     if (data.success) {
                         showMessage('时间已设置', 'success');
@@ -1064,7 +1214,8 @@
                         showMessage(data.message || '操作失败', 'error');
                     }
                 } catch (error) {
-                    showMessage('操作失败', 'error');
+                    console.error('设置时间失败:', error);
+                    showMessage('操作失败: ' + error.message, 'error');
                 }
             });
 
@@ -1080,49 +1231,23 @@
                 });
             });
 
-            // 进攻时钟控制
-            document.getElementById('btnStartShotClock').addEventListener('click', () => {
-                fetch('/api/shot-clock/start', { method: 'POST' })
-                    .then(() => showMessage('进攻时钟已开始', 'success'))
-                    .catch(() => showMessage('操作失败', 'error'));
-            });
 
-            document.getElementById('btnResetShotClock').addEventListener('click', () => {
-                fetch('/api/shot-clock/reset', { method: 'POST' })
-                    .then(() => showMessage('进攻时钟已重置', 'success'))
-                    .catch(() => showMessage('操作失败', 'error'));
-            });
-
-            document.getElementById('btnPauseShotClock').addEventListener('click', () => {
-                fetch('/api/shot-clock/pause', { method: 'POST' })
-                    .then(() => showMessage('进攻时钟已暂停', 'success'))
-                    .catch(() => showMessage('操作失败', 'error'));
-            });
-
-            document.getElementById('btnShotClock24').addEventListener('click', () => {
-                fetch('/api/shot-clock/set', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seconds: 24 })
-                }).then(() => showMessage('进攻时钟设为24秒', 'success'))
-                  .catch(() => showMessage('操作失败', 'error'));
-            });
-
-            document.getElementById('btnShotClock14').addEventListener('click', () => {
-                fetch('/api/shot-clock/set', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seconds: 14 })
-                }).then(() => showMessage('进攻时钟设为14秒', 'success'))
-                  .catch(() => showMessage('操作失败', 'error'));
-            });
 
             // 清空事件
             document.getElementById('btnClearEvents').addEventListener('click', () => {
                 if (confirm('确定要清空所有事件记录吗？')) {
                     fetch('/api/events', { method: 'DELETE' })
-                        .then(() => showMessage('所有事件已清空', 'success'))
-                        .catch(() => showMessage('操作失败', 'error'));
+                    .then(res => {
+                        if (!res.ok) {
+                            showMessage('网络请求失败', 'error');
+                            return;
+                        }
+                        showMessage('所有事件已清空', 'success');
+                    })
+                    .catch(error => {
+                        console.error('清空事件失败:', error);
+                        showMessage('操作失败: ' + error.message, 'error');
+                    });
                 }
             });
         });

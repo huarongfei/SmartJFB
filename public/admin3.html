@@ -3,305 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理面板3 - 判罚管理 | SmartJFB</title>
+    <title>布局编辑器 - SmartJFB</title>
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/layout-editor.css">
     <style>
-        .foul-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .btn-foul {
-            padding: 15px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #fff;
-        }
-
-        .btn-foul:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-personal {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .btn-shooting {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .btn-offensive {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .btn-technical {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .btn-flagrant {
-            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
-        }
-
-        .player-quick-list {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .player-quick-btn {
-            padding: 15px 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 3px solid transparent;
-            border-radius: 10px;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 12px;
-            text-align: center;
-        }
-        
-        .player-quick-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-        
-        .player-quick-btn.selected {
-            border-color: #ff6b6b;
-            background: rgba(255, 107, 107, 0.2);
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
-        }
-        
-        .player-quick-btn .number {
-            font-size: 24px;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .player-quick-btn .name {
-            font-size: 11px;
-            display: block;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .team-foul-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 15px;
-            padding: 30px;
+        .section {
             margin-bottom: 30px;
-        }
-
-        .team-foul-section h3 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            text-align: center;
-            color: #ff6b6b;
-        }
-
-        .foul-preview {
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
+            padding: 25px;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        .foul-preview .selected-player {
-            font-size: 20px;
-            color: #ff6b6b;
-            margin-bottom: 10px;
-        }
-
-        .foul-preview .hint {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .timeout-section {
-            background: rgba(255, 255, 255, 0.03);
             border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .timeout-buttons {
-            display: flex;
+        
+        .section h2 {
+            margin-top: 0;
+            color: #00d9ff;
+            border-bottom: 2px solid rgba(0, 217, 255, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .layout-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            justify-content: center;
             margin-top: 20px;
         }
-
-        .btn-timeout {
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
+        
+        .control-card {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #fff;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .btn-timeout:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .events-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 15px;
-            padding: 30px;
-        }
-
-        .events-list {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .event-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .event-icon {
-            font-size: 24px;
-            width: 40px;
+            padding: 20px;
             text-align: center;
         }
-
-        .event-details {
-            flex: 1;
+        
+        .control-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
-
-        .event-team {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-
-        .event-desc {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 3px;
-        }
-
-        .event-time {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .btn-delete-event {
-            padding: 8px 15px;
-            background: #ff6b6b;
+        
+        .btn-layout-save {
+            background: linear-gradient(45deg, #51cf66, #40c057);
             color: white;
+        }
+        
+        .btn-layout-load {
+            background: linear-gradient(45deg, #339af0, #228be6);
+            color: white;
+        }
+        
+        .btn-layout-reset {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .btn-layout-preview {
+            background: linear-gradient(45deg, #ffd43b, #fcc419);
+            color: #000;
+        }
+        
+        .component-selector {
+            margin-top: 20px;
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .component-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .component-item:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .component-item.selected {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+        }
+        
+        .layout-preview {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(100px, auto);
+            gap: 10px;
+        }
+        
+        .preview-item {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            position: relative;
+        }
+        
+        .preview-item .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .preview-item:hover .delete-btn {
+            display: block;
+        }
+        
+        .grid-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .grid-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
-
-        .btn-delete-event:hover {
-            background: #ff4757;
+        
+        .grid-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-grid-add {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+        }
+        
+        .btn-grid-remove {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .btn-grid-move {
+            background: linear-gradient(45deg, #339af0, #228be6);
+            color: white;
+        }
+        
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-auto-rows: minmax(60px, auto);
+            gap: 5px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .grid-cell {
+            min-height: 60px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .grid-cell:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .grid-cell.drag-over {
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+        }
+        
+        .draggable-component {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
+            cursor: move;
+            text-align: center;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>⚠️ SmartJFB 管理面板 3</h1>
+            <h1>🎨 SmartJFB 布局编辑器</h1>
             <div class="header-controls">
                 <div id="connectionStatus" class="connection-status disconnected">
                     <span class="status-dot"></span>
                     <span class="status-text">未连接</span>
                 </div>
+                <button class="btn btn-small" onclick="location.href='admin.html'">总控制台</button>
+                <button class="btn btn-small" onclick="location.href='admin1.html'">计分系统</button>
+                <button class="btn btn-small" onclick="location.href='admin2.html'">判罚记录</button>
+                <button class="btn btn-small" onclick="location.href='admin4.html'">球员队徽</button>
+                <button class="btn btn-small" onclick="location.href='ball-possession.html'">球权管理</button>
                 <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
             </div>
         </header>
 
-        <nav class="admin-nav">
-            <a href="admin1.html" class="nav-link">队伍与计时</a>
-            <a href="admin2.html" class="nav-link">球员计分</a>
-            <a href="admin3.html" class="nav-link active">判罚管理</a>
-        </nav>
-
         <main>
-            <!-- 暂停管理 -->
+            <!-- 布局控制 -->
             <section class="section">
-                <div class="timeout-section">
-                    <h2>⏸️ 暂停管理</h2>
-                    <div class="timeout-buttons">
-                        <button class="btn btn-timeout" onclick="recordTimeout('home')">主队暂停</button>
-                        <button class="btn btn-timeout" onclick="recordTimeout('away')">客队暂停</button>
+                <h2>💾 布局控制</h2>
+                <div class="layout-controls">
+                    <div class="control-card">
+                        <h3>保存与加载</h3>
+                        <button class="control-btn btn-layout-save" onclick="saveLayout()">
+                            💾 保存当前布局
+                        </button>
+                        <button class="control-btn btn-layout-load" onclick="loadLayout()">
+                            📁 加载布局
+                        </button>
+                        <button class="control-btn btn-layout-reset" onclick="resetLayout()">
+                            🔄 重置布局
+                        </button>
+                    </div>
+                    <div class="control-card">
+                        <h3>预览与应用</h3>
+                        <button class="control-btn btn-layout-preview" onclick="previewLayout()">
+                            👁️ 预览布局
+                        </button>
+                        <button class="control-btn btn-layout-save" onclick="applyLayout()">
+                            ✅ 应用布局
+                        </button>
+                        <button class="control-btn btn-layout-reset" onclick="clearDisplay()">
+                            🧹 清空显示
+                        </button>
                     </div>
                 </div>
             </section>
 
-            <!-- 主队犯规 -->
+            <!-- 组件选择 -->
             <section class="section">
-                <div class="team-foul-section">
-                    <h3 id="homeTeamName">主队</h3>
-                    <div id="homeQuickFoulList" class="player-quick-list"></div>
-                    <div class="foul-preview">
-                        <div id="homeSelectedPlayer" class="selected-player">未选择球员</div>
-                        <div class="hint">请先选择犯规球员，然后选择犯规类型</div>
-                    </div>
-                    <div class="foul-buttons">
-                        <button class="btn btn-foul btn-personal" onclick="recordFoul('home', 'personal')">普通犯规</button>
-                        <button class="btn btn-foul btn-shooting" onclick="recordFoul('home', 'shooting')">投篮犯规</button>
-                        <button class="btn btn-foul btn-offensive" onclick="recordFoul('home', 'offensive')">进攻犯规</button>
-                        <button class="btn btn-foul btn-technical" onclick="recordFoul('home', 'technical')">技术犯规</button>
-                        <button class="btn btn-foul btn-flagrant" onclick="recordFoul('home', 'flagrant')">违体犯规</button>
-                        <button class="btn btn-foul" onclick="recordFoul('home', 'double')">双发犯规</button>
+                <h2>🧩 组件选择</h2>
+                <div class="component-selector">
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 15px;">
+                        选择要添加到布局的组件
+                    </p>
+                    <div class="component-grid">
+                        <div class="component-item" onclick="selectComponent('scoreboard')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">🏆</div>
+                            <div>计分板</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('timer')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">⏱️</div>
+                            <div>计时器</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('shot-clock')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">⏰</div>
+                            <div>进攻时钟</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('team-info')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">👥</div>
+                            <div>队伍信息</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('player-list')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📝</div>
+                            <div>球员名单</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('statistics')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📊</div>
+                            <div>统计信息</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('video')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📹</div>
+                            <div>视频播放</div>
+                        </div>
+                        <div class="component-item" onclick="selectComponent('text')">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📝</div>
+                            <div>文本显示</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- 客队犯规 -->
+            <!-- 网格布局控制 -->
             <section class="section">
-                <div class="team-foul-section">
-                    <h3 id="awayTeamName">客队</h3>
-                    <div id="awayQuickFoulList" class="player-quick-list"></div>
-                    <div class="foul-preview">
-                        <div id="awaySelectedPlayer" class="selected-player">未选择球员</div>
-                        <div class="hint">请先选择犯规球员，然后选择犯规类型</div>
-                    </div>
-                    <div class="foul-buttons">
-                        <button class="btn btn-foul btn-personal" onclick="recordFoul('away', 'personal')">普通犯规</button>
-                        <button class="btn btn-foul btn-shooting" onclick="recordFoul('away', 'shooting')">投篮犯规</button>
-                        <button class="btn btn-foul btn-offensive" onclick="recordFoul('away', 'offensive')">进攻犯规</button>
-                        <button class="btn btn-foul btn-technical" onclick="recordFoul('away', 'technical')">技术犯规</button>
-                        <button class="btn btn-foul btn-flagrant" onclick="recordFoul('away', 'flagrant')">违体犯规</button>
-                        <button class="btn btn-foul" onclick="recordFoul('away', 'double')">双发犯规</button>
-                    </div>
+                <h2>📏 网格布局控制</h2>
+                <div class="grid-controls">
+                    <button class="grid-btn btn-grid-add" onclick="addComponentToGrid()">
+                        ➕ 添加到网格
+                    </button>
+                    <button class="grid-btn btn-grid-remove" onclick="removeComponentFromGrid()">
+                        ➖ 移除选中组件
+                    </button>
+                    <button class="grid-btn btn-grid-move" onclick="moveComponent()">
+                        🔄 移动组件
+                    </button>
+                    <button class="grid-btn btn-grid-add" onclick="adjustGridSize(1)">
+                        ➕ 增加网格行
+                    </button>
+                    <button class="grid-btn btn-grid-remove" onclick="adjustGridSize(-1)">
+                        ➖ 减少网格行
+                    </button>
                 </div>
             </section>
 
-            <!-- 事件记录 -->
+            <!-- 拖拽布局编辑器 -->
             <section class="section">
-                <div class="events-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2>📊 事件记录</h2>
-                        <button id="btnClearEvents" class="btn btn-small" style="background: linear-gradient(135deg, #ff6b6b, #ff4757);">清空所有事件</button>
-                    </div>
-                    <div id="eventsList" class="events-list">
-                        <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px;">
-                            暂无事件记录
+                <h2>🏗️ 拖拽布局编辑器</h2>
+                <div class="layout-grid" id="layoutGrid">
+                    <!-- 12x12 网格布局 -->
+                    <div class="grid-cell" data-row="1" data-col="1"></div>
+                    <div class="grid-cell" data-row="1" data-col="2"></div>
+                    <div class="grid-cell" data-row="1" data-col="3"></div>
+                    <div class="grid-cell" data-row="1" data-col="4"></div>
+                    <div class="grid-cell" data-row="1" data-col="5"></div>
+                    <div class="grid-cell" data-row="1" data-col="6"></div>
+                    <div class="grid-cell" data-row="1" data-col="7"></div>
+                    <div class="grid-cell" data-row="1" data-col="8"></div>
+                    <div class="grid-cell" data-row="1" data-col="9"></div>
+                    <div class="grid-cell" data-row="1" data-col="10"></div>
+                    <div class="grid-cell" data-row="1" data-col="11"></div>
+                    <div class="grid-cell" data-row="1" data-col="12"></div>
+                    
+                    <div class="grid-cell" data-row="2" data-col="1"></div>
+                    <div class="grid-cell" data-row="2" data-col="2"></div>
+                    <div class="grid-cell" data-row="2" data-col="3"></div>
+                    <div class="grid-cell" data-row="2" data-col="4"></div>
+                    <div class="grid-cell" data-row="2" data-col="5"></div>
+                    <div class="grid-cell" data-row="2" data-col="6"></div>
+                    <div class="grid-cell" data-row="2" data-col="7"></div>
+                    <div class="grid-cell" data-row="2" data-col="8"></div>
+                    <div class="grid-cell" data-row="2" data-col="9"></div>
+                    <div class="grid-cell" data-row="2" data-col="10"></div>
+                    <div class="grid-cell" data-row="2" data-col="11"></div>
+                    <div class="grid-cell" data-row="2" data-col="12"></div>
+                    
+                    <div class="grid-cell" data-row="3" data-col="1"></div>
+                    <div class="grid-cell" data-row="3" data-col="2"></div>
+                    <div class="grid-cell" data-row="3" data-col="3"></div>
+                    <div class="grid-cell" data-row="3" data-col="4"></div>
+                    <div class="grid-cell" data-row="3" data-col="5"></div>
+                    <div class="grid-cell" data-row="3" data-col="6"></div>
+                    <div class="grid-cell" data-row="3" data-col="7"></div>
+                    <div class="grid-cell" data-row="3" data-col="8"></div>
+                    <div class="grid-cell" data-row="3" data-col="9"></div>
+                    <div class="grid-cell" data-row="3" data-col="10"></div>
+                    <div class="grid-cell" data-row="3" data-col="11"></div>
+                    <div class="grid-cell" data-row="3" data-col="12"></div>
+                    
+                    <div class="grid-cell" data-row="4" data-col="1"></div>
+                    <div class="grid-cell" data-row="4" data-col="2"></div>
+                    <div class="grid-cell" data-row="4" data-col="3"></div>
+                    <div class="grid-cell" data-row="4" data-col="4"></div>
+                    <div class="grid-cell" data-row="4" data-col="5"></div>
+                    <div class="grid-cell" data-row="4" data-col="6"></div>
+                    <div class="grid-cell" data-row="4" data-col="7"></div>
+                    <div class="grid-cell" data-row="4" data-col="8"></div>
+                    <div class="grid-cell" data-row="4" data-col="9"></div>
+                    <div class="grid-cell" data-row="4" data-col="10"></div>
+                    <div class="grid-cell" data-row="4" data-col="11"></div>
+                    <div class="grid-cell" data-row="4" data-col="12"></div>
+                    
+                    <div class="grid-cell" data-row="5" data-col="1"></div>
+                    <div class="grid-cell" data-row="5" data-col="2"></div>
+                    <div class="grid-cell" data-row="5" data-col="3"></div>
+                    <div class="grid-cell" data-row="5" data-col="4"></div>
+                    <div class="grid-cell" data-row="5" data-col="5"></div>
+                    <div class="grid-cell" data-row="5" data-col="6"></div>
+                    <div class="grid-cell" data-row="5" data-col="7"></div>
+                    <div class="grid-cell" data-row="5" data-col="8"></div>
+                    <div class="grid-cell" data-row="5" data-col="9"></div>
+                    <div class="grid-cell" data-row="5" data-col="10"></div>
+                    <div class="grid-cell" data-row="5" data-col="11"></div>
+                    <div class="grid-cell" data-row="5" data-col="12"></div>
+                </div>
+            </section>
+
+            <!-- 布局预览 -->
+            <section class="section">
+                <h2>👁️ 布局预览</h2>
+                <div class="layout-preview">
+                    <div class="preview-grid" id="layoutPreview">
+                        <div class="preview-item" data-id="1">
+                            <button class="delete-btn" onclick="removePreviewItem(1)">×</button>
+                            <div>🏆 计分板</div>
+                            <div style="font-size: 10px; margin-top: 5px;">主队 vs 客队</div>
+                        </div>
+                        <div class="preview-item" data-id="2">
+                            <button class="delete-btn" onclick="removePreviewItem(2)">×</button>
+                            <div>⏱️ 比赛计时</div>
+                            <div style="font-size: 10px; margin-top: 5px;">12:00</div>
+                        </div>
+                        <div class="preview-item" data-id="3">
+                            <button class="delete-btn" onclick="removePreviewItem(3)">×</button>
+                            <div>⏰ 进攻时钟</div>
+                            <div style="font-size: 10px; margin-top: 5px;">24秒</div>
+                        </div>
+                        <div class="preview-item" data-id="4">
+                            <button class="delete-btn" onclick="removePreviewItem(4)">×</button>
+                            <div>📊 统计信息</div>
+                            <div style="font-size: 10px; margin-top: 5px;">得分/犯规</div>
                         </div>
                     </div>
                 </div>
@@ -316,15 +452,14 @@
     <script>
         // Socket.IO连接
         const socket = io('http://localhost:3001');
-
-        // 当前选择
-        let selectedFoulPlayer = { home: null, away: null };
+        let selectedComponent = null;
+        let selectedPreviewItem = null;
 
         // 连接状态更新
         socket.on('connect', () => {
             updateConnectionStatus(true);
             console.log('Socket.IO已连接');
-            socket.emit('register_client', 'admin3');
+            socket.emit('register_client', 'admin');
         });
 
         socket.on('disconnect', () => {
@@ -335,14 +470,6 @@
         socket.on('connect_error', (error) => {
             console.error('Socket.IO错误:', error);
             updateConnectionStatus(false);
-        });
-
-        socket.on('initial_data', (data) => {
-            handleUpdate({ matchInfo: data });
-        });
-
-        socket.on('data_update', (data) => {
-            handleUpdate(data);
         });
 
         function updateConnectionStatus(connected) {
@@ -358,250 +485,335 @@
             }
         }
 
-        function handleUpdate(data) {
-            if (data.matchInfo) {
-                updateMatchInfo(data.matchInfo);
-            }
-            if (data.events) {
-                updateEventsList(data.events);
-            }
-        }
-
-        function updateMatchInfo(matchInfo) {
-            // 更新队伍名称
-            document.getElementById('homeTeamName').textContent = matchInfo.homeTeam?.name || '主队';
-            document.getElementById('awayTeamName').textContent = matchInfo.awayTeam?.name || '客队';
-
-            // 更新球员列表
-            if (matchInfo.homeTeam?.players && matchInfo.homeTeam.players.length > 0) {
-                displayQuickFoulList('homeQuickFoulList', matchInfo.homeTeam.players, 'home');
-            } else {
-                document.getElementById('homeQuickFoulList').innerHTML = '';
-            }
-            
-            if (matchInfo.awayTeam?.players && matchInfo.awayTeam.players.length > 0) {
-                displayQuickFoulList('awayQuickFoulList', matchInfo.awayTeam.players, 'away');
-            } else {
-                document.getElementById('awayQuickFoulList').innerHTML = '';
-            }
-        }
-
-        function displayQuickFoulList(containerId, players, team) {
-            const container = document.getElementById(containerId);
-            if (!players || players.length === 0) return;
-
-            container.innerHTML = players.map((player, index) => `
-                <button class="player-quick-btn" data-team="${team}" data-index="${index}"
-                        onclick="selectFoulPlayer('${team}', ${index})">
-                    <span class="number">#${player.number || '-'}</span>
-                    <span class="name">${player.name || '未知'}</span>
-                </button>
-            `).join('');
-        }
-
-        function selectFoulPlayer(team, index) {
+        // 组件选择功能
+        function selectComponent(componentType) {
             // 取消之前的选择
-            document.querySelectorAll(`#${team}QuickFoulList .player-quick-btn`).forEach(btn => {
-                btn.classList.remove('selected');
+            document.querySelectorAll('.component-item').forEach(item => {
+                item.classList.remove('selected');
             });
             
-            // 选择新的
-            const selectedBtn = document.querySelector(`#${team}QuickFoulList .player-quick-btn[data-index="${index}"]`);
-            if (selectedBtn) {
-                selectedBtn.classList.add('selected');
-                selectedFoulPlayer[team] = index;
-                
-                // 更新选中球员显示
-                fetch('/api/match-info').then(res => res.json()).then(response => {
-                    const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
-                    const teamData = response.data[teamKey];
-                    if (teamData && teamData.players && teamData.players[index]) {
-                        const player = teamData.players[index];
-                        const displayId = team === 'home' ? 'homeSelectedPlayer' : 'awaySelectedPlayer';
-                        document.getElementById(displayId).textContent = `#${player.number} ${player.name}`;
-                    }
-                });
-            }
+            // 选择当前组件
+            event.currentTarget.classList.add('selected');
+            selectedComponent = componentType;
+            
+            showMessage(`已选择组件: ${getComponentName(componentType)}`, 'info');
         }
 
-        function recordFoul(team, foulType) {
-            const playerIndex = selectedFoulPlayer[team];
-            
-            // 检查是否选择了球员
-            if (playerIndex === null || playerIndex === undefined) {
-                showMessage('请先选择犯规球员', 'error');
-                return;
-            }
-            
-            let eventData = {
-                type: 'foul',
-                team,
-                foulType,
-                quarter: '1'
+        function getComponentName(componentType) {
+            const names = {
+                'scoreboard': '计分板',
+                'timer': '计时器',
+                'shot-clock': '进攻时钟',
+                'team-info': '队伍信息',
+                'player-list': '球员名单',
+                'statistics': '统计信息',
+                'video': '视频播放',
+                'text': '文本显示'
             };
-
-            // 获取当前节数
-            fetch('/api/match-info').then(res => res.json()).then(response => {
-                if (response.data.currentQuarter) {
-                    eventData.quarter = response.data.currentQuarter;
-                }
-                
-                // 添加球员信息
-                const teamKey = team === 'home' ? 'homeTeam' : 'awayTeam';
-                const teamData = response.data[teamKey];
-                if (teamData && teamData.players && teamData.players[playerIndex]) {
-                    const player = teamData.players[playerIndex];
-                    eventData.playerIndex = playerIndex;
-                    eventData.playerNumber = player.number;
-                    eventData.playerName = player.name;
-                    addEvent(eventData);
-                }
-            });
+            return names[componentType] || componentType;
         }
 
-        function recordTimeout(team) {
-            let eventData = {
-                type: 'timeout',
-                team,
-                quarter: '1'
-            };
-
-            // 获取当前节数
-            fetch('/api/match-info').then(res => res.json()).then(response => {
-                if (response.data.currentQuarter) {
-                    eventData.quarter = response.data.currentQuarter;
-                }
-                addEvent(eventData);
-            });
-        }
-
-        async function addEvent(eventData) {
+        // 布局控制功能
+        async function saveLayout() {
             try {
-                const response = await fetch('/api/events', {
+                // 获取当前布局信息
+                const layout = getCurrentLayout();
+                
+                const response = await fetch('/api/layout/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(eventData)
+                    body: JSON.stringify(layout)
                 });
+                
                 const data = await response.json();
                 if (data.success) {
-                    if (eventData.type === 'foul') {
-                        const foulTypeNames = {
-                            'personal': '普通犯规',
-                            'shooting': '投篮犯规',
-                            'offensive': '进攻犯规',
-                            'technical': '技术犯规',
-                            'flagrant': '违体犯规',
-                            'double': '双发犯规'
-                        };
-                        showMessage(`${eventData.playerName} ${foulTypeNames[eventData.foulType] || '犯规'}`, 'success');
-                    } else if (eventData.type === 'timeout') {
-                        const teamName = eventData.team === 'home' ? '主队' : '客队';
-                        showMessage(`${teamName}请求暂停`, 'success');
-                    }
+                    showMessage('布局已保存', 'success');
                 } else {
-                    showMessage(data.message || '操作失败', 'error');
+                    showMessage(data.message || '保存失败', 'error');
                 }
             } catch (error) {
-                console.error('记录事件失败:', error);
-                showMessage('操作失败', 'error');
+                console.error('保存布局失败:', error);
+                showMessage('保存失败: ' + error.message, 'error');
             }
         }
 
-        function updateEventsList(events) {
-            const container = document.getElementById('eventsList');
-            if (!events || events.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 40px;">暂无事件记录</div>';
-                return;
+        async function loadLayout() {
+            try {
+                const response = await fetch('/api/layout/load');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage('布局已加载', 'success');
+                    updatePreview(data.layout);
+                } else {
+                    showMessage('加载失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载布局失败:', error);
+                showMessage('加载失败: ' + error.message, 'error');
             }
+        }
 
-            container.innerHTML = events.slice().reverse().map((event, index) => {
-                const actualIndex = events.length - 1 - index;
-                const eventIcon = getEventIcon(event.type);
-                const teamName = event.team === 'home' ? 
-                    (event.team === 'home' ? (document.getElementById('homeTeamName').textContent || '主队') : (document.getElementById('awayTeamName').textContent || '客队')) : '';
-                
-                let description = getEventDescription(event);
-                
-                return `
-                    <div class="event-item">
-                        <div class="event-icon">${eventIcon}</div>
-                        <div class="event-details">
-                            <div class="event-team">${teamName}</div>
-                            <div class="event-desc">${description}</div>
-                            <div class="event-time">${event.quarter}节 ${formatEventTime(event.gameTime)}</div>
-                        </div>
-                        <button class="btn-delete-event" data-index="${actualIndex}">删除</button>
-                    </div>
-                `;
-            }).join('');
-
-            container.querySelectorAll('.btn-delete-event').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    deleteEvent(index);
+        async function resetLayout() {
+            if (!confirm('确定要重置布局吗？所有自定义设置将丢失。')) return;
+            
+            try {
+                const response = await fetch('/api/layout/reset', {
+                    method: 'POST'
                 });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('布局已重置', 'success');
+                    resetPreview();
+                } else {
+                    showMessage(data.message || '重置失败', 'error');
+                }
+            } catch (error) {
+                console.error('重置布局失败:', error);
+                showMessage('重置失败: ' + error.message, 'error');
+            }
+        }
+
+        async function applyLayout() {
+            try {
+                const layout = getCurrentLayout();
+                
+                const response = await fetch('/api/layout/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(layout)
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showMessage('布局已应用到显示端', 'success');
+                    socket.emit('layout_update', layout);
+                } else {
+                    showMessage(data.message || '应用失败', 'error');
+                }
+            } catch (error) {
+                console.error('应用布局失败:', error);
+                showMessage('应用失败: ' + error.message, 'error');
+            }
+        }
+
+        // 预览功能
+        function previewLayout() {
+            showMessage('布局预览已更新', 'success');
+        }
+
+        function getCurrentLayout() {
+            // 获取当前预览布局的数据
+            const items = document.querySelectorAll('#layoutPreview .preview-item');
+            const layout = [];
+            
+            items.forEach((item, index) => {
+                layout.push({
+                    id: item.dataset.id,
+                    type: item.querySelector('div').textContent.includes('计分板') ? 'scoreboard' :
+                         item.querySelector('div').textContent.includes('比赛计时') ? 'timer' :
+                         item.querySelector('div').textContent.includes('进攻时钟') ? 'shot-clock' :
+                         item.querySelector('div').textContent.includes('统计信息') ? 'statistics' : 'unknown',
+                    position: index
+                });
+            });
+            
+            return {
+                components: layout,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        function updatePreview(layout) {
+            // 更新预览区域
+            const preview = document.getElementById('layoutPreview');
+            preview.innerHTML = '';
+            
+            layout.components.forEach(component => {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.dataset.id = component.id;
+                
+                let content = '';
+                switch(component.type) {
+                    case 'scoreboard':
+                        content = '<button class="delete-btn" onclick="removePreviewItem(' + component.id + ')">×</button><div>🏆 计分板</div><div style="font-size: 10px; margin-top: 5px;">主队 vs 客队</div>';
+                        break;
+                    case 'timer':
+                        content = '<button class="delete-btn" onclick="removePreviewItem(' + component.id + ')">×</button><div>⏱️ 比赛计时</div><div style="font-size: 10px; margin-top: 5px;">12:00</div>';
+                        break;
+                    case 'shot-clock':
+                        content = '<button class="delete-btn" onclick="removePreviewItem(' + component.id + ')">×</button><div>⏰ 进攻时钟</div><div style="font-size: 10px; margin-top: 5px;">24秒</div>';
+                        break;
+                    case 'statistics':
+                        content = '<button class="delete-btn" onclick="removePreviewItem(' + component.id + ')">×</button><div>📊 统计信息</div><div style="font-size: 10px; margin-top: 5px;">得分/犯规</div>';
+                        break;
+                    default:
+                        content = '<button class="delete-btn" onclick="removePreviewItem(' + component.id + ')">×</button><div>🧩 组件</div><div style="font-size: 10px; margin-top: 5px;">未知类型</div>';
+                }
+                
+                item.innerHTML = content;
+                preview.appendChild(item);
             });
         }
 
-        function getEventIcon(type) {
-            const icons = {
-                'score': '🏀',
-                'foul': '⚠️',
-                'timeout': '⏸️',
-                'quarter': '📋'
-            };
-            return icons[type] || '📌';
+        function resetPreview() {
+            const preview = document.getElementById('layoutPreview');
+            preview.innerHTML = `
+                <div class="preview-item" data-id="1">
+                    <button class="delete-btn" onclick="removePreviewItem(1)">×</button>
+                    <div>🏆 计分板</div>
+                    <div style="font-size: 10px; margin-top: 5px;">主队 vs 客队</div>
+                </div>
+                <div class="preview-item" data-id="2">
+                    <button class="delete-btn" onclick="removePreviewItem(2)">×</button>
+                    <div>⏱️ 比赛计时</div>
+                    <div style="font-size: 10px; margin-top: 5px;">12:00</div>
+                </div>
+                <div class="preview-item" data-id="3">
+                    <button class="delete-btn" onclick="removePreviewItem(3)">×</button>
+                    <div>⏰ 进攻时钟</div>
+                    <div style="font-size: 10px; margin-top: 5px;">24秒</div>
+                </div>
+                <div class="preview-item" data-id="4">
+                    <button class="delete-btn" onclick="removePreviewItem(4)">×</button>
+                    <div>📊 统计信息</div>
+                    <div style="font-size: 10px; margin-top: 5px;">得分/犯规</div>
+                </div>
+            `;
         }
 
-        function getEventDescription(event) {
-            switch (event.type) {
-                case 'score':
-                    const player = event.playerName || `#${event.playerNumber || '?'}`;
-                    const points = event.points === 1 ? '罚球' : event.points === 2 ? '2分' : '3分';
-                    return `${player} 投中 ${points}`;
-                case 'foul':
-                    const foulPlayer = event.playerName || `#${event.playerNumber || '?'}`;
-                    const foulTypeNames = {
-                        'personal': '普通犯规',
-                        'shooting': '投篮犯规',
-                        'offensive': '进攻犯规',
-                        'technical': '技术犯规',
-                        'flagrant': '违体犯规',
-                        'double': '双发犯规'
-                    };
-                    const foulType = foulTypeNames[event.foulType] || '犯规';
-                    return `${foulPlayer} ${foulType}`;
-                case 'timeout':
-                    return '请求暂停';
-                case 'quarter':
-                    return `进入${event.quarter}节`;
-                default:
-                    return event.description || '未知事件';
+        function removePreviewItem(id) {
+            const item = document.querySelector(`#layoutPreview .preview-item[data-id="${id}"]`);
+            if (item) {
+                item.remove();
+                showMessage('组件已从布局中移除', 'success');
             }
         }
 
-        function formatEventTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        // 网格操作功能
+        function addComponentToGrid() {
+            if (!selectedComponent) {
+                showMessage('请先选择一个组件', 'error');
+                return;
+            }
+            
+            // 创建可拖拽组件
+            const draggable = document.createElement('div');
+            draggable.className = 'draggable-component';
+            draggable.draggable = true;
+            draggable.textContent = getComponentName(selectedComponent);
+            
+            // 添加拖拽事件
+            draggable.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', selectedComponent);
+                e.dataTransfer.setData('component-type', selectedComponent);
+            });
+            
+            // 添加到第一个可用网格单元
+            const firstCell = document.querySelector('.grid-cell:not(:has(*))');
+            if (firstCell) {
+                firstCell.appendChild(draggable);
+            } else {
+                // 如果没有空单元，就添加到第一个单元
+                const firstCell = document.querySelector('.grid-cell');
+                firstCell.appendChild(draggable);
+            }
+            
+            showMessage(`${getComponentName(selectedComponent)} 已添加到网格`, 'success');
         }
 
-        async function deleteEvent(index) {
-            try {
-                const response = await fetch(`/api/events/${index}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showMessage('事件已删除', 'success');
-                } else {
-                    showMessage(data.message || '操作失败', 'error');
+        function removeComponentFromGrid() {
+            const selected = document.querySelector('.grid-cell .draggable-component.selected');
+            if (selected) {
+                selected.remove();
+                showMessage('组件已从网格中移除', 'success');
+            } else {
+                showMessage('请先选择要移除的组件', 'error');
+            }
+        }
+
+        function moveComponent() {
+            showMessage('移动功能开发中...', 'info');
+        }
+
+        function adjustGridSize(change) {
+            if (change > 0) {
+                // 增加行
+                const grid = document.getElementById('layoutGrid');
+                const currentRows = grid.children.length / 12;
+                const newRow = [];
+                
+                for (let i = 0; i < 12; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = currentRows + 1;
+                    cell.dataset.col = i + 1;
+                    grid.appendChild(cell);
                 }
-            } catch (error) {
-                console.error('删除事件失败:', error);
-                showMessage('操作失败', 'error');
+                
+                showMessage('网格行数已增加', 'success');
+            } else {
+                // 减少行（如果有多余的行）
+                const grid = document.getElementById('layoutGrid');
+                const rows = Array.from(grid.children).reduce((acc, cell) => {
+                    const row = parseInt(cell.dataset.row);
+                    if (!acc.includes(row)) acc.push(row);
+                    return acc;
+                }, []);
+                
+                if (rows.length > 1) {
+                    // 移除最后一行的单元格
+                    const maxRow = Math.max(...rows);
+                    const cellsToRemove = grid.querySelectorAll(`[data-row="${maxRow}"]`);
+                    cellsToRemove.forEach(cell => cell.remove());
+                    showMessage('网格行数已减少', 'success');
+                } else {
+                    showMessage('网格行数已达到最小值', 'error');
+                }
             }
         }
+
+        function clearDisplay() {
+            if (!confirm('确定要清空显示端吗？')) return;
+            
+            socket.emit('clear_display');
+            showMessage('显示端已清空', 'success');
+        }
+
+        // 拖拽功能
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                cell.classList.add('drag-over');
+            });
+            
+            cell.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                cell.classList.remove('drag-over');
+            });
+            
+            cell.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cell.classList.remove('drag-over');
+                
+                const componentType = e.dataTransfer.getData('component-type');
+                if (componentType) {
+                    const draggable = document.createElement('div');
+                    draggable.className = 'draggable-component';
+                    draggable.draggable = true;
+                    draggable.textContent = getComponentName(componentType);
+                    
+                    // 添加拖拽事件
+                    draggable.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('component-type', componentType);
+                    });
+                    
+                    cell.appendChild(draggable);
+                }
+            });
+        });
 
         function showMessage(message, type = 'info') {
             const toast = document.getElementById('toast');
@@ -613,18 +825,6 @@
                 toast.style.display = 'none';
             }, 3000);
         }
-
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            // 清空事件
-            document.getElementById('btnClearEvents').addEventListener('click', () => {
-                if (confirm('确定要清空所有事件记录吗？')) {
-                    fetch('/api/events', { method: 'DELETE' })
-                        .then(() => showMessage('所有事件已清空', 'success'))
-                        .catch(() => showMessage('操作失败', 'error'));
-                }
-            });
-        });
     </script>
 </body>
 </html>

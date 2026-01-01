@@ -329,9 +329,17 @@
         setInterval(async () => {
             try {
                 const response = await fetch('/api/clients');
+                
+                if (!response.ok) {
+                    console.error('获取客户端数量失败:', response.status, response.statusText);
+                    return;
+                }
+                
                 const data = await response.json();
                 if (data.success) {
                     document.getElementById('connectedClients').textContent = data.data.count || 0;
+                } else {
+                    console.error('获取客户端数量失败:', data.message || '服务器返回错误');
                 }
             } catch (error) {
                 console.error('获取客户端数量失败:', error);

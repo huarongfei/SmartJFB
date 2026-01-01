@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>球权管理 - SmartJFB</title>
+    <title>球权与进攻时钟管理 - SmartJFB</title>
     <link rel="stylesheet" href="css/admin.css">
     <style>
         .ball-possession-container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -132,6 +132,75 @@
             border-color: rgba(255, 255, 255, 0.4);
             transform: scale(1.05);
         }
+        
+        .shot-clock-controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .shot-clock-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .shot-clock-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .shot-clock-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .shot-clock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .shot-clock-btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-shot-clock-start {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+        }
+        
+        .btn-shot-clock-pause {
+            background: linear-gradient(45deg, #339af0, #228be6);
+            color: white;
+        }
+        
+        .btn-shot-clock-reset {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .btn-shot-clock-24 {
+            background: linear-gradient(45deg, #ffd43b, #fcc419);
+            color: #000;
+        }
+        
+        .btn-shot-clock-14 {
+            background: linear-gradient(45deg, #ffd43b, #fcc419);
+            color: #000;
+        }
 
         @media (max-width: 768px) {
             .possession-controls {
@@ -151,6 +220,14 @@
             }
 
             .btn-switch {
+                width: 100%;
+            }
+            
+            .shot-clock-buttons {
+                flex-direction: column;
+            }
+            
+            .shot-clock-btn {
                 width: 100%;
             }
         }
@@ -217,13 +294,32 @@
                     <h2>📊 当前状态</h2>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                         <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; text-align: center;">
-                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-bottom: 10px;">进攻时钟</div>
-                            <div id="shotClockDisplay" style="font-size: 48px; font-weight: bold; color: #fff;">24</div>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; text-align: center;">
                             <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-bottom: 10px;">当前球权</div>
                             <div id="currentPossessionDisplay" style="font-size: 32px; font-weight: bold; color: #fff;">未设置</div>
                         </div>
+                    </div>
+                </section>
+                
+                <!-- 进攻时钟控制 -->
+                <section class="shot-clock-controls">
+                    <h2 style="color: #00d9ff; margin-top: 0; margin-bottom: 20px;">⏱️ 进攻时钟控制</h2>
+                    <div class="shot-clock-display" id="shotClockDisplay">24</div>
+                    <div class="shot-clock-buttons">
+                        <button class="shot-clock-btn btn-shot-clock-start" onclick="startShotClock()">
+                            ▶️ 开始
+                        </button>
+                        <button class="shot-clock-btn btn-shot-clock-pause" onclick="pauseShotClock()">
+                            ⏸️ 暂停
+                        </button>
+                        <button class="shot-clock-btn btn-shot-clock-reset" onclick="resetShotClock()">
+                            🔄 重置
+                        </button>
+                        <button class="shot-clock-btn btn-shot-clock-24" onclick="setShotClock24()">
+                            24秒
+                        </button>
+                        <button class="shot-clock-btn btn-shot-clock-14" onclick="setShotClock14()">
+                            14秒
+                        </button>
                     </div>
                 </section>
 
@@ -334,6 +430,10 @@
             if (data.matchInfo) {
                 updateTeamNames(data.matchInfo);
                 updateLogos(data.matchInfo);
+                // 更新运动类型相关信息
+                if (data.matchInfo.sportType) {
+                    updateMatchTimeDisplayForSport(data.matchInfo.sportType);
+                }
             }
             if (data.timerStatus) {
                 updateShotClock(data.timerStatus);
@@ -370,6 +470,90 @@
         function updateShotClock(timerStatus) {
             const shotTime = timerStatus.shotClock?.currentTime || 0;
             document.getElementById('shotClockDisplay').textContent = Math.floor(shotTime);
+        }
+        
+        // 进攻时钟控制函数
+        async function startShotClock() {
+            try {
+                const response = await fetch('/api/shot-clock/start', { method: 'POST' });
+                
+                if (response.ok) {
+                    showMessage('进攻时钟已开始', 'success');
+                } else {
+                    showMessage('开始进攻时钟失败', 'error');
+                }
+            } catch (error) {
+                console.error('开始进攻时钟失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+        
+        async function pauseShotClock() {
+            try {
+                const response = await fetch('/api/shot-clock/pause', { method: 'POST' });
+                
+                if (response.ok) {
+                    showMessage('进攻时钟已暂停', 'success');
+                } else {
+                    showMessage('暂停进攻时钟失败', 'error');
+                }
+            } catch (error) {
+                console.error('暂停进攻时钟失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+        
+        async function resetShotClock() {
+            try {
+                const response = await fetch('/api/shot-clock/reset', { method: 'POST' });
+                
+                if (response.ok) {
+                    showMessage('进攻时钟已重置', 'success');
+                } else {
+                    showMessage('重置进攻时钟失败', 'error');
+                }
+            } catch (error) {
+                console.error('重置进攻时钟失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+        
+        async function setShotClock24() {
+            try {
+                const response = await fetch('/api/shot-clock/set', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds: 24 })
+                });
+                
+                if (response.ok) {
+                    showMessage('进攻时钟设为24秒', 'success');
+                } else {
+                    showMessage('设置进攻时钟失败', 'error');
+                }
+            } catch (error) {
+                console.error('设置进攻时钟失败:', error);
+                showMessage('操作失败', 'error');
+            }
+        }
+        
+        async function setShotClock14() {
+            try {
+                const response = await fetch('/api/shot-clock/set', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds: 14 })
+                });
+                
+                if (response.ok) {
+                    showMessage('进攻时钟设为14秒', 'success');
+                } else {
+                    showMessage('设置进攻时钟失败', 'error');
+                }
+            } catch (error) {
+                console.error('设置进攻时钟失败:', error);
+                showMessage('操作失败', 'error');
+            }
         }
 
         function updateBallPossessionDisplay(possession) {
@@ -566,7 +750,9 @@
         // 更新比赛时长显示
         function updateMatchTimeDisplay(quarterMinutes) {
             document.getElementById('currentQuarterTime').textContent = `${quarterMinutes}分钟`;
-            document.getElementById('totalMatchTime').textContent = `${quarterMinutes * 4}分钟`;
+            // 根据运动类型设置总时长，篮球4节，足球2半场
+            const totalQuarters = 4; // 默认为篮球4节
+            document.getElementById('totalMatchTime').textContent = `${quarterMinutes * totalQuarters}分钟`;
         }
 
         function showMessage(message, type = 'info') {

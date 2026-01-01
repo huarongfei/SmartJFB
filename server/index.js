@@ -51,6 +51,9 @@ const adService = new AdvertisementService(dataStore);
 // 初始化布局服务
 const layoutService = new LayoutService();
 
+// 将broadcastLayoutUpdate设置为全局变量，以便布局服务可以访问
+global.broadcastLayoutUpdate = broadcastLayoutUpdate;
+
 // 中间件
 app.use(cors());
 app.use(express.json());
@@ -86,6 +89,12 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 请求当前布局
+  socket.on('request_current_layout', () => {
+    const currentLayout = layoutService.getCurrentLayout();
+    socket.emit('current_layout', currentLayout);
+  });
+
   // 断开连接
   socket.on('disconnect', () => {
     connectedClients.delete(socket.id);
@@ -97,6 +106,14 @@ io.on('connection', (socket) => {
 function broadcastUpdate(data) {
   io.emit('data_update', data);
 }
+
+// 广播布局更新
+function broadcastLayoutUpdate(layout) {
+  io.emit('layout_update', layout);
+}
+
+// 将broadcastLayoutUpdate设置为全局变量，以便布局服务可以访问
+global.broadcastLayoutUpdate = broadcastLayoutUpdate;
 
 // 广播计时器更新
 function broadcastTimerUpdate(data) {
@@ -223,6 +240,13 @@ app.post('/api/timer/end-quarter', (req, res) => {
 app.post('/api/timer/set-time', (req, res) => {
   const { seconds } = req.body;
 
+  if (typeof seconds !== 'number' || seconds < 0) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的秒数'
+    });
+  }
+
   timerController.setGameTime(seconds);
   broadcastTimerUpdate(timerController.getTimerStatus());
   broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
@@ -246,6 +270,14 @@ app.post('/api/timer/toggle-direction', (req, res) => {
 // 设置计时精度
 app.post('/api/timer/set-precision', (req, res) => {
   const { precision } = req.body; // 'second', 'minute', 'millisecond'
+
+  const validPrecisions = ['second', 'minute', 'millisecond'];
+  if (!validPrecisions.includes(precision)) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的计时精度'
+    });
+  }
 
   dataStore.gameClock.precision = precision;
   broadcastTimerUpdate(timerController.getTimerStatus());
@@ -287,7 +319,14 @@ app.post('/api/shot-clock/reset', (req, res) => {
 app.post('/api/shot-clock/set-time', (req, res) => {
   const { seconds } = req.body;
 
-  timerController.setShotClockMaxTime(seconds);
+  if (typeof seconds !== 'number' || seconds < 0) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的秒数'
+    });
+  }
+
+  timerController.setShotClockTime(seconds);
   broadcastTimerUpdate(timerController.getTimerStatus());
   broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
 
@@ -297,6 +336,13 @@ app.post('/api/shot-clock/set-time', (req, res) => {
 // 设置进攻时钟（简化版）
 app.post('/api/shot-clock/set', (req, res) => {
   const { seconds } = req.body;
+
+  if (typeof seconds !== 'number' || seconds < 0) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的秒数'
+    });
+  }
 
   timerController.setShotClockTime(seconds);
   timerController.startShotClock();
@@ -311,6 +357,34 @@ app.post('/api/shot-clock/set', (req, res) => {
 // 更新比分
 app.post('/api/score', (req, res) => {
   const { team, points, operation } = req.body; // operation: 'add' | 'subtract'
+
+  if (!team || !points || !operation) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少必需参数'
+    });
+  }
+
+  if (!['home', 'away'].includes(team)) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的队伍'
+    });
+  }
+
+  if (!['add', 'subtract'].includes(operation)) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的操作类型'
+    });
+  }
+
+  if (typeof points !== 'number' || points <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: '分数必须是正数'
+    });
+  }
 
   const teamData = team === 'home'
     ? dataStore.homeTeam
@@ -364,6 +438,27 @@ app.post('/api/team/update', (req, res) => {
 // 添加球员
 app.post('/api/player/add', (req, res) => {
   const { team, playerData } = req.body;
+
+  if (!team || !playerData) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少必需参数'
+    });
+  }
+
+  if (!['home', 'away'].includes(team)) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的队伍'
+    });
+  }
+
+  if (!playerData.number || !playerData.name) {
+    return res.status(400).json({
+      success: false,
+      message: '球员号码和姓名不能为空'
+    });
+  }
 
   const teamData = team === 'home'
     ? dataStore.homeTeam
@@ -476,7 +571,7 @@ app.get('/api/events', (req, res) => {
 // 记录比赛事件（新版，用于管理面板）
 app.post('/api/events', (req, res) => {
   const eventData = req.body;
-  const { type, team, points, playerIndex, playerNumber, playerName, foulType, quarter } = eventData;
+  const { type, team, points, playerIndex, playerId, playerNumber, playerName, foulType, quarter } = eventData;
 
   // 获取当前比赛时间
   const gameTime = timerController.dataStore.gameClock.currentTime;
@@ -494,14 +589,24 @@ app.post('/api/events', (req, res) => {
   // 根据事件类型添加字段
   if (type === 'score') {
     event.points = points;
-    if (playerIndex !== undefined) {
+    if (playerId) {
+      event.playerId = playerId;
+      event.playerNumber = playerNumber;
+      event.playerName = playerName;
+    } else if (playerIndex !== undefined) {
+      // 兼容旧的索引方式
       event.playerIndex = playerIndex;
       event.playerNumber = playerNumber;
       event.playerName = playerName;
     }
   } else if (type === 'foul') {
     event.foulType = foulType || '普通犯规';
-    if (playerIndex !== undefined) {
+    if (playerId) {
+      event.playerId = playerId;
+      event.playerNumber = playerNumber;
+      event.playerName = playerName;
+    } else if (playerIndex !== undefined) {
+      // 兼容旧的索引方式
       event.playerIndex = playerIndex;
       event.playerNumber = playerNumber;
       event.playerName = playerName;
@@ -513,9 +618,15 @@ app.post('/api/events', (req, res) => {
     const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
     teamData.score += points;
 
-    // 更新球员统计
-    if (playerIndex !== undefined && teamData.players[playerIndex]) {
-      const player = teamData.players[playerIndex];
+    // 更新球员统计 - 优先使用ID，兼容索引
+    let player = null;
+    if (playerId) {
+      player = teamData.players.find(p => p.id === playerId);
+    } else if (playerIndex !== undefined && teamData.players[playerIndex]) {
+      player = teamData.players[playerIndex];
+    }
+
+    if (player) {
       player.statistics.points += points;
       player.statistics.shots.attempts++;
       player.statistics.shots.made++;
@@ -523,15 +634,25 @@ app.post('/api/events', (req, res) => {
       if (points === 3) {
         player.statistics.threePointers.attempts++;
         player.statistics.threePointers.made++;
+      } else if (points === 1) {
+        // 对于罚球，增加罚球尝试和命中
+        player.statistics.freeThrows.attempts++;
+        player.statistics.freeThrows.made++;
       }
     }
   } else if (type === 'foul' && team) {
     const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
     teamData.fouls++;
 
-    // 更新球员犯规统计
-    if (playerIndex !== undefined && teamData.players[playerIndex]) {
-      const player = teamData.players[playerIndex];
+    // 更新球员犯规统计 - 优先使用ID，兼容索引
+    let player = null;
+    if (playerId) {
+      player = teamData.players.find(p => p.id === playerId);
+    } else if (playerIndex !== undefined && teamData.players[playerIndex]) {
+      player = teamData.players[playerIndex];
+    }
+
+    if (player) {
       player.statistics.fouls++;
     }
   }
@@ -616,6 +737,14 @@ app.post('/api/teams/score', (req, res) => {
 // 添加/减少时间
 app.post('/api/timer/add', (req, res) => {
   const { seconds } = req.body;
+
+  if (typeof seconds !== 'number') {
+    return res.status(400).json({
+      success: false,
+      message: '无效的秒数'
+    });
+  }
+
   timerController.addTime(seconds);
   broadcastTimerUpdate(timerController.getTimerStatus());
   broadcastUpdate({ matchInfo: dataStore.getMatchInfo() });
@@ -807,8 +936,8 @@ app.post('/api/ball-possession/switch-and-reset', (req, res) => {
 });
 
 // 删除球员（新接口）
-app.delete('/api/teams/:team/players/:index', (req, res) => {
-  const { team, index } = req.params;
+app.delete('/api/teams/:team/players/:id', (req, res) => {
+  const { team, id } = req.params;
 
   const teamData = team === 'home' ? dataStore.homeTeam : dataStore.awayTeam;
 
@@ -816,8 +945,8 @@ app.delete('/api/teams/:team/players/:index', (req, res) => {
     return res.json({ success: false, message: '队伍未找到' });
   }
 
-  const playerIndex = parseInt(index);
-  if (playerIndex >= 0 && playerIndex < teamData.players.length) {
+  const playerIndex = teamData.players.findIndex(player => player.id === id);
+  if (playerIndex !== -1) {
     const removed = teamData.players.splice(playerIndex, 1);
     dataStore.lastUpdate = Date.now();
 
@@ -827,16 +956,16 @@ app.delete('/api/teams/:team/players/:index', (req, res) => {
 
     res.json({ success: true, message: '球员已删除', data: removed[0] });
   } else {
-    res.json({ success: false, message: '球员索引无效' });
+    res.json({ success: false, message: '球员未找到' });
   }
 });
 
-// 按索引删除事件
-app.delete('/api/events/:index', (req, res) => {
-  const { index } = req.params;
-  const eventIndex = parseInt(index);
-
-  if (eventIndex >= 0 && eventIndex < dataStore.events.length) {
+// 按ID删除事件
+app.delete('/api/events/:id', (req, res) => {
+  const { id } = req.params;
+  
+  const eventIndex = dataStore.events.findIndex(event => event.id === id);
+  if (eventIndex !== -1) {
     dataStore.events.splice(eventIndex, 1);
     dataStore.lastUpdate = Date.now();
 
@@ -846,7 +975,7 @@ app.delete('/api/events/:index', (req, res) => {
 
     res.json({ success: true, message: '事件已删除' });
   } else {
-    res.json({ success: false, message: '事件索引无效' });
+    res.json({ success: false, message: '事件未找到' });
   }
 });
 

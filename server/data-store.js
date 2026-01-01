@@ -142,6 +142,14 @@ class DataStore {
           missed: 0,
           attempts: 0
         },
+        threePointers: {
+          made: 0,
+          attempts: 0
+        },
+        freeThrows: {
+          made: 0,
+          attempts: 0
+        },
         fouls: 0,
         yellowCards: 0,
         redCards: 0,
@@ -252,13 +260,11 @@ class DataStore {
       : 0;
 
     // 计算三分球命中率
-    stats.threePointers.attempts = team.players.reduce((sum, p) => {
-      const threePointAttempts = p.statistics.shots.attempts;
-      return sum + threePointAttempts;
-    }, 0);
+    stats.threePointers.attempts = team.players.reduce((sum, p) =>
+      sum + (p.statistics.threePointers?.attempts || 0), 0);
 
     stats.threePointers.made = team.players.reduce((sum, p) =>
-      sum + p.statistics.shots.made, 0);
+      sum + (p.statistics.threePointers?.made || 0), 0);
 
     stats.threePointers.percentage = stats.threePointers.attempts > 0
       ? (stats.threePointers.made / stats.threePointers.attempts * 100).toFixed(1)
@@ -266,10 +272,10 @@ class DataStore {
 
     // 计算罚球命中率
     stats.freeThrows.attempts = team.players.reduce((sum, p) =>
-      sum + p.statistics.shots.attempts, 0);
+      sum + (p.statistics.freeThrows?.attempts || 0), 0);
 
     stats.freeThrows.made = team.players.reduce((sum, p) =>
-      sum + p.statistics.shots.made, 0);
+      sum + (p.statistics.freeThrows?.made || 0), 0);
 
     stats.freeThrows.percentage = stats.freeThrows.attempts > 0
       ? (stats.freeThrows.made / stats.freeThrows.attempts * 100).toFixed(1)
