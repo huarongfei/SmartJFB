@@ -304,6 +304,11 @@
                         🏀
                     </div>
                 </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn btn-small" onclick="returnToPreviousPossession()">
+                        ↩️ 回表
+                    </button>
+                </div>
             </section>
 
             <!-- 计时控制 -->
@@ -322,6 +327,24 @@
                         <button id="btnSubMinute" class="btn btn-small">-1分钟</button>
                         <button id="btnSetTime" class="btn btn-small">设置时间</button>
                         <button id="btnEndQuarter" class="btn btn-small">本节结束</button>
+                    </div>
+
+                    <!-- 比赛时长设置 -->
+                    <div style="margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 10px;">
+                        <h4 style="margin-bottom: 15px; color: rgba(255, 255, 255, 0.8);">⏱️ 单节比赛时长</h4>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                            <button class="btn btn-small" onclick="adjustQuarterTime(-1)" style="background: linear-gradient(90deg, #ff6b6b, #ff4757);">-1</button>
+                            <input type="number" id="quarterTimeInput" value="12" min="1" max="60" step="1"
+                                   style="width: 80px; padding: 8px; text-align: center; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 5px; color: #fff; font-size: 16px;">
+                            <button class="btn btn-small" onclick="adjustQuarterTime(1)" style="background: linear-gradient(90deg, #00ff88, #00cc6a);">+1</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn btn-small" onclick="setQuarterTime(8)" style="background: rgba(255, 255, 255, 0.15);">8分钟</button>
+                            <button class="btn btn-small" onclick="setQuarterTime(10)" style="background: rgba(255, 255, 255, 0.15);">10分钟</button>
+                            <button class="btn btn-small" onclick="setQuarterTime(12)" style="background: rgba(255, 255, 255, 0.15);">12分钟</button>
+                            <button class="btn btn-small" onclick="setQuarterTime(15)" style="background: rgba(255, 255, 255, 0.15);">15分钟</button>
+                            <button class="btn btn-small" onclick="setQuarterTime(20)" style="background: rgba(255, 255, 255, 0.15);">20分钟</button>
+                        </div>
                     </div>
                 </div>
 
@@ -420,6 +443,9 @@
         // Socket.IO连接
         const socket = io('http://localhost:3001');
 
+        // 记录上一次的球权，用于回表功能
+        let previousPossession = null;
+
         // 当前选择
         let currentAddTeam = 'home';
         let currentImportTeam = 'home';
@@ -479,6 +505,9 @@
             }
             if (data.ballPossession) {
                 updateBallPossession(data.ballPossession);
+            }
+            if (data.ballPossessionUpdate) {
+                updateBallPossession(data.ballPossessionUpdate.to);
             }
         }
 
@@ -611,6 +640,13 @@
 
         async function setBallPossession(team) {
             try {
+                // 记录当前球权，用于回表功能
+                const currentResponse = await fetch('/api/ball-possession');
+                const currentData = await currentResponse.json();
+                if (currentData.success && currentData.team) {
+                    previousPossession = currentData.team;
+                }
+
                 const response = await fetch('/api/ball-possession', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -618,12 +654,56 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    showMessage(`球权已设置为${team === 'home' ? '主队' : '客队'}`, 'success');
+                    // 自动重置进攻时钟为24秒
+                    await fetch('/api/shot-clock/set', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ seconds: 24 })
+                    });
+
+                    // 启动进攻时钟
+                    await fetch('/api/shot-clock/start', {
+                        method: 'POST'
+                    });
+
+                    showMessage(`球权已设置为${team === 'home' ? '主队' : '客队'}，进攻时钟已重置为24秒并启动`, 'success');
                 } else {
                     showMessage(data.message || '操作失败', 'error');
                 }
             } catch (error) {
                 console.error('设置球权失败:', error);
+                    showMessage('操作失败', 'error');
+            }
+        }
+
+        // 回表功能 - 切换回上一次的球权
+        async function returnToPreviousPossession() {
+            if (!previousPossession) {
+                showMessage('没有可以回表的记录', 'error');
+                return;
+            }
+
+            try {
+                // 暂停当前的进攻时钟（不重置时间）
+                await fetch('/api/shot-clock/pause', {
+                    method: 'POST'
+                });
+
+                // 切换回上一次的球权
+                const possessionResponse = await fetch('/api/ball-possession', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team: previousPossession })
+                });
+
+                if (possessionResponse.ok) {
+                    const teamName = previousPossession === 'home' ? '主队' : '客队';
+                    showMessage(`已回表至${teamName}，进攻时钟未重置`, 'success');
+                } else {
+                    showMessage('回表失败', 'error');
+                }
+            } catch (error) {
+                console.error('回表失败:', error);
                 showMessage('操作失败', 'error');
             }
         }
@@ -721,6 +801,45 @@
                 showMessage(`成功导入 ${count} 名球员`, 'success');
             } else {
                 showMessage(`成功导入 ${count} 名球员，${errors} 行格式错误`, 'error');
+            }
+        }
+
+        // 调整单节比赛时长
+        async function adjustQuarterTime(minutes) {
+            const input = document.getElementById('quarterTimeInput');
+            let newTime = parseInt(input.value) + minutes;
+
+            // 验证范围
+            newTime = Math.max(1, Math.min(60, newTime));
+            input.value = newTime;
+
+            await setQuarterTime(newTime);
+        }
+
+        // 设置单节比赛时长
+        async function setQuarterTime(minutes) {
+            const input = document.getElementById('quarterTimeInput');
+            input.value = minutes;
+
+            // 转换为秒
+            const seconds = minutes * 60;
+
+            // 调用API设置比赛时间
+            try {
+                const response = await fetch('/api/timer/set-time', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seconds })
+                });
+
+                if (response.ok) {
+                    showMessage(`单节时长已设置为${minutes}分钟`, 'success');
+                } else {
+                    showMessage('设置时长失败', 'error');
+                }
+            } catch (error) {
+                console.error('设置时长失败:', error);
+                showMessage('操作失败', 'error');
             }
         }
 

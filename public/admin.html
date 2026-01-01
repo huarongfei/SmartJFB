@@ -157,6 +157,7 @@
                     <span class="status-dot"></span>
                     <span class="status-text">未连接</span>
                 </div>
+                <button class="btn btn-small" onclick="location.href='ball-possession.html'">球权管理</button>
                 <button class="btn btn-small" onclick="location.href='/'">返回主页</button>
             </div>
         </header>
@@ -583,13 +584,19 @@
         }
 
         function updateTimerStatus(timerStatus) {
-            const gameMinutes = Math.floor(timerStatus.gameClock / 60);
-            const gameSeconds = timerStatus.gameClock % 60;
+            if (!timerStatus || !timerStatus.gameClock) return;
+
+            // gameClock 是一个对象，需要访问 currentTime 属性
+            const gameTime = timerStatus.gameClock.currentTime || 0;
+            const gameMinutes = Math.floor(gameTime / 60);
+            const gameSeconds = Math.floor(gameTime % 60);
             const gameTimeStr = `${String(gameMinutes).padStart(2, '0')}:${String(gameSeconds).padStart(2, '0')}`;
             document.getElementById('timerDisplay').textContent = gameTimeStr;
             document.getElementById('gameTimeDisplay').textContent = gameTimeStr;
 
-            document.getElementById('shotClockDisplay').textContent = timerStatus.shotClock || 0;
+            // shotClock 也是一个对象
+            const shotTime = timerStatus.shotClock?.currentTime || 0;
+            document.getElementById('shotClockDisplay').textContent = Math.floor(shotTime);
         }
 
         function updateEventsList(events) {

@@ -131,6 +131,45 @@ body {
     color: #ff6b6b;
 }
 
+.ball-possession {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.possession-indicator {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    font-size: 32px;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+.possession-indicator.active {
+    opacity: 1;
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+.possession-text {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
 .footer {
     display: flex;
     justify-content: space-between;
@@ -241,6 +280,21 @@ body {
         gap: 15px;
         padding: 15px;
     }
+
+    .ball-possession {
+        gap: 10px;
+        padding: 10px 15px;
+    }
+
+    .possession-indicator {
+        width: 45px;
+        height: 45px;
+        font-size: 24px;
+    }
+
+    .possession-text {
+        font-size: 14px;
+    }
 }
 
 /* 小屏幕手机优化 */
@@ -256,6 +310,21 @@ body {
     .team-logo {
         width: 60px;
         height: 60px;
+    }
+
+    .ball-possession {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .possession-indicator {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .possession-text {
+        font-size: 12px;
     }
 
     .team-name h2 {

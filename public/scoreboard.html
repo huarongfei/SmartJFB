@@ -59,6 +59,17 @@
             </div>
         </div>
 
+        <!-- 球权显示 -->
+        <div class="ball-possession" id="ballPossessionDisplay">
+            <div class="possession-indicator" id="homeBallPossession">
+                <span>🏀</span>
+            </div>
+            <div class="possession-text" id="ballPossessionText">未设置</div>
+            <div class="possession-indicator" id="awayBallPossession">
+                <span>🏀</span>
+            </div>
+        </div>
+
         <div class="shot-clock" id="shotClockContainer">
             <div class="shot-clock-label">进攻时钟</div>
             <div class="shot-clock-time" id="shotClock">24</div>
@@ -91,6 +102,12 @@
             }
             if (data.timerStatus) {
                 updateTimer(data.timerStatus);
+            }
+            if (data.ballPossession !== undefined) {
+                updateBallPossession(data.ballPossession);
+            }
+            if (data.ballPossessionUpdate) {
+                updateBallPossession(data.ballPossessionUpdate.to);
             }
             if (data.events) {
                 // 处理事件更新（如果需要）
@@ -170,6 +187,27 @@
             if (data.shotClock?.currentTime !== undefined) {
                 const shotTime = Math.floor(data.shotClock.currentTime);
                 document.getElementById('shotClock').textContent = shotTime;
+            }
+        }
+
+        // 更新球权显示
+        function updateBallPossession(possession) {
+            const homeIndicator = document.getElementById('homeBallPossession');
+            const awayIndicator = document.getElementById('awayBallPossession');
+            const text = document.getElementById('ballPossessionText');
+
+            if (possession === 'home') {
+                homeIndicator.classList.add('active');
+                awayIndicator.classList.remove('active');
+                text.textContent = '主队球权';
+            } else if (possession === 'away') {
+                awayIndicator.classList.add('active');
+                homeIndicator.classList.remove('active');
+                text.textContent = '客队球权';
+            } else {
+                homeIndicator.classList.remove('active');
+                awayIndicator.classList.remove('active');
+                text.textContent = '未设置';
             }
         }
     </script>

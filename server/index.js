@@ -41,6 +41,10 @@ const timerController = new TimerController(dataStore);
 // 初始化导出服务
 const exportService = new ExportService(dataStore);
 
+// 设置定时广播计时器更新
+let lastTimerBroadcast = 0;
+const TIMER_BROADCAST_INTERVAL = 100; // 每100ms广播一次
+
 // 初始化广告服务
 const adService = new AdvertisementService(dataStore);
 
@@ -98,6 +102,18 @@ function broadcastUpdate(data) {
 function broadcastTimerUpdate(data) {
   io.emit('timer_update', data);
 }
+
+// 定时广播计时器状态（确保时间实时更新）
+setInterval(() => {
+  const now = Date.now();
+  if (timerController.dataStore.gameClock.isRunning) {
+    if (now - lastTimerBroadcast >= TIMER_BROADCAST_INTERVAL) {
+      const timerStatus = timerController.getTimerStatus();
+      io.emit('timer_update', timerStatus);
+      lastTimerBroadcast = now;
+    }
+  }
+}, 50); // 每50ms检查一次
 
 // ==================== RESTful API ====================
 
@@ -721,16 +737,21 @@ app.delete('/api/teams/:team/logo', (req, res) => {
 // 设置球权
 app.post('/api/ball-possession', (req, res) => {
   const { team } = req.body;
-  
+
   if (team !== 'home' && team !== 'away' && team !== null) {
     return res.json({ success: false, message: '无效的球队' });
   }
 
+  const oldPossession = dataStore.ballPossession;
   dataStore.ballPossession = team;
   dataStore.lastUpdate = Date.now();
 
   broadcastUpdate({
     ballPossession: team,
+    ballPossessionUpdate: {
+      from: oldPossession,
+      to: team
+    },
     matchInfo: dataStore.getMatchInfo()
   });
 
@@ -741,6 +762,48 @@ app.post('/api/ball-possession', (req, res) => {
 // 获取球权
 app.get('/api/ball-possession', (req, res) => {
   res.json({ success: true, team: dataStore.ballPossession });
+});
+
+// 切换球权并重置进攻时钟
+app.post('/api/ball-possession/switch-and-reset', (req, res) => {
+  const currentPossession = dataStore.ballPossession;
+
+  // 切换球权
+  let newPossession;
+  if (currentPossession === 'home') {
+    newPossession = 'away';
+  } else if (currentPossession === 'away') {
+    newPossession = 'home';
+  } else {
+    newPossession = 'home';
+  }
+
+  dataStore.ballPossession = newPossession;
+
+  // 自动重置进攻时钟为24秒并启动
+  timerController.setShotClockTime(24);
+  timerController.startShotClock();
+
+  dataStore.lastUpdate = Date.now();
+
+  broadcastUpdate({
+    ballPossession: newPossession,
+    ballPossessionUpdate: {
+      from: currentPossession,
+      to: newPossession,
+      autoReset: true
+    },
+    matchInfo: dataStore.getMatchInfo()
+  });
+
+  broadcastTimerUpdate(timerController.getTimerStatus());
+
+  const teamName = newPossession === 'home' ? '主队' : '客队';
+  res.json({
+    success: true,
+    message: `球权已切换到${teamName}，进攻时钟已重置为24秒`,
+    team: newPossession
+  });
 });
 
 // 删除球员（新接口）

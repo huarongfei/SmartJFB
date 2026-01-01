@@ -12,6 +12,7 @@ class TimerController {
     this.tickRate = 10; // 10ms一次tick，实现毫秒级精度
     this.lastTick = Date.now();
     this.elapsedTime = 0;
+    this.shotClockElapsedTime = 0; // 进攻时钟累计时间
   }
 
   // 开始比赛时钟
@@ -228,10 +229,7 @@ class TimerController {
 
     this.dataStore.shotClock.isRunning = true;
     this.dataStore.shotClock.currentTime = this.dataStore.shotClock.maxTime;
-
-    this.shotClockInterval = setInterval(() => {
-      this.updateShotClock();
-    }, this.tickRate);
+    this.shotClockElapsedTime = 0;
   }
 
   // 暂停进攻时钟
@@ -244,30 +242,45 @@ class TimerController {
     }
   }
 
-  // 更新进攻时钟
-  updateShotClock(delta = 10) {
+  // 更新进攻时钟（从比赛时钟tick中调用）
+  updateShotClock(delta) {
+    if (!this.dataStore.shotClock.isRunning) return;
+
     const precision = this.dataStore.gameClock.precision;
+    this.shotClockElapsedTime += delta;
 
     if (precision === 'millisecond') {
+      // 毫秒级计时
       this.dataStore.shotClock.currentTime -= delta / 1000;
 
       if (this.dataStore.shotClock.currentTime <= 0) {
         this.dataStore.shotClock.currentTime = 0;
         this.pauseShotClock();
 
+        // 自动切换球权
+        this.switchBallPossession();
+
         // 触发进攻时间违例事件
         this.dataStore.addEvent('shot_clock_violation', {
-          team: this.dataStore.homeTeam // 需要确定当前控球方
+          team: this.dataStore.ballPossession || 'home'
         });
       }
     } else {
-      // 秒级
-      if (delta >= 1000) {
+      // 秒级计时 - 只在累计超过1秒时才减1
+      if (this.shotClockElapsedTime >= 1000) {
         this.dataStore.shotClock.currentTime--;
+        this.shotClockElapsedTime = 0; // 重置累计时间
+
         if (this.dataStore.shotClock.currentTime <= 0) {
           this.dataStore.shotClock.currentTime = 0;
           this.pauseShotClock();
-          this.dataStore.addEvent('shot_clock_violation', {});
+
+          // 自动切换球权
+          this.switchBallPossession();
+
+          this.dataStore.addEvent('shot_clock_violation', {
+            team: this.dataStore.ballPossession || 'home'
+          });
         }
       }
     }
@@ -275,10 +288,32 @@ class TimerController {
     this.dataStore.lastUpdate = Date.now();
   }
 
+  // 自动切换球权
+  switchBallPossession() {
+    const currentPossession = this.dataStore.ballPossession;
+
+    // 如果有球权，切换到另一方
+    if (currentPossession === 'home') {
+      this.dataStore.ballPossession = 'away';
+    } else if (currentPossession === 'away') {
+      this.dataStore.ballPossession = 'home';
+    } else {
+      // 如果没有球权，默认为主队
+      this.dataStore.ballPossession = 'home';
+    }
+
+    this.dataStore.addEvent('ball_possession_change', {
+      from: currentPossession,
+      to: this.dataStore.ballPossession,
+      reason: 'shot_clock_violation'
+    });
+  }
+
   // 复位进攻时钟
   resetShotClock() {
     this.pauseShotClock();
     this.dataStore.shotClock.currentTime = this.dataStore.shotClock.maxTime;
+    this.shotClockElapsedTime = 0;
     this.dataStore.lastUpdate = Date.now();
   }
 
