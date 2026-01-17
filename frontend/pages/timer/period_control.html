@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 节数控制</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>节数/周期控制</h1>
+        <div class="status-bar">
+          <span id="connection-status" class="status-indicator">未连接</span>
+          <span id="timer-status" class="status-indicator">就绪</span>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- Game Selection -->
+        <section class="panel">
+          <h2>选择比赛</h2>
+          <div class="form-group">
+            <label for="active-games">当前比赛:</label>
+            <select id="active-games">
+              <option value="">请选择比赛...</option>
+              <option value="game-1">比赛 1 - 主队 vs 客队</option>
+              <option value="game-2">比赛 2 - 篮球友谊赛</option>
+            </select>
+            <button id="refresh-games" class="btn btn-info">刷新比赛列表</button>
+          </div>
+        </section>
+
+        <!-- Period Control -->
+        <section id="period-control" class="panel">
+          <h2>节数控制</h2>
+          
+          <div class="timer-info">
+            <div class="info-item">
+              <span>比赛类型:</span>
+              <span id="sport-type-display">篮球</span>
+            </div>
+            <div class="info-item">
+              <span>当前节:</span>
+              <span id="current-period">1</span>
+            </div>
+            <div class="info-item">
+              <span>最大节数:</span>
+              <span id="max-periods">4</span>
+            </div>
+          </div>
+          
+          <div class="controls">
+            <div class="control-group">
+              <h3>节数操作</h3>
+              <div class="control-buttons">
+                <button id="prev-period" class="btn btn-secondary">上一节</button>
+                <button id="next-period" class="btn btn-primary">下一节</button>
+                <button id="set-period" class="btn btn-info">设置节数</button>
+              </div>
+              <div class="control-inputs">
+                <label for="period-input">设置节数:</label>
+                <input type="number" id="period-input" placeholder="节数" value="1" min="1" max="6">
+                <button id="apply-period" class="btn btn-primary">应用</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/main.js"></script>
+  <script src="../../js/timer/periodControl.js"></script>
+</body>
+</html>

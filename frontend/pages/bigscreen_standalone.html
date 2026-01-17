@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 大屏显示</title>
+  <link rel="stylesheet" href="../css/bigscreen.css">
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div class="big-screen-container">
+    <!-- Center Info Overlay -->
+    <div id="center-info-overlay" class="center-info hidden"></div>
+    
+    <!-- Main Scoreboard -->
+    <div class="big-screen-scoreboard">
+      <div class="big-screen-team">
+        <div class="big-screen-team-logo" id="home-team-logo">H</div>
+        <div class="big-screen-team-name" id="home-team-name">HOME TEAM</div>
+        <div class="big-screen-team-score" id="home-team-score">0</div>
+        <div class="foul-counter">F: <span id="home-fouls">0</span></div>
+        <div class="timeout-indicator" id="home-timeouts">
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+        </div>
+      </div>
+      
+      <div class="vs-center">VS</div>
+      
+      <div class="big-screen-team">
+        <div class="big-screen-team-logo" id="away-team-logo">A</div>
+        <div class="big-screen-team-name" id="away-team-name">AWAY TEAM</div>
+        <div class="big-screen-team-score" id="away-team-score">0</div>
+        <div class="foul-counter">F: <span id="away-fouls">0</span></div>
+        <div class="timeout-indicator" id="away-timeouts">
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game Timer -->
+    <div class="big-screen-timer" id="game-timer">12:00</div>
+    
+    <!-- Shot Clock (Basketball specific) -->
+    <div class="big-screen-shot-clock hidden" id="shot-clock">24.0</div>
+    
+    <!-- Period/Quarter -->
+    <div class="big-screen-period" id="period-display">1ST QUARTER</div>
+    
+    <!-- Extra Info -->
+    <div class="big-screen-extra-info">
+      <div class="extra-info-item">Possession: <span id="possession">-</span></div>
+      <div class="extra-info-item">Time Out: <span id="timeouts-left">-</span></div>
+      <div class="extra-info-item">Venue: <span id="venue">Arena</span></div>
+    </div>
+  </div>
+
+  <script src="../js/bigscreen_standalone.js"></script>
+</body>
+</html>

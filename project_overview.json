@@ -1,0 +1,279 @@
+{
+  "project_name": "SmartJFB",
+  "version": "1.0.0",
+  "last_updated": "2023-10-15",
+  "overview": "专业级篮球/足球比赛计分计时得分分析系统，支持双模式切换，具备实时大屏展示、数据分析和企业级管理功能",
+  
+  "core_requirements": {
+    "supported_sports": {
+      "basketball": {
+        "game_periods": "支持4节/2半场/自定义时段",
+        "score_types": ["2分", "3分", "罚球", "技术犯规罚球", "加时赛得分"],
+        "timing_modes": ["比赛时间(12/10分钟)", "24秒进攻时限", "14秒进攻时限", "8秒过半场", "暂停时间(60/75/90秒)"],
+        "player_stats": ["得分", "篮板", "助攻", "抢断", "盖帽", "失误", "犯规", "上场时间"],
+        "special_rules": ["加时赛(5分钟)", "技术犯规", "违体犯规", "24秒违例", "8秒违例", "3秒违例"]
+      },
+      "soccer": {
+        "game_periods": "支持2半场/加时赛/点球大战",
+        "score_types": ["常规进球", "点球", "乌龙球"],
+        "timing_modes": ["比赛时间(45分钟半场)", "伤停补时", "加时赛(15分钟半场)", "点球大战计时"],
+        "player_stats": ["进球", "助攻", "黄牌", "红牌", "射门", "射正", "传球", "抢断"],
+        "special_rules": ["越位", "点球", "直接/间接任意球", "角球", "球门球", "换人名额"]
+      }
+    },
+    "system_modes": ["比赛模式", "训练模式", "演示模式", "回放模式"],
+    "display_modes": ["控制台界面", "大屏主视图", "大屏副视图", "移动端视图", "裁判终端视图"]
+  },
+
+  "functional_modules": {
+    "game_management": {
+      "game_setup": {
+        "team_config": {
+          "required": ["队名", "队徽", "主色调", "缩写(3-4字符)", "球员名单"],
+          "player_info": ["姓名", "号码", "位置", "身高", "体重", "国籍", "头像"],
+          "staff_info": ["主教练", "助理教练", "队医"]
+        },
+        "game_config": {
+          "basic": ["比赛类型(篮球/足球)", "联赛名称", "比赛阶段", "场馆", "日期时间"],
+          "rules": ["选择预设规则包", "自定义规则参数", "计时器精度(0.1秒/1秒)"],
+          "officials": ["主裁判", "副裁判", "计时员", "记分员"]
+        }
+      },
+      "game_operations": {
+        "pre_game": ["赛前名单确认", "首发阵容设置", "热身倒计时"],
+        "in_game": ["比赛开始/暂停/结束", "节次切换", "加时赛管理", "官方暂停"],
+        "post_game": ["比赛数据归档", "技术统计生成", "比赛录像关联"]
+      }
+    },
+
+    "scoring_module": {
+      "score_entry": {
+        "entry_methods": ["快捷键输入", "触摸屏点击", "语音指令", "裁判设备同步"],
+        "basketball_specific": {
+          "shot_types": ["内线得分", "中距离", "三分球", "快攻得分", "二次进攻"],
+          "foul_handling": ["普通犯规记录", "技术犯规", "违体犯规", "投篮犯规(2/3分)", "加罚管理"],
+          "instant_replay": ["得分回放标记", "争议球标注", "教练挑战记录"]
+        },
+        "soccer_specific": {
+          "goal_details": ["运动战进球", "定位球", "点球", "乌龙球"],
+          "assist_recognition": ["直接助攻", "间接助攻", "造点"],
+          "card_management": ["黄牌警告", "红牌罚下", "两黄变一红"]
+        }
+      },
+      "real_time_stats": {
+        "team_stats": ["实时比分", "命中率/射正率", "篮板数/控球率", "犯规次数", "暂停剩余"],
+        "player_stats": ["个人得分", "效率值", "正负值", "命中率", "上场时间"]
+      }
+    },
+
+    "timing_module": {
+      "primary_clocks": {
+        "game_clock": {
+          "features": ["正计时/倒计时切换", "精度0.1秒", "自动/手动模式", "超时自动报警"],
+          "basketball": ["12分钟节", "10分钟节", "5分钟加时"],
+          "soccer": ["45分钟半场", "15分钟加时", "伤停补时独立计时"]
+        },
+        "shot_clock": {
+          "basketball": ["24秒复位规则", "14秒进攻时限", "显示格式(秒.十分位)"],
+          "reset_triggers": ["投篮碰筐", "防守触碰", "犯规", "出界"]
+        }
+      },
+      "secondary_timers": {
+        "timeouts": ["长暂停(100秒)", "短暂停(60秒)", "媒体暂停", "官方暂停"],
+        "intervals": ["节间休息", "中场休息", "加时赛准备"],
+        "special": ["罚球准备时间", "换人时间", "视频回看时间"]
+      },
+      "control_features": {
+        "sync_mechanism": ["主副计时器同步", "多屏时间同步", "NTP时间服务器"],
+        "accuracy": ["局域网内误差<10ms", "手动微调(±0.1秒)"],
+        "backup": ["备用物理计时器接口", "断电保护", "自动保存点"]
+      }
+    },
+
+    "big_screen_display": {
+      "main_display": {
+        "layout_templates": ["标准布局", "数据密集布局", "极简布局", "对比布局"],
+        "dynamic_areas": {
+          "scoreboard": {
+            "essential": ["球队信息(队徽/队名)", "大比分", "节次/时间", "犯规次数", "暂停剩余"],
+            "basketball_add": ["本节分数", "24秒倒计时", "球队犯规"],
+            "soccer_add": ["半场标识", "伤停补时", "红黄牌统计"]
+          },
+          "player_highlight": {
+            "single_player": ["特写球员数据", "实时头像", "本场统计", "赛季平均"],
+            "matchup_view": ["对位球员对比", "关键数据PK", "效率值对比"]
+          },
+          "game_info": ["比赛时钟", "当前节次", "比赛状态", "下一个回合"]
+        }
+      },
+      "secondary_displays": {
+        "stats_overview": ["实时数据统计表", "得分趋势图", "命中率热区"],
+        "player_tracker": ["得分王", "篮板王/控球率", "助攻王/传球成功率", "犯规困扰球员"],
+        "replay_view": ["即时回放窗口", "精彩集锦轮播", "争议判罚回放"]
+      },
+      "display_controls": {
+        "transition_effects": ["平滑切换", "动画效果", "主题颜色渐变"],
+        "emergency_overlays": ["系统状态提示", "信号丢失提示", "备用信息显示"],
+        "custom_elements": ["赞助商logo轮播", "广告位管理", "自定义字幕/图形"]
+      }
+    },
+
+    "analytics_engine": {
+      "real_time_analysis": {
+        "momentum_tracker": ["得分高潮", "关键时刻", "转折点识别"],
+        "efficiency_metrics": ["进攻效率", "防守效率", "净效率值", "真实命中率"],
+        "predictive_models": ["实时胜率预测", "得分期望值", "关键球员影响值"]
+      },
+      "advanced_stats": {
+        "basketball": ["四要素分析(EFG%/TOV%/OREB%/FTR)", "使用率", "PER值", "进攻篮板率"],
+        "soccer": ["预期进球(xG)", "控球优势", "传球网络图", "压迫强度"]
+      },
+      "visualization": {
+        "charts": ["得分时间分布图", "命中率热力图", "球员动线图", "数据对比雷达图"],
+        "reports": ["单节报告", "半场报告", "全场报告", "自定义时段报告"]
+      }
+    },
+
+    "control_panel": {
+      "dashboard": {
+        "game_controls": ["主计时器控制", "得分调整", "犯规管理", "暂停管理"],
+        "quick_actions": ["快速得分按钮", "常用犯规设置", "模板事件记录"],
+        "system_status": ["网络连接状态", "设备在线状态", "数据同步状态"]
+      },
+      "data_validation": {
+        "consistency_checks": ["分数逻辑校验", "时间连续性检查", "犯规次数验证"],
+        "conflict_resolution": ["数据冲突提示", "手动覆盖确认", "版本恢复功能"]
+      }
+    },
+
+    "multi_user_collaboration": {
+      "role_management": {
+        "roles": ["主管理员", "记分员", "计时员", "统计员", "显示控制员", "观察员"],
+        "permissions": {
+          "admin": "完全控制",
+          "scorekeeper": "得分/犯规录入",
+          "timekeeper": "计时器控制",
+          "statistician": "数据统计/分析",
+          "display_operator": "大屏内容控制",
+          "viewer": "只读查看"
+        }
+      },
+      "collaboration_features": ["操作日志记录", "实时操作冲突检测", "语音通讯集成", "任务分配看板"]
+    },
+
+    "hardware_integration": {
+      "input_devices": {
+        "supported_devices": ["专用记分键盘", "触摸屏", "平板电脑", "裁判信号器"],
+        "redundancy": ["主次输入设备切换", "输入冲突解决", "设备故障检测"]
+      },
+      "output_systems": {
+        "display_outputs": ["HDMI", "SDI", "NDI", "WebSocket流"],
+        "broadcast_integration": ["字幕机数据导出", "转播车信号对接", "实时数据接口"]
+      },
+      "network_architecture": {
+        "topology": ["星型局域网", "双网卡冗余", "离线模式"],
+        "performance": ["局域网延迟<50ms", "自动网络诊断", "数据包重传机制"]
+      }
+    }
+  },
+
+  "non_functional_requirements": {
+    "performance": {
+      "response_time": ["控制操作响应<100ms", "大屏更新延迟<200ms", "数据同步<500ms"],
+      "concurrency": ["支持50+并发控制终端", "万级观众大屏连接", "无丢帧视频输出"],
+      "stability": ["系统可用性99.9%", "连续运行72小时无故障", "崩溃自动恢复<30秒"]
+    },
+    "reliability": {
+      "data_integrity": ["每笔操作事务性保存", "操作日志不可篡改", "自动备份每5分钟"],
+      "fault_tolerance": ["主从服务器热备", "UPS电源支持", "网络中断自动续传"],
+      "disaster_recovery": ["全系统状态快照", "关键操作撤销/重做", "数据版本回溯"]
+    },
+    "scalability": {
+      "horizontal": ["支持多比赛同时进行", "动态增加统计项目", "插件化功能扩展"],
+      "vertical": ["支持4K/8K输出", "百万元素数据实时处理", "多语言即时切换"]
+    },
+    "usability": {
+      "accessibility": ["WCAG 2.1 AA标准", "高对比度模式", "键盘快捷键全覆盖"],
+      "learnability": ["新手引导流程", "操作提示系统", "情境帮助文档"],
+      "efficiency": ["高频操作快捷键", "批量操作支持", "自定义工作流"]
+    },
+    "security": {
+      "authentication": ["多因素认证", "单点登录支持", "操作员指纹/刷卡登录"],
+      "authorization": ["基于角色的细粒度权限", "操作范围限制", "时间受限权限"],
+      "audit": ["完整操作审计日志", "数据修改追溯", "异常行为报警"]
+    }
+  },
+
+  "data_management": {
+    "storage_requirements": {
+      "game_data": ["结构化比赛数据", "二进制事件流", "多媒体关联文件"],
+      "historical_data": ["赛季档案库", "球员历史数据库", "比赛录像索引"],
+      "system_data": ["用户配置", "界面模板", "规则预设库"]
+    },
+    "data_formats": {
+      "export_formats": ["JSON", "XML", "CSV", "PDF报表", "Excel高级报表"],
+      "broadcast_formats": ["XML-TV", "SDI嵌入数据", "SCTE-104标准"],
+      "api_formats": ["RESTful JSON API", "WebSocket实时流", "GraphQL查询"]
+    },
+    "backup_strategy": {
+      "real_time": ["操作日志实时同步", "数据库主从复制", "异地容灾备份"],
+      "scheduled": ["每小时增量备份", "每日全量备份", "每周归档备份"]
+    }
+  },
+
+  "integration_points": {
+    "third_party_systems": {
+      "broadcast": ["字幕机系统", "慢动作回放系统", "转播车数据接口"],
+      "statistics": ["官方数据供应商(Stats, Opta)", "联赛数据平台", "媒体数据接口"],
+      "facility": ["场馆计分板", "灯光音响系统", "视频墙控制系统"]
+    },
+    "public_apis": {
+      "data_consumption": ["实时数据推送", "历史数据查询", "统计分析服务"],
+      "system_control": ["远程管理API", "自动化脚本接口", "webhook事件通知"]
+    }
+  },
+
+  "compliance_standards": {
+    "sport_governing_bodies": {
+      "basketball": ["FIBA规则兼容", "NBA技术标准", "CBA数据规范"],
+      "soccer": ["FIFA规则兼容", "IFAB技术标准", "UEFA数据格式"]
+    },
+    "industry_standards": ["SMPTE ST 2110", "JSON-LD数据标准", "WCAG无障碍标准"],
+    "data_privacy": ["GDPR合规", "个人信息脱敏", "数据访问日志"]
+  },
+
+  "deployment_environment": {
+    "server_specifications": {
+      "minimum": ["8核CPU", "32GB RAM", "1TB SSD", "双千兆网卡"],
+      "recommended": ["16核CPU", "64GB RAM", "2TB NVMe RAID", "万兆网卡"],
+      "redundant": ["双机热备", "负载均衡集群", "分布式存储"]
+    },
+    "client_requirements": {
+      "control_terminals": ["Windows 10+/macOS 10.15+", "现代浏览器(Chrome 90+)", "触摸屏支持"],
+      "display_systems": ["4K分辨率支持", "高刷新率(60Hz+)", "HDR色彩支持"]
+    },
+    "network_requirements": {
+      "bandwidth": ["控制网络: 1Gbps LAN", "显示网络: 10Gbps 推荐", "隔离网络环境"],
+      "latency": ["控制终端<1ms", "显示终端<16ms", "外部API<100ms"]
+    }
+  },
+
+  "quality_assurance": {
+    "testing_scenarios": {
+      "stress_tests": ["千人同时访问", "72小时连续运行", "网络闪断恢复"],
+      "edge_cases": ["最后0.1秒得分", "多犯规同时发生", "设备突然断开"],
+      "sport_specific": ["篮球: 24秒违例各种情况", "足球: 伤停补时计算规则", "加时赛所有场景"]
+    },
+    "acceptance_criteria": {
+      "functional": ["所有计分场景100%准确", "计时误差<0.1秒", "数据一致性100%"],
+      "performance": ["大屏刷新率≥30fps", "控制响应时间<100ms", "系统恢复时间<30秒"],
+      "usability": ["新操作员30分钟培训后能独立操作", "常用操作3步内完成", "界面误操作率<1%"]
+    }
+  },
+
+  "documentation_requirements": {
+    "user_manuals": ["操作员快速指南", "管理员配置手册", "故障排除手册"],
+    "technical_docs": ["系统架构文档", "API参考手册", "数据库设计文档"],
+    "training_materials": ["互动式培训模块", "视频教程", "模拟训练环境"]
+  }
+}

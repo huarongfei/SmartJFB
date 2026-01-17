@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 大屏显示</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <style>
+    /* Big screen specific styles */
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+    }
+    
+    .big-screen-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .big-screen-scoreboard {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 5vh;
+    }
+    
+    .big-screen-team {
+      flex: 1;
+      padding: 20px;
+    }
+    
+    .big-screen-team-logo {
+      width: 200px;
+      height: 200px;
+      background-color: #ccc;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: #000;
+    }
+    
+    .big-screen-team-name {
+      font-size: 5rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    
+    .big-screen-team-score {
+      font-size: 15rem;
+      font-weight: bold;
+      color: #4CAF50;
+      text-shadow: 0 0 30px rgba(76, 175, 80, 0.7);
+    }
+    
+    .vs-center {
+      display: flex;
+      align-items: center;
+      font-size: 6rem;
+      font-weight: bold;
+      color: #FFC107;
+    }
+    
+    .big-screen-timer {
+      font-size: 10rem;
+      font-weight: bold;
+      color: #2196F3;
+      text-shadow: 0 0 30px rgba(33, 150, 243, 0.7);
+      margin: 30px 0;
+    }
+    
+    .big-screen-shot-clock {
+      font-size: 6rem;
+      color: #FF9800;
+      text-shadow: 0 0 20px rgba(255, 152, 0, 0.7);
+      margin: 20px 0;
+    }
+    
+    .big-screen-period {
+      font-size: 4rem;
+      color: #E91E63;
+      margin: 20px 0;
+    }
+    
+    .big-screen-fouls {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 20px;
+      font-size: 3rem;
+    }
+    
+    .foul-counter {
+      background-color: #f44336;
+      color: white;
+      padding: 10px 30px;
+      border-radius: 10px;
+      min-width: 100px;
+    }
+    
+    .big-screen-extra-info {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 30px;
+      font-size: 2.5rem;
+    }
+    
+    .extra-info-item {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 15px 30px;
+      border-radius: 10px;
+      min-width: 200px;
+      margin: 0 10px;
+    }
+    
+    .timeout-indicator {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      font-size: 2.5rem;
+    }
+    
+    .timeout-dot {
+      width: 30px;
+      height: 30px;
+      background-color: #FFC107;
+      border-radius: 50%;
+      margin: 0 10px;
+      opacity: 0.3;
+    }
+    
+    .timeout-dot.active {
+      opacity: 1;
+    }
+    
+    .center-info {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4rem;
+      color: #FFC107;
+      text-shadow: 0 0 30px rgba(255, 193, 7, 0.7);
+      z-index: 10;
+    }
+    
+    .center-info.half-time {
+      font-size: 8rem;
+    }
+  </style>
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div class="big-screen-container">
+    <!-- Center Info Overlay -->
+    <div id="center-info-overlay" class="center-info hidden"></div>
+    
+    <!-- Main Scoreboard -->
+    <div class="big-screen-scoreboard">
+      <div class="big-screen-team">
+        <div class="big-screen-team-logo" id="home-team-logo">H</div>
+        <div class="big-screen-team-name" id="home-team-name">HOME TEAM</div>
+        <div class="big-screen-team-score" id="home-team-score">0</div>
+        <div class="foul-counter">F: <span id="home-fouls">0</span></div>
+        <div class="timeout-indicator" id="home-timeouts">
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+        </div>
+      </div>
+      
+      <div class="vs-center">VS</div>
+      
+      <div class="big-screen-team">
+        <div class="big-screen-team-logo" id="away-team-logo">A</div>
+        <div class="big-screen-team-name" id="away-team-name">AWAY TEAM</div>
+        <div class="big-screen-team-score" id="away-team-score">0</div>
+        <div class="foul-counter">F: <span id="away-fouls">0</span></div>
+        <div class="timeout-indicator" id="away-timeouts">
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+          <div class="timeout-dot"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game Timer -->
+    <div class="big-screen-timer" id="game-timer">12:00</div>
+    
+    <!-- Shot Clock (Basketball specific) -->
+    <div class="big-screen-shot-clock hidden" id="shot-clock">24.0</div>
+    
+    <!-- Period/Quarter -->
+    <div class="big-screen-period" id="period-display">1ST QUARTER</div>
+    
+    <!-- Extra Info -->
+    <div class="big-screen-extra-info">
+      <div class="extra-info-item">Possession: <span id="possession">-</span></div>
+      <div class="extra-info-item">Time Out: <span id="timeouts-left">-</span></div>
+      <div class="extra-info-item">Venue: <span id="venue">Arena</span></div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/bigscreen.js"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 管理面板</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>系统管理面板</h1>
+        <div class="status-bar">
+          <span id="connection-status" class="status-indicator">未连接</span>
+          <span id="admin-status" class="status-indicator">就绪</span>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- System Stats -->
+        <section id="system-stats" class="panel">
+          <h2>系统统计</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>用户数量</h3>
+              <div class="stat-value large" id="total-users">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>比赛数量</h3>
+              <div class="stat-value large" id="total-games">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>活跃比赛</h3>
+              <div class="stat-value large" id="active-games">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>系统状态</h3>
+              <div class="stat-value large" id="system-status">正常</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- User Management -->
+        <section id="user-management" class="panel">
+          <h2>用户管理</h2>
+          <div class="management-controls">
+            <button id="show-add-user" class="btn btn-primary">添加用户</button>
+            <button id="refresh-users" class="btn btn-info">刷新列表</button>
+          </div>
+          
+          <div class="form-container hidden" id="add-user-form">
+            <h3>添加新用户</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-username">用户名:</label>
+                <input type="text" id="new-username" placeholder="输入用户名">
+              </div>
+              <div class="form-group">
+                <label for="new-email">邮箱:</label>
+                <input type="email" id="new-email" placeholder="输入邮箱">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-role">角色:</label>
+                <select id="new-role">
+                  <option value="operator">操作员</option>
+                  <option value="admin">管理员</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="new-password">密码:</label>
+                <input type="password" id="new-password" placeholder="输入密码">
+              </div>
+            </div>
+            <button id="submit-new-user" class="btn btn-success">创建用户</button>
+            <button id="cancel-add-user" class="btn btn-secondary">取消</button>
+          </div>
+          
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>用户名</th>
+                  <th>邮箱</th>
+                  <th>角色</th>
+                  <th>创建时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <!-- User rows will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Game History -->
+        <section id="game-history" class="panel">
+          <h2>比赛历史</h2>
+          <div class="filters">
+            <div class="form-group">
+              <label for="sport-filter">运动类型:</label>
+              <select id="sport-filter">
+                <option value="">全部</option>
+                <option value="basketball">篮球</option>
+                <option value="soccer">足球</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="date-from">开始日期:</label>
+              <input type="date" id="date-from">
+            </div>
+            <div class="form-group">
+              <label for="date-to">结束日期:</label>
+              <input type="date" id="date-to">
+            </div>
+            <button id="apply-filters" class="btn btn-primary">应用筛选</button>
+          </div>
+          
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>运动类型</th>
+                  <th>主队</th>
+                  <th>客队</th>
+                  <th>比分</th>
+                  <th>日期时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="games-table-body">
+                <!-- Game rows will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- System Configuration -->
+        <section id="system-config" class="panel">
+          <h2>系统配置</h2>
+          <div class="config-container">
+            <div class="config-group">
+              <h3>功能开关</h3>
+              <div class="toggle-group">
+                <div class="toggle-item">
+                  <label for="basketball-enabled">篮球功能:</label>
+                  <input type="checkbox" id="basketball-enabled" checked>
+                </div>
+                <div class="toggle-item">
+                  <label for="soccer-enabled">足球功能:</label>
+                  <input type="checkbox" id="soccer-enabled" checked>
+                </div>
+                <div class="toggle-item">
+                  <label for="analytics-enabled">数据分析:</label>
+                  <input type="checkbox" id="analytics-enabled" checked>
+                </div>
+                <div class="toggle-item">
+                  <label for="export-enabled">数据导出:</label>
+                  <input type="checkbox" id="export-enabled" checked>
+                </div>
+              </div>
+            </div>
+            
+            <div class="config-group">
+              <h3>系统信息</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span>版本:</span>
+                  <span id="system-version">1.0.0</span>
+                </div>
+                <div class="info-item">
+                  <span>运行时间:</span>
+                  <span id="system-uptime">0 天 0 小时</span>
+                </div>
+                <div class="info-item">
+                  <span>Node版本:</span>
+                  <span id="node-version">-</span>
+                </div>
+                <div class="info-item">
+                  <span>数据库状态:</span>
+                  <span id="db-status">已连接</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <button id="save-config" class="btn btn-primary">保存配置</button>
+        </section>
+
+        <!-- Recent Activity -->
+        <section id="recent-activity" class="panel">
+          <h2>最近活动</h2>
+          <div class="activity-container">
+            <div class="activity-item">
+              <span class="timestamp">2023-10-15 10:30:22</span>
+              <span class="user">admin</span>
+              <span class="action">创建了新比赛</span>
+              <span class="details">篮球友谊赛</span>
+            </div>
+            <div class="activity-item">
+              <span class="timestamp">2023-10-15 10:15:45</span>
+              <span class="user">operator1</span>
+              <span class="action">更新了比赛分数</span>
+              <span class="details">比赛ID: abc123</span>
+            </div>
+            <div class="activity-item">
+              <span class="timestamp">2023-10-15 09:45:10</span>
+              <span class="user">admin</span>
+              <span class="action">导出了比赛数据</span>
+              <span class="details">CSV格式</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>

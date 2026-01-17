@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 登录</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>用户认证</h1>
+        <div class="status-bar">
+          <span id="connection-status" class="status-indicator">未连接</span>
+          <span id="auth-status" class="status-indicator">就绪</span>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- Login Form -->
+        <section id="login-section" class="panel">
+          <h2>登录</h2>
+          <div class="auth-form">
+            <div class="form-group">
+              <label for="login-username">用户名/邮箱:</label>
+              <input type="text" id="login-username" placeholder="输入用户名或邮箱">
+            </div>
+            <div class="form-group">
+              <label for="login-password">密码:</label>
+              <input type="password" id="login-password" placeholder="输入密码">
+            </div>
+            <button id="login-btn" class="btn btn-primary">登录</button>
+            <div class="form-footer">
+              <a href="#" id="show-forgot-password">忘记密码？</a>
+              <a href="#" id="show-register">还没有账户？立即注册</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Register Form (initially hidden) -->
+        <section id="register-section" class="panel hidden">
+          <h2>注册新账户</h2>
+          <div class="auth-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="register-username">用户名:</label>
+                <input type="text" id="register-username" placeholder="输入用户名">
+              </div>
+              <div class="form-group">
+                <label for="register-email">邮箱:</label>
+                <input type="email" id="register-email" placeholder="输入邮箱">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="register-password">密码:</label>
+                <input type="password" id="register-password" placeholder="输入密码">
+              </div>
+              <div class="form-group">
+                <label for="register-confirm-password">确认密码:</label>
+                <input type="password" id="register-confirm-password" placeholder="确认密码">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="register-role">角色:</label>
+              <select id="register-role">
+                <option value="operator">操作员</option>
+                <option value="admin">管理员</option>
+              </select>
+            </div>
+            <button id="register-btn" class="btn btn-success">注册</button>
+            <div class="form-footer">
+              <a href="#" id="show-login">已有账户？立即登录</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Forgot Password Form (initially hidden) -->
+        <section id="forgot-password-section" class="panel hidden">
+          <h2>找回密码</h2>
+          <div class="auth-form">
+            <div class="form-group">
+              <label for="forgot-email">邮箱:</label>
+              <input type="email" id="forgot-email" placeholder="输入注册邮箱">
+            </div>
+            <p>输入您的邮箱，我们将发送密码重置链接到您的邮箱。</p>
+            <button id="forgot-password-btn" class="btn btn-warning">发送重置链接</button>
+            <div class="form-footer">
+              <a href="#" id="back-to-login">返回登录</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Profile Management (initially hidden, shown after login) -->
+        <section id="profile-section" class="panel hidden">
+          <h2>个人资料</h2>
+          <div class="profile-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="profile-username">用户名:</label>
+                <input type="text" id="profile-username" placeholder="用户名">
+              </div>
+              <div class="form-group">
+                <label for="profile-email">邮箱:</label>
+                <input type="email" id="profile-email" placeholder="邮箱">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="profile-role">角色:</label>
+              <input type="text" id="profile-role" placeholder="角色" readonly>
+            </div>
+            <div class="form-group">
+              <label for="profile-created-at">注册时间:</label>
+              <input type="text" id="profile-created-at" placeholder="注册时间" readonly>
+            </div>
+            <div class="form-group">
+              <label for="current-password">当前密码:</label>
+              <input type="password" id="current-password" placeholder="输入当前密码">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="new-password">新密码:</label>
+                <input type="password" id="new-password" placeholder="输入新密码">
+              </div>
+              <div class="form-group">
+                <label for="confirm-new-password">确认新密码:</label>
+                <input type="password" id="confirm-new-password" placeholder="确认新密码">
+              </div>
+            </div>
+            <div class="controls">
+              <button id="update-profile-btn" class="btn btn-primary">更新资料</button>
+              <button id="change-password-btn" class="btn btn-warning">修改密码</button>
+              <button id="logout-btn" class="btn btn-danger">退出登录</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Session Info -->
+        <section id="session-info" class="panel">
+          <h2>会话信息</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span>登录状态:</span>
+              <span id="login-status">未登录</span>
+            </div>
+            <div class="info-item">
+              <span>当前用户:</span>
+              <span id="current-user">-</span>
+            </div>
+            <div class="info-item">
+              <span>用户角色:</span>
+              <span id="user-role">-</span>
+            </div>
+            <div class="info-item">
+              <span>登录时间:</span>
+              <span id="login-time">-</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

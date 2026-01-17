@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 计分系统</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>计分系统</h1>
+        <div class="status-bar">
+          <span id="connection-status" class="status-indicator">未连接</span>
+          <span id="scoring-status" class="status-indicator">就绪</span>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- Game Selection -->
+        <section class="panel">
+          <h2>选择比赛</h2>
+          <div class="form-group">
+            <label for="active-games">当前比赛:</label>
+            <select id="active-games">
+              <option value="">请选择比赛...</option>
+              <option value="game-1">比赛 1 - 主队 vs 客队</option>
+              <option value="game-2">比赛 2 - 篮球友谊赛</option>
+            </select>
+            <button id="refresh-games" class="btn btn-info">刷新比赛列表</button>
+          </div>
+        </section>
+
+        <!-- Live Scoreboard -->
+        <section id="live-scoreboard" class="panel">
+          <h2>实时计分板</h2>
+          <div class="score-display large">
+            <div class="team home-team">
+              <div class="team-name" id="home-team-name">主队</div>
+              <div class="team-score" id="home-team-score">0</div>
+              <div class="team-stats">
+                <div class="stat">犯规: <span id="home-fouls-count">0</span></div>
+                <div class="stat">暂停: <span id="home-timeouts-count">3</span></div>
+              </div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team away-team">
+              <div class="team-name" id="away-team-name">客队</div>
+              <div class="team-score" id="away-team-score">0</div>
+              <div class="team-stats">
+                <div class="stat">犯规: <span id="away-fouls-count">0</span></div>
+                <div class="stat">暂停: <span id="away-timeouts-count">3</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scoring Controls -->
+        <section id="scoring-controls" class="panel">
+          <h2>计分控制</h2>
+          <div class="controls">
+            <div class="team-scoring">
+              <h3>主队得分</h3>
+              <div class="scoring-buttons">
+                <button class="btn btn-score btn-lg" data-team="home" data-points="1">罚球 1分</button>
+                <button class="btn btn-score btn-lg" data-team="home" data-points="2">2分球</button>
+                <button class="btn btn-score btn-lg" data-team="home" data-points="3">3分球</button>
+                <button class="btn btn-warning btn-lg" data-team="home" data-action="foul">犯规</button>
+                <button class="btn btn-info btn-lg" data-team="home" data-action="timeout">暂停</button>
+              </div>
+            </div>
+            
+            <div class="team-scoring">
+              <h3>客队得分</h3>
+              <div class="scoring-buttons">
+                <button class="btn btn-score btn-lg" data-team="away" data-points="1">罚球 1分</button>
+                <button class="btn btn-score btn-lg" data-team="away" data-points="2">2分球</button>
+                <button class="btn btn-score btn-lg" data-team="away" data-points="3">3分球</button>
+                <button class="btn btn-warning btn-lg" data-team="away" data-action="foul">犯规</button>
+                <button class="btn btn-info btn-lg" data-team="away" data-action="timeout">暂停</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Detailed Scoring -->
+        <section id="detailed-scoring" class="panel">
+          <h2>详细计分</h2>
+          <div class="controls">
+            <div class="scoring-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="scoring-team">队伍:</label>
+                  <select id="scoring-team">
+                    <option value="home">主队</option>
+                    <option value="away">客队</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="scoring-player">球员号码:</label>
+                  <input type="number" id="scoring-player" placeholder="球员号码">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="scoring-type">得分类型:</label>
+                  <select id="scoring-type">
+                    <option value="1">罚球 (1分)</option>
+                    <option value="2">2分球</option>
+                    <option value="3">3分球</option>
+                    <option value="technical">技术犯规罚球</option>
+                    <option value="other">其他得分</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="scoring-points">分数:</label>
+                  <input type="number" id="scoring-points" value="2" min="1" max="3">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="scoring-description">描述:</label>
+                <input type="text" id="scoring-description" placeholder="得分描述...">
+              </div>
+              
+              <button id="record-score" class="btn btn-primary">记录得分</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Event Logging -->
+        <section id="event-logging" class="panel">
+          <h2>事件记录</h2>
+          <div class="event-controls">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="event-team">队伍:</label>
+                <select id="event-team">
+                  <option value="home">主队</option>
+                  <option value="away">客队</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="event-type">事件类型:</label>
+                <select id="event-type">
+                  <option value="foul">犯规</option>
+                  <option value="timeout">暂停</option>
+                  <option value="substitution">换人</option>
+                  <option value="rebound">篮板</option>
+                  <option value="steal">抢断</option>
+                  <option value="block">盖帽</option>
+                  <option value="turnover">失误</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="event-player">球员号码:</label>
+                <input type="number" id="event-player" placeholder="球员号码">
+              </div>
+              <div class="form-group">
+                <label for="event-description">描述:</label>
+                <input type="text" id="event-description" placeholder="事件描述...">
+              </div>
+            </div>
+            
+            <button id="record-event" class="btn btn-secondary">记录事件</button>
+          </div>
+        </section>
+
+        <!-- Recent Events -->
+        <section id="recent-events" class="panel">
+          <h2>最近事件</h2>
+          <div id="events-list" class="events-container">
+            <div class="event-item">
+              <span class="event-time">12:34</span>
+              <span class="event-team home">主队</span>
+              <span class="event-desc">2分球得分</span>
+              <span class="event-player">#23 张三</span>
+            </div>
+            <div class="event-item">
+              <span class="event-time">12:20</span>
+              <span class="event-team away">客队</span>
+              <span class="event-desc">犯规</span>
+              <span class="event-player">#11 李四</span>
+            </div>
+            <div class="event-item">
+              <span class="event-time">12:10</span>
+              <span class="event-team home">主队</span>
+              <span class="event-desc">3分球得分</span>
+              <span class="event-player">#7 王五</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/scoring.js"></script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 数据分析</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>数据分析面板</h1>
+        <div class="status-bar">
+          <span id="connection-status" class="status-indicator">未连接</span>
+          <span id="analytics-status" class="status-indicator">就绪</span>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- Game Selection -->
+        <section class="panel">
+          <h2>选择比赛</h2>
+          <div class="form-group">
+            <label for="active-games">当前比赛:</label>
+            <select id="active-games">
+              <option value="">请选择比赛...</option>
+              <option value="game-1">比赛 1 - 主队 vs 客队</option>
+              <option value="game-2">比赛 2 - 篮球友谊赛</option>
+            </select>
+            <button id="refresh-games" class="btn btn-info">刷新比赛列表</button>
+          </div>
+        </section>
+
+        <!-- Game Statistics -->
+        <section id="game-stats" class="panel">
+          <h2>比赛统计数据</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>总得分</h3>
+              <div class="stat-values">
+                <div class="stat-value home-stat"><span id="home-total-score">0</span> 主队</div>
+                <div class="stat-value away-stat"><span id="away-total-score">0</span> 客队</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3>投篮命中率</h3>
+              <div class="stat-values">
+                <div class="stat-value home-stat"><span id="home-shooting-pct">0%</span> 主队</div>
+                <div class="stat-value away-stat"><span id="away-shooting-pct">0%</span> 客队</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3>篮板</h3>
+              <div class="stat-values">
+                <div class="stat-value home-stat"><span id="home-rebounds">0</span> 主队</div>
+                <div class="stat-value away-stat"><span id="away-rebounds">0</span> 客队</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3>助攻</h3>
+              <div class="stat-values">
+                <div class="stat-value home-stat"><span id="home-assists">0</span> 主队</div>
+                <div class="stat-value away-stat"><span id="away-assists">0</span> 客队</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3>抢断</h3>
+              <div class="stat-values">
+                <div class="stat-value home-stat"><span id="home-steals">0</span> 主队</div>
+                <div class="stat-value away-stat"><span id="away-steals">0</span> 客队</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3>盖帽</h3>
+              <div class="stat-values">
+                <div class="stat-value home-stat"><span id="home-blocks">0</span> 主队</div>
+                <div class="stat-value away-stat"><span id="away-blocks">0</span> 客队</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Charts -->
+        <section id="charts-section" class="panel">
+          <h2>数据图表</h2>
+          <div class="chart-container">
+            <div class="chart-wrapper">
+              <h3>得分趋势</h3>
+              <canvas id="scoreChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+              <h3>投篮对比</h3>
+              <canvas id="shootingChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-wrapper wide">
+              <h3>比赛节奏与势头</h3>
+              <canvas id="momentumChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Player Stats -->
+        <section id="player-stats" class="panel">
+          <h2>球员统计数据</h2>
+          <div class="player-stats-container">
+            <div class="team-stats">
+              <h3>主队球员</h3>
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th>号码</th>
+                    <th>姓名</th>
+                    <th>得分</th>
+                    <th>篮板</th>
+                    <th>助攻</th>
+                    <th>投篮%</th>
+                    <th>效率</th>
+                  </tr>
+                </thead>
+                <tbody id="home-players-stats">
+                  <tr>
+                    <td>#23</td>
+                    <td>张三</td>
+                    <td>22</td>
+                    <td>8</td>
+                    <td>7</td>
+                    <td>56%</td>
+                    <td>24.5</td>
+                  </tr>
+                  <tr>
+                    <td>#7</td>
+                    <td>李四</td>
+                    <td>18</td>
+                    <td>12</td>
+                    <td>4</td>
+                    <td>48%</td>
+                    <td>19.2</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="team-stats">
+              <h3>客队球员</h3>
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th>号码</th>
+                    <th>姓名</th>
+                    <th>得分</th>
+                    <th>篮板</th>
+                    <th>助攻</th>
+                    <th>投篮%</th>
+                    <th>效率</th>
+                  </tr>
+                </thead>
+                <tbody id="away-players-stats">
+                  <tr>
+                    <td>#11</td>
+                    <td>王五</td>
+                    <td>25</td>
+                    <td>6</td>
+                    <td>9</td>
+                    <td>52%</td>
+                    <td>22.1</td>
+                  </tr>
+                  <tr>
+                    <td>#9</td>
+                    <td>赵六</td>
+                    <td>15</td>
+                    <td>10</td>
+                    <td>3</td>
+                    <td>41%</td>
+                    <td>15.8</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Advanced Metrics -->
+        <section id="advanced-metrics" class="panel">
+          <h2>高级指标</h2>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <h3>效率值 (PER)</h3>
+              <div class="metric-values">
+                <div class="metric-value home-metric"><span id="home-per">0.0</span> 主队</div>
+                <div class="metric-value away-metric"><span id="away-per">0.0</span> 客队</div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <h3>四要素分析</h3>
+              <div class="four-factors">
+                <div class="factor">
+                  <span>有效投篮%</span>
+                  <span class="home-factor" id="home-efg">0%</span>
+                  <span class="away-factor" id="away-efg">0%</span>
+                </div>
+                <div class="factor">
+                  <span>失误率</span>
+                  <span class="home-factor" id="home-tov">0%</span>
+                  <span class="away-factor" id="away-tov">0%</span>
+                </div>
+                <div class="factor">
+                  <span>进攻篮板%</span>
+                  <span class="home-factor" id="home-orb">0%</span>
+                  <span class="away-factor" id="away-orb">0%</span>
+                </div>
+                <div class="factor">
+                  <span>罚球率</span>
+                  <span class="home-factor" id="home-ftr">0%</span>
+                  <span class="away-factor" id="away-ftr">0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <h3>比赛势头</h3>
+              <div class="momentum-analysis">
+                <div class="momentum-item">
+                  <span>领先时间</span>
+                  <span class="home-momentum" id="home-lead-time">0%</span>
+                  <span class="away-momentum" id="away-lead-time">0%</span>
+                </div>
+                <div class="momentum-item">
+                  <span>最大领先</span>
+                  <span class="home-momentum" id="home-max-lead">0</span>
+                  <span class="away-momentum" id="away-max-lead">0</span>
+                </div>
+                <div class="momentum-item">
+                  <span>得分高潮</span>
+                  <span class="home-momentum" id="home-scoring-run">0</span>
+                  <span class="away-momentum" id="away-scoring-run">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Export Options -->
+        <section id="export-options" class="panel">
+          <h2>数据导出</h2>
+          <div class="controls">
+            <button id="export-csv" class="btn btn-primary">导出为CSV</button>
+            <button id="export-pdf" class="btn btn-info">导出为PDF</button>
+            <button id="export-full-report" class="btn btn-success">生成完整报告</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/analytics.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 进攻时钟</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>进攻时钟控制</h1>
+        <div class="status-bar">
+          <span id="connection-status" class="status-indicator">未连接</span>
+          <span id="timer-status" class="status-indicator">就绪</span>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- Game Selection -->
+        <section class="panel">
+          <h2>选择比赛</h2>
+          <div class="form-group">
+            <label for="active-games">当前比赛:</label>
+            <select id="active-games">
+              <option value="">请选择比赛...</option>
+              <option value="game-1">比赛 1 - 主队 vs 客队</option>
+              <option value="game-2">比赛 2 - 篮球友谊赛</option>
+            </select>
+            <button id="refresh-games" class="btn btn-info">刷新比赛列表</button>
+          </div>
+        </section>
+
+        <!-- Shot Clock Controls -->
+        <section id="shot-clock-controls" class="panel">
+          <h2>进攻时钟控制</h2>
+          
+          <div class="timer-display">
+            <div id="shot-clock" class="clock medium">24.0</div>
+          </div>
+          
+          <div class="timer-info">
+            <div class="info-item">
+              <span>比赛类型:</span>
+              <span id="sport-type-display">篮球</span>
+            </div>
+            <div class="info-item">
+              <span>状态:</span>
+              <span id="timer-state">停止</span>
+            </div>
+          </div>
+          
+          <div class="controls">
+            <div class="control-group">
+              <h3>进攻时钟操作</h3>
+              <div class="control-buttons">
+                <button id="start-shot-clock" class="btn btn-success">开始</button>
+                <button id="pause-shot-clock" class="btn btn-warning">暂停</button>
+                <button id="reset-shot-clock" class="btn btn-info">重置</button>
+              </div>
+              <div class="control-inputs">
+                <label for="shot-clock-input">设置时间:</label>
+                <input type="text" id="shot-clock-input" placeholder="秒" value="24">
+                <button id="set-shot-clock" class="btn btn-primary">设置</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/main.js"></script>
+  <script src="../../js/timer/shotClock.js"></script>
+</body>
+</html>
