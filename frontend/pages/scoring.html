@@ -12,16 +12,18 @@
   <div id="app">
     <div class="dashboard">
       <header class="dashboard-header">
-        <h1>计分系统</h1>
-        <div class="status-bar">
-          <span id="connection-status" class="status-indicator">未连接</span>
-          <span id="scoring-status" class="status-indicator">就绪</span>
+        <div class="header-content">
+          <h1>计分系统</h1>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="scoring-status" class="status-indicator">就绪</span>
+          </div>
         </div>
       </header>
 
       <div class="dashboard-main">
         <!-- Game Selection -->
-        <section class="panel">
+        <section class="card">
           <h2>选择比赛</h2>
           <div class="form-group">
             <label for="active-games">当前比赛:</label>
@@ -33,7 +35,7 @@
         </section>
 
         <!-- Live Scoreboard -->
-        <section id="live-scoreboard" class="panel">
+        <section id="live-scoreboard" class="card">
           <h2>实时计分板</h2>
           <div class="score-display large">
             <div class="team home-team">
@@ -57,7 +59,7 @@
         </section>
 
         <!-- Scoring Controls -->
-        <section id="scoring-controls" class="panel">
+        <section id="scoring-controls" class="card">
           <h2>计分控制</h2>
           <div class="controls">
             <div class="team-scoring">
@@ -85,7 +87,7 @@
         </section>
 
         <!-- Detailed Scoring -->
-        <section id="detailed-scoring" class="panel">
+        <section id="detailed-scoring" class="card">
           <h2>详细计分</h2>
           <div class="controls">
             <div class="scoring-form">
@@ -131,7 +133,7 @@
         </section>
 
         <!-- Event Logging -->
-        <section id="event-logging" class="panel">
+        <section id="event-logging" class="card">
           <h2>事件记录</h2>
           <div class="event-controls">
             <div class="form-row">
@@ -172,26 +174,44 @@
         </section>
 
         <!-- Recent Events -->
-        <section id="recent-events" class="panel">
+        <section id="recent-events" class="card">
           <h2>最近事件</h2>
           <div id="events-list" class="events-container">
             <div class="event-item">
-              <span class="event-time">12:34</span>
-              <span class="event-team home">主队</span>
-              <span class="event-desc">2分球得分</span>
-              <span class="event-player">#23 张三</span>
+              <div class="event-content">
+                <div class="event-header">
+                  <span class="event-time">12:34</span>
+                  <span class="event-team home">主队</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-desc">2分球得分</span>
+                  <span class="event-player">#23 张三</span>
+                </div>
+              </div>
             </div>
             <div class="event-item">
-              <span class="event-time">12:20</span>
-              <span class="event-team away">客队</span>
-              <span class="event-desc">犯规</span>
-              <span class="event-player">#11 李四</span>
+              <div class="event-content">
+                <div class="event-header">
+                  <span class="event-time">12:20</span>
+                  <span class="event-team away">客队</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-desc">犯规</span>
+                  <span class="event-player">#11 李四</span>
+                </div>
+              </div>
             </div>
             <div class="event-item">
-              <span class="event-time">12:10</span>
-              <span class="event-team home">主队</span>
-              <span class="event-desc">3分球得分</span>
-              <span class="event-player">#7 王五</span>
+              <div class="event-content">
+                <div class="event-header">
+                  <span class="event-time">12:10</span>
+                  <span class="event-team home">主队</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-desc">3分球得分</span>
+                  <span class="event-player">#7 王五</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>

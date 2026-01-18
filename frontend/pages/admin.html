@@ -12,16 +12,18 @@
   <div id="app">
     <div class="dashboard">
       <header class="dashboard-header">
-        <h1>系统管理面板</h1>
-        <div class="status-bar">
-          <span id="connection-status" class="status-indicator">未连接</span>
-          <span id="admin-status" class="status-indicator">就绪</span>
+        <div class="header-content">
+          <h1>系统管理面板</h1>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="admin-status" class="status-indicator">就绪</span>
+          </div>
         </div>
       </header>
 
       <div class="dashboard-main">
         <!-- System Stats -->
-        <section id="system-stats" class="panel">
+        <section id="system-stats" class="card">
           <h2>系统统计</h2>
           <div class="stats-grid">
             <div class="stat-card">
@@ -44,11 +46,13 @@
         </section>
 
         <!-- User Management -->
-        <section id="user-management" class="panel">
-          <h2>用户管理</h2>
-          <div class="management-controls">
-            <button id="show-add-user" class="btn btn-primary">添加用户</button>
-            <button id="refresh-users" class="btn btn-info">刷新列表</button>
+        <section id="user-management" class="card">
+          <div class="section-header">
+            <h2>用户管理</h2>
+            <div class="management-controls">
+              <button id="show-add-user" class="btn btn-primary">添加用户</button>
+              <button id="refresh-users" class="btn btn-info">刷新列表</button>
+            </div>
           </div>
           
           <div class="form-container hidden" id="add-user-form">
@@ -76,8 +80,10 @@
                 <input type="password" id="new-password" placeholder="输入密码">
               </div>
             </div>
-            <button id="submit-new-user" class="btn btn-success">创建用户</button>
-            <button id="cancel-add-user" class="btn btn-secondary">取消</button>
+            <div class="form-actions">
+              <button id="submit-new-user" class="btn btn-success">创建用户</button>
+              <button id="cancel-add-user" class="btn btn-secondary">取消</button>
+            </div>
           </div>
           
           <div class="table-container">
@@ -100,26 +106,30 @@
         </section>
 
         <!-- Game History -->
-        <section id="game-history" class="panel">
-          <h2>比赛历史</h2>
+        <section id="game-history" class="card">
+          <div class="section-header">
+            <h2>比赛历史</h2>
+          </div>
           <div class="filters">
-            <div class="form-group">
-              <label for="sport-filter">运动类型:</label>
-              <select id="sport-filter">
-                <option value="">全部</option>
-                <option value="basketball">篮球</option>
-                <option value="soccer">足球</option>
-              </select>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sport-filter">运动类型:</label>
+                <select id="sport-filter">
+                  <option value="">全部</option>
+                  <option value="basketball">篮球</option>
+                  <option value="soccer">足球</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="date-from">开始日期:</label>
+                <input type="date" id="date-from">
+              </div>
+              <div class="form-group">
+                <label for="date-to">结束日期:</label>
+                <input type="date" id="date-to">
+              </div>
+              <button id="apply-filters" class="btn btn-primary">应用筛选</button>
             </div>
-            <div class="form-group">
-              <label for="date-from">开始日期:</label>
-              <input type="date" id="date-from">
-            </div>
-            <div class="form-group">
-              <label for="date-to">结束日期:</label>
-              <input type="date" id="date-to">
-            </div>
-            <button id="apply-filters" class="btn btn-primary">应用筛选</button>
           </div>
           
           <div class="table-container">
@@ -143,27 +153,39 @@
         </section>
 
         <!-- System Configuration -->
-        <section id="system-config" class="panel">
+        <section id="system-config" class="card">
           <h2>系统配置</h2>
           <div class="config-container">
             <div class="config-group">
               <h3>功能开关</h3>
               <div class="toggle-group">
                 <div class="toggle-item">
-                  <label for="basketball-enabled">篮球功能:</label>
-                  <input type="checkbox" id="basketball-enabled" checked>
+                  <div class="toggle-label">篮球功能:</div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="basketball-enabled" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
                 </div>
                 <div class="toggle-item">
-                  <label for="soccer-enabled">足球功能:</label>
-                  <input type="checkbox" id="soccer-enabled" checked>
+                  <div class="toggle-label">足球功能:</div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="soccer-enabled" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
                 </div>
                 <div class="toggle-item">
-                  <label for="analytics-enabled">数据分析:</label>
-                  <input type="checkbox" id="analytics-enabled" checked>
+                  <div class="toggle-label">数据分析:</div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="analytics-enabled" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
                 </div>
                 <div class="toggle-item">
-                  <label for="export-enabled">数据导出:</label>
-                  <input type="checkbox" id="export-enabled" checked>
+                  <div class="toggle-label">数据导出:</div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="export-enabled" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -191,30 +213,50 @@
             </div>
           </div>
           
-          <button id="save-config" class="btn btn-primary">保存配置</button>
+          <div class="form-actions">
+            <button id="save-config" class="btn btn-primary">保存配置</button>
+          </div>
         </section>
 
         <!-- Recent Activity -->
-        <section id="recent-activity" class="panel">
+        <section id="recent-activity" class="card">
           <h2>最近活动</h2>
           <div class="activity-container">
             <div class="activity-item">
-              <span class="timestamp">2023-10-15 10:30:22</span>
-              <span class="user">admin</span>
-              <span class="action">创建了新比赛</span>
-              <span class="details">-</span>
+              <div class="activity-content">
+                <div class="activity-header">
+                  <span class="timestamp">2023-10-15 10:30:22</span>
+                  <span class="user">admin</span>
+                </div>
+                <div class="activity-details">
+                  <span class="action">创建了新比赛</span>
+                  <span class="details">-</span>
+                </div>
+              </div>
             </div>
             <div class="activity-item">
-              <span class="timestamp">2023-10-15 10:15:45</span>
-              <span class="user">operator1</span>
-              <span class="action">更新了比赛分数</span>
-              <span class="details">比赛ID: abc123</span>
+              <div class="activity-content">
+                <div class="activity-header">
+                  <span class="timestamp">2023-10-15 10:15:45</span>
+                  <span class="user">operator1</span>
+                </div>
+                <div class="activity-details">
+                  <span class="action">更新了比赛分数</span>
+                  <span class="details">比赛ID: abc123</span>
+                </div>
+              </div>
             </div>
             <div class="activity-item">
-              <span class="timestamp">2023-10-15 09:45:10</span>
-              <span class="user">admin</span>
-              <span class="action">导出了比赛数据</span>
-              <span class="details">CSV格式</span>
+              <div class="activity-content">
+                <div class="activity-header">
+                  <span class="timestamp">2023-10-15 09:45:10</span>
+                  <span class="user">admin</span>
+                </div>
+                <div class="activity-details">
+                  <span class="action">导出了比赛数据</span>
+                  <span class="details">CSV格式</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -223,6 +265,14 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script>
+    // 检查认证状态，如果没有认证则重定向到登录页面
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!requireAuth('../pages/auth.html')) {
+        return; // requireAuth 函数会处理重定向
+      }
+    });
+  </script>
   <script src="../js/admin.js"></script>
 </body>
 </html>

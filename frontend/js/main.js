@@ -2,6 +2,10 @@
 const API_BASE_URL = 'http://localhost:3001/api';
 const SOCKET_URL = 'http://localhost:3001';
 
+// Authentication state
+let authToken = localStorage.getItem('smartjfb_token') || null;
+let currentUser = JSON.parse(localStorage.getItem('smartjfb_user')) || null;
+
 // Global state
 let gameState = {
   currentGameId: null,
@@ -28,6 +32,9 @@ function initApp() {
   
   // Check connection status
   checkConnectionStatus();
+  
+  // Check authentication status
+  checkAuthStatus();
 }
 
 function initSocket() {
@@ -101,6 +108,48 @@ function checkConnectionStatus() {
   }
 }
 
+function checkAuthStatus() {
+  // Refresh authentication state from localStorage
+  authToken = localStorage.getItem('smartjfb_token');
+  currentUser = JSON.parse(localStorage.getItem('smartjfb_user'));
+  
+  // Update UI based on authentication status
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  // Update UI elements based on authentication status
+  const loginStatusElement = document.getElementById('login-status');
+  const currentUserElement = document.getElementById('current-user');
+  
+  if (loginStatusElement) {
+    loginStatusElement.textContent = authToken ? '已登录' : '未登录';
+  }
+  
+  if (currentUserElement) {
+    currentUserElement.textContent = currentUser ? currentUser.username : '-';
+  }
+}
+
+// Function to check if user is authenticated
+function isAuthenticated() {
+  return !!authToken && !!currentUser;
+}
+
+// Function to get current user role
+function getUserRole() {
+  return currentUser ? currentUser.role : null;
+}
+
+// Function to redirect to login page if not authenticated
+function requireAuth(redirectUrl = './pages/auth.html') {
+  if (!isAuthenticated()) {
+    window.location.href = redirectUrl;
+    return false;
+  }
+  return true;
+}
+
 function updateConnectionStatus(isConnected) {
   const statusElement = document.getElementById('connection-status');
   if (statusElement) {
@@ -165,4 +214,22 @@ function formatDecimalTime(seconds) {
 // Format shot clock time (tenths of seconds)
 function formatShotClock(tenths) {
   return (tenths / 10).toFixed(1);
+}
+
+// Function to store authentication data
+function storeAuthData(token, user) {
+  authToken = token;
+  currentUser = user;
+  
+  localStorage.setItem('smartjfb_token', token);
+  localStorage.setItem('smartjfb_user', JSON.stringify(user));
+}
+
+// Function to clear authentication data
+function clearAuthData() {
+  authToken = null;
+  currentUser = null;
+  
+  localStorage.removeItem('smartjfb_token');
+  localStorage.removeItem('smartjfb_user');
 }

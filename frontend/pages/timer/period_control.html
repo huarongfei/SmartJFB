@@ -12,16 +12,18 @@
   <div id="app">
     <div class="dashboard">
       <header class="dashboard-header">
-        <h1>节数/周期控制</h1>
-        <div class="status-bar">
-          <span id="connection-status" class="status-indicator">未连接</span>
-          <span id="timer-status" class="status-indicator">就绪</span>
+        <div class="header-content">
+          <h1>节数/周期控制</h1>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="timer-status" class="status-indicator">就绪</span>
+          </div>
         </div>
       </header>
 
       <div class="dashboard-main">
         <!-- Game Selection -->
-        <section class="panel">
+        <section class="card">
           <h2>选择比赛</h2>
           <div class="form-group">
             <label for="active-games">当前比赛:</label>
@@ -33,7 +35,7 @@
         </section>
 
         <!-- Period Control -->
-        <section id="period-control" class="panel">
+        <section id="period-control" class="card">
           <h2>节数控制</h2>
           
           <div class="timer-info">
@@ -55,9 +57,9 @@
             <div class="control-group">
               <h3>节数操作</h3>
               <div class="control-buttons">
-                <button id="prev-period" class="btn btn-secondary">上一节</button>
-                <button id="next-period" class="btn btn-primary">下一节</button>
-                <button id="set-period" class="btn btn-info">设置节数</button>
+                <button id="prev-period" class="btn btn-secondary btn-lg">上一节</button>
+                <button id="next-period" class="btn btn-primary btn-lg">下一节</button>
+                <button id="set-period" class="btn btn-info btn-lg">设置节数</button>
               </div>
               <div class="control-inputs">
                 <label for="period-input">设置节数:</label>

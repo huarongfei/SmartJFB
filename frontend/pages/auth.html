@@ -11,17 +11,23 @@
 <body>
   <div id="app">
     <div class="dashboard">
-      <header class="dashboard-header">
-        <h1>用户认证</h1>
-        <div class="status-bar">
-          <span id="connection-status" class="status-indicator">未连接</span>
-          <span id="auth-status" class="status-indicator">就绪</span>
+      <div class="auth-container">
+        <div class="auth-hero">
+          <h1>SmartJFB</h1>
+          <p>专业篮球/足球计分计时分析系统</p>
         </div>
-      </header>
+        <div class="auth-wrapper">
+          <header class="auth-header">
+            <h1>用户认证</h1>
+            <div class="status-bar">
+              <span id="connection-status" class="status-indicator">未连接</span>
+              <span id="auth-status" class="status-indicator">就绪</span>
+            </div>
+          </header>
 
       <div class="dashboard-main">
         <!-- Login Form -->
-        <section id="login-section" class="panel">
+        <section id="login-section" class="card">
           <h2>登录</h2>
           <div class="auth-form">
             <div class="form-group">
@@ -32,16 +38,16 @@
               <label for="login-password">密码:</label>
               <input type="password" id="login-password" placeholder="输入密码">
             </div>
-            <button id="login-btn" class="btn btn-primary">登录</button>
-            <div class="form-footer">
-              <a href="#" id="show-forgot-password">忘记密码？</a>
-              <a href="#" id="show-register">还没有账户？立即注册</a>
+            <button id="login-btn" class="btn btn-primary btn-lg" style="width: 100%; margin: 15px 0;">登录</button>
+            <div class="form-footer" style="display: flex; justify-content: space-between;">
+              <a href="#" id="show-forgot-password" class="btn btn-outline btn-sm">忘记密码？</a>
+              <a href="#" id="show-register" class="btn btn-outline btn-sm">还没有账户？立即注册</a>
             </div>
           </div>
         </section>
 
         <!-- Register Form (initially hidden) -->
-        <section id="register-section" class="panel hidden">
+        <section id="register-section" class="card hidden">
           <h2>注册新账户</h2>
           <div class="auth-form">
             <div class="form-row">
@@ -71,15 +77,15 @@
                 <option value="admin">管理员</option>
               </select>
             </div>
-            <button id="register-btn" class="btn btn-success">注册</button>
-            <div class="form-footer">
-              <a href="#" id="show-login">已有账户？立即登录</a>
+            <button id="register-btn" class="btn btn-success btn-lg" style="width: 100%; margin: 15px 0;">注册</button>
+            <div class="form-footer" style="text-align: center;">
+              <a href="#" id="show-login" class="btn btn-outline btn-sm">已有账户？立即登录</a>
             </div>
           </div>
         </section>
 
         <!-- Forgot Password Form (initially hidden) -->
-        <section id="forgot-password-section" class="panel hidden">
+        <section id="forgot-password-section" class="card hidden">
           <h2>找回密码</h2>
           <div class="auth-form">
             <div class="form-group">
@@ -87,15 +93,15 @@
               <input type="email" id="forgot-email" placeholder="输入注册邮箱">
             </div>
             <p>输入您的邮箱，我们将发送密码重置链接到您的邮箱。</p>
-            <button id="forgot-password-btn" class="btn btn-warning">发送重置链接</button>
-            <div class="form-footer">
-              <a href="#" id="back-to-login">返回登录</a>
+            <button id="forgot-password-btn" class="btn btn-warning btn-lg" style="width: 100%; margin: 15px 0;">发送重置链接</button>
+            <div class="form-footer" style="text-align: center;">
+              <a href="#" id="back-to-login" class="btn btn-outline btn-sm">返回登录</a>
             </div>
           </div>
         </section>
 
         <!-- Profile Management (initially hidden, shown after login) -->
-        <section id="profile-section" class="panel hidden">
+        <section id="profile-section" class="card hidden">
           <h2>个人资料</h2>
           <div class="profile-form">
             <div class="form-row">
@@ -114,7 +120,7 @@
             </div>
             <div class="form-group">
               <label for="profile-created-at">注册时间:</label>
-              <input type="text" id="profile-created-at" placeholder="注册时间" readonly>
+                <input type="text" id="profile-created-at" placeholder="注册时间" readonly>
             </div>
             <div class="form-group">
               <label for="current-password">当前密码:</label>
@@ -130,7 +136,7 @@
                 <input type="password" id="confirm-new-password" placeholder="确认新密码">
               </div>
             </div>
-            <div class="controls">
+            <div class="controls" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px;">
               <button id="update-profile-btn" class="btn btn-primary">更新资料</button>
               <button id="change-password-btn" class="btn btn-warning">修改密码</button>
               <button id="logout-btn" class="btn btn-danger">退出登录</button>
@@ -139,7 +145,7 @@
         </section>
 
         <!-- Session Info -->
-        <section id="session-info" class="panel">
+        <section id="session-info" class="card">
           <h2>会话信息</h2>
           <div class="info-grid">
             <div class="info-item">
@@ -160,6 +166,7 @@
             </div>
           </div>
         </section>
+        </div>
       </div>
     </div>
   </div>

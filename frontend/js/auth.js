@@ -88,6 +88,11 @@ async function login() {
       updateSessionInfo();
       
       alert('登录成功');
+      
+      // 登录成功后跳转到管理界面
+      setTimeout(() => {
+        window.location.href = '../pages/admin.html';
+      }, 1000);
     } else {
       throw new Error(result.error || 'Login failed');
     }
@@ -146,6 +151,11 @@ async function register() {
       updateSessionInfo();
       
       alert('注册成功，已自动登录');
+      
+      // 注册成功后跳转到管理界面
+      setTimeout(() => {
+        window.location.href = '../pages/admin.html';
+      }, 1000);
     } else {
       throw new Error(result.error || 'Registration failed');
     }

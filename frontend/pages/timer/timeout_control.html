@@ -12,16 +12,18 @@
   <div id="app">
     <div class="dashboard">
       <header class="dashboard-header">
-        <h1>暂停/超时控制</h1>
-        <div class="status-bar">
-          <span id="connection-status" class="status-indicator">未连接</span>
-          <span id="timer-status" class="status-indicator">就绪</span>
+        <div class="header-content">
+          <h1>暂停/超时控制</h1>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="timer-status" class="status-indicator">就绪</span>
+          </div>
         </div>
       </header>
 
       <div class="dashboard-main">
         <!-- Game Selection -->
-        <section class="panel">
+        <section class="card">
           <h2>选择比赛</h2>
           <div class="form-group">
             <label for="active-games">当前比赛:</label>
@@ -33,7 +35,7 @@
         </section>
 
         <!-- Timeout Control -->
-        <section id="timeout-control" class="panel">
+        <section id="timeout-control" class="card">
           <h2>暂停控制</h2>
           
           <div class="timer-info">
@@ -51,9 +53,9 @@
                   <h4>主队暂停</h4>
                   <div class="timeout-info">剩余: <span id="home-timeouts">3</span></div>
                   <div class="timeout-buttons">
-                    <button id="use-home-timeout" class="btn btn-warning">使用暂停</button>
-                    <button id="add-home-timeout" class="btn btn-success">增加暂停</button>
-                    <button id="reset-home-timeouts" class="btn btn-info">重置暂停</button>
+                    <button id="use-home-timeout" class="btn btn-warning btn-lg">使用暂停</button>
+                    <button id="add-home-timeout" class="btn btn-success btn-lg">增加暂停</button>
+                    <button id="reset-home-timeouts" class="btn btn-info btn-lg">重置暂停</button>
                   </div>
                 </div>
                 
@@ -61,9 +63,9 @@
                   <h4>客队暂停</h4>
                   <div class="timeout-info">剩余: <span id="away-timeouts">3</span></div>
                   <div class="timeout-buttons">
-                    <button id="use-away-timeout" class="btn btn-warning">使用暂停</button>
-                    <button id="add-away-timeout" class="btn btn-success">增加暂停</button>
-                    <button id="reset-away-timeouts" class="btn btn-info">重置暂停</button>
+                    <button id="use-away-timeout" class="btn btn-warning btn-lg">使用暂停</button>
+                    <button id="add-away-timeout" class="btn btn-success btn-lg">增加暂停</button>
+                    <button id="reset-away-timeouts" class="btn btn-info btn-lg">重置暂停</button>
                   </div>
                 </div>
               </div>

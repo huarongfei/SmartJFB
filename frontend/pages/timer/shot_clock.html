@@ -12,16 +12,18 @@
   <div id="app">
     <div class="dashboard">
       <header class="dashboard-header">
-        <h1>进攻时钟控制</h1>
-        <div class="status-bar">
-          <span id="connection-status" class="status-indicator">未连接</span>
-          <span id="timer-status" class="status-indicator">就绪</span>
+        <div class="header-content">
+          <h1>进攻时钟控制</h1>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="timer-status" class="status-indicator">就绪</span>
+          </div>
         </div>
       </header>
 
       <div class="dashboard-main">
         <!-- Game Selection -->
-        <section class="panel">
+        <section class="card">
           <h2>选择比赛</h2>
           <div class="form-group">
             <label for="active-games">当前比赛:</label>
@@ -33,7 +35,7 @@
         </section>
 
         <!-- Shot Clock Controls -->
-        <section id="shot-clock-controls" class="panel">
+        <section id="shot-clock-controls" class="card">
           <h2>进攻时钟控制</h2>
           
           <div class="timer-display">
@@ -55,9 +57,9 @@
             <div class="control-group">
               <h3>进攻时钟操作</h3>
               <div class="control-buttons">
-                <button id="start-shot-clock" class="btn btn-success">开始</button>
-                <button id="pause-shot-clock" class="btn btn-warning">暂停</button>
-                <button id="reset-shot-clock" class="btn btn-info">重置</button>
+                <button id="start-shot-clock" class="btn btn-success btn-lg">开始</button>
+                <button id="pause-shot-clock" class="btn btn-warning btn-lg">暂停</button>
+                <button id="reset-shot-clock" class="btn btn-info btn-lg">重置</button>
               </div>
               <div class="control-inputs">
                 <label for="shot-clock-input">设置时间:</label>
