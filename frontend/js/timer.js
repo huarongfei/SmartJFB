@@ -2,6 +2,12 @@
 
 // Using utilities from utils.js
 
+// Global state for timer
+let gameState = {
+  currentGameId: null,
+  sport: null
+};
+
 document.addEventListener('DOMContentLoaded', function() {
   initTimerPage();
 });
@@ -13,8 +19,43 @@ function initTimerPage() {
   // Update connection status
   checkConnectionStatus();
   
+  // Connect to socket for real-time updates
+  connectToTimerUpdates();
+  
   // Load active games list
   refreshGamesList();
+}
+
+// Connect to socket for real-time timer updates
+function connectToTimerUpdates() {
+  if (window.io) {
+    window.socket = io('http://localhost:3000');
+    
+    window.socket.on('connect', function() {
+      console.log('Connected to timer updates');
+      updateConnectionStatus('connected', '已连接');
+    });
+    
+    window.socket.on('disconnect', function() {
+      updateConnectionStatus('disconnected', '未连接');
+    });
+    
+    // Listen for timer updates
+    window.socket.on('timerUpdate', function(data) {
+      if (data.timer) {
+        updateTimerDisplay(data.timer);
+      }
+    });
+  }
+}
+
+// Update connection status
+function updateConnectionStatus(status, text) {
+  const statusElement = document.getElementById('connection-status');
+  if (statusElement) {
+    statusElement.className = `status-indicator ${status}`;
+    statusElement.textContent = text;
+  }
 }
 
 function initTimerEventHandlers() {
@@ -52,22 +93,101 @@ function initTimerEventHandlers() {
 async function loadGameTimer() {
   const gameId = document.getElementById('active-games').value;
   
-  if (!gameId) return;
+  if (!gameId) {
+    // Reset the display when no game is selected
+    resetTimerDisplay();
+    gameState.currentGameId = null;
+    return;
+  }
   
   try {
-    const response = await fetch(`${API_BASE_URL}/advanced-timers/${gameId}`);
+    const response = await fetch(`${API_BASE_URL}/games/${gameId}`);
     const result = await response.json();
     
     if (response.ok) {
-      updateTimerDisplay(result.timer);
+      // Update game state
       gameState.currentGameId = gameId;
+      gameState.sport = result.sport;
+      
+      // Join game room for updates
+      if (window.socket) {
+        window.socket.emit('join-game', gameId);
+      }
+      
+      // Try to get existing timer data
+      let timerResult;
+      try {
+        const timerResponse = await fetch(`${API_BASE_URL}/advanced-timers/${gameId}`);
+        timerResult = await timerResponse.json();
+        
+        if (!timerResponse.ok) {
+          // Timer doesn't exist, initialize it
+          const initResponse = await fetch(`${API_BASE_URL}/advanced-timers/${gameId}/init`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sport: result.sport, gameType: 'quarter' })
+          });
+          
+          if (initResponse.ok) {
+            const initResult = await initResponse.json();
+            timerResult = initResult;
+          } else {
+            // If initialization fails, use default values
+            throw new Error('Failed to initialize timer');
+          }
+        }
+      } catch (timerError) {
+        // If getting timer data fails, initialize a new timer
+        const initResponse = await fetch(`${API_BASE_URL}/advanced-timers/${gameId}/init`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sport: result.sport, gameType: 'quarter' })
+        });
+        
+        if (initResponse.ok) {
+          timerResult = await initResponse.json();
+        } else {
+          // If all attempts fail, use default values
+          const defaultTimer = {
+            gameClock: { time: 720, isRunning: false }, // 12 minutes default
+            shotClock: { time: 240, isRunning: false }, // 24 seconds default
+            period: 1,
+            timeouts: { home: 3, away: 3 },
+            fouls: { home: 0, away: 0 },
+            sport: result.sport
+          };
+          updateTimerDisplay(defaultTimer);
+          return;
+        }
+      }
+      
+      // Update display with timer data
+      if (timerResult.timer) {
+        updateTimerDisplay(timerResult.timer);
+      } else {
+        updateTimerDisplay(timerResult);
+      }
     } else {
-      throw new Error(result.error || 'Failed to load timer data');
+      throw new Error(result.error || 'Failed to load game data');
     }
   } catch (error) {
     console.error('Error loading game timer:', error);
-    alert(`加载计时器数据失败: ${error.message}`);
+    alert(`加载比赛数据失败: ${error.message}`);
   }
+}
+
+// Reset timer display to default state
+function resetTimerDisplay() {
+  document.getElementById('game-clock').textContent = '12:00';
+  document.getElementById('shot-clock').textContent = '24.0';
+  document.getElementById('current-period').textContent = '1';
+  document.getElementById('period-display').textContent = '1';
+  document.getElementById('home-timeouts').textContent = '3';
+  document.getElementById('away-timeouts').textContent = '3';
+  document.getElementById('home-fouls').textContent = '0';
+  document.getElementById('away-fouls').textContent = '0';
+  document.getElementById('timer-state').textContent = '停止';
+  document.getElementById('sport-type-display').textContent = '篮球';
 }
 
 // Refresh list of active games (overriding the default function)
@@ -418,9 +538,9 @@ function updateTimerDisplay(timer) {
   
   // Update period
   const periodElement = document.getElementById('current-period');
-  if (periodElement) {
-    periodElement.textContent = timer.period;
-  }
+  const periodDisplayElement = document.getElementById('period-display');
+  if (periodElement) periodElement.textContent = timer.period;
+  if (periodDisplayElement) periodDisplayElement.textContent = timer.period;
   
   // Update timeouts
   const homeTimeoutsElement = document.getElementById('home-timeouts');
@@ -444,12 +564,6 @@ function updateTimerDisplay(timer) {
   const sportElement = document.getElementById('sport-type-display');
   if (sportElement) {
     sportElement.textContent = timer.sport === 'basketball' ? '篮球' : '足球';
-  }
-  
-  // Update period display
-  const periodDisplayElement = document.getElementById('period-display');
-  if (periodDisplayElement) {
-    periodDisplayElement.textContent = timer.period;
   }
 }
 

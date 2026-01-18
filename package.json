@@ -10,7 +10,9 @@
     "frontend": "cd frontend && npx http-server -p 3002 -c-1",
     "backend": "node backend/server.js",
     "start-all": "concurrently --kill-others-on-fail \"npm run backend\" \"npm run frontend\"",
-    "dev-all": "concurrently \"npm run dev\" \"npm run frontend\""
+    "dev-all": "concurrently \"npm run dev\" \"npm run frontend\"",
+    "clean-start": "taskkill /f /im node.exe >nul 2>&1 & timeout /t 3 /nobreak >nul & npm run start-all",
+        "start-both": "concurrently --kill-others-on-fail \"npm run backend\" \"cd frontend && npx http-server -p 3002 -c-1\""
   },
   "keywords": [
     "sports",

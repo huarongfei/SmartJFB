@@ -16,7 +16,7 @@
         <div class="header-content">
           <div class="header-left">
             <a href="../../nav.html" class="btn btn-secondary">返回导航</a>
-            <h1>节数/周期控制</h1>
+            <h1>节数控制</h1>
           </div>
           <div class="status-bar">
             <span id="connection-status" class="status-indicator">未连接</span>
@@ -38,22 +38,14 @@
           </div>
         </section>
 
-        <!-- Period Control -->
-        <section id="period-control" class="card">
+        <!-- Period Controls -->
+        <section id="period-controls" class="card">
           <h2>节数控制</h2>
           
-          <div class="timer-info">
-            <div class="info-item">
-              <span>比赛类型:</span>
-              <span id="sport-type-display">篮球</span>
-            </div>
-            <div class="info-item">
+          <div class="timer-display">
+            <div class="period-display">
               <span>当前节:</span>
-              <span id="current-period">1</span>
-            </div>
-            <div class="info-item">
-              <span>最大节数:</span>
-              <span id="max-periods">4</span>
+              <span id="current-period" class="period-number">1</span>
             </div>
           </div>
           
@@ -61,13 +53,12 @@
             <div class="control-group">
               <h3>节数操作</h3>
               <div class="control-buttons">
-                <button id="prev-period" class="btn btn-secondary btn-lg">上一节</button>
-                <button id="next-period" class="btn btn-primary btn-lg">下一节</button>
-                <button id="set-period" class="btn btn-info btn-lg">设置节数</button>
+                <button id="prev-period" class="btn btn-secondary">上一节</button>
+                <button id="next-period" class="btn btn-primary">下一节</button>
               </div>
               <div class="control-inputs">
-                <label for="period-input">设置节数:</label>
-                <input type="number" id="period-input" placeholder="节数" value="1" min="1" max="6">
+                <label for="period-input">节数:</label>
+                <input type="number" id="period-input" min="1" max="4" value="1">
                 <button id="apply-period" class="btn btn-primary">应用</button>
               </div>
             </div>
@@ -82,7 +73,7 @@
   <script>
     // 检查认证状态，如果没有认证则重定向到登录页面
     document.addEventListener('DOMContentLoaded', function() {
-// 延迟检查认证，确保utils.js完全加载
+      // 延迟检查认证，确保utils.js完全加载
       setTimeout(function() {
         if (!window.isAuthenticated || !window.isAuthenticated()) {
           // 如果未认证，则使用requireAuth进行重定向

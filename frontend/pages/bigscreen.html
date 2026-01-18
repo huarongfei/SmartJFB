@@ -13,9 +13,9 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background-color: #000;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
       color: #fff;
-      font-family: 'Arial', sans-serif;
+      font-family: 'Arial', 'Microsoft YaHei', sans-serif;
     }
     
     .big-screen-container {
@@ -26,126 +26,213 @@
       justify-content: center;
       align-items: center;
       text-align: center;
+      background: radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.9) 100%);
+      position: relative;
+    }
+    
+    .big-screen-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></svg>') repeat;
+      pointer-events: none;
+      z-index: -1;
     }
     
     .big-screen-scoreboard {
       display: flex;
       justify-content: space-around;
       width: 100%;
-      margin-bottom: 5vh;
+      margin-bottom: 3vh;
+      position: relative;
+      z-index: 2;
     }
     
     .big-screen-team {
       flex: 1;
       padding: 20px;
+      position: relative;
+    }
+    
+    .big-screen-team::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent);
+    }
+    
+    .big-screen-team.home::before {
+      left: 0;
+      background: linear-gradient(to bottom, transparent, #4CAF50, transparent);
+    }
+    
+    .big-screen-team.away::before {
+      right: 0;
+      background: linear-gradient(to bottom, transparent, #2196F3, transparent);
     }
     
     .big-screen-team-logo {
-      width: 200px;
-      height: 200px;
-      background-color: #ccc;
+      width: 180px;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 50%;
       margin: 0 auto 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      color: #000;
+      font-size: 4rem;
+      color: #fff;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 30px rgba(102, 126, 234, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.2);
+      animation: pulse 2s infinite alternate;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.2); }
+      100% { box-shadow: 0 0 50px rgba(102, 126, 234, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.3); }
     }
     
     .big-screen-team-name {
-      font-size: 5rem;
-      font-weight: bold;
-      margin-bottom: 20px;
+      font-size: 4.5rem;
+      font-weight: 800;
+      margin-bottom: 15px;
       text-transform: uppercase;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      letter-spacing: 2px;
+      background: linear-gradient(to right, #fff, #ddd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .big-screen-team-score {
-      font-size: 15rem;
-      font-weight: bold;
-      color: #4CAF50;
-      text-shadow: 0 0 30px rgba(76, 175, 80, 0.7);
+      font-size: 18rem;
+      font-weight: 900;
+      color: #FFD700;
+      text-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.6);
+      margin: 10px 0;
+      transition: all 0.3s ease;
+    }
+    
+    .big-screen-team-score.changing {
+      transform: scale(1.1);
+      text-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.8);
     }
     
     .vs-center {
       display: flex;
       align-items: center;
-      font-size: 6rem;
-      font-weight: bold;
+      font-size: 8rem;
+      font-weight: 900;
       color: #FFC107;
+      text-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+      margin: 0 20px;
+      min-width: 120px;
     }
     
     .big-screen-timer {
-      font-size: 10rem;
-      font-weight: bold;
-      color: #2196F3;
-      text-shadow: 0 0 30px rgba(33, 150, 243, 0.7);
-      margin: 30px 0;
+      font-size: 14rem;
+      font-weight: 900;
+      color: #FF5722;
+      text-shadow: 0 0 50px rgba(255, 87, 34, 0.8), 0 0 70px rgba(255, 87, 34, 0.6);
+      margin: 20px 0;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px 30px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
     }
     
     .big-screen-shot-clock {
-      font-size: 6rem;
-      color: #FF9800;
-      text-shadow: 0 0 20px rgba(255, 152, 0, 0.7);
-      margin: 20px 0;
+      font-size: 8rem;
+      color: #9C27B0;
+      text-shadow: 0 0 40px rgba(156, 39, 176, 0.8);
+      margin: 15px 0;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px 25px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
     }
     
     .big-screen-period {
-      font-size: 4rem;
+      font-size: 5rem;
       color: #E91E63;
-      margin: 20px 0;
+      margin: 15px 0;
+      text-shadow: 0 0 30px rgba(233, 30, 99, 0.6);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px 25px;
+      border-radius: 10px;
+      display: inline-block;
     }
     
     .big-screen-fouls {
       display: flex;
       justify-content: space-around;
       width: 100%;
-      margin-top: 20px;
-      font-size: 3rem;
+      margin-top: 15px;
+      font-size: 3.5rem;
+      position: relative;
+      z-index: 2;
     }
     
     .foul-counter {
-      background-color: #f44336;
+      background: linear-gradient(135deg, #f44336, #d32f2f);
       color: white;
-      padding: 10px 30px;
-      border-radius: 10px;
-      min-width: 100px;
+      padding: 15px 35px;
+      border-radius: 15px;
+      min-width: 120px;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
     }
     
     .big-screen-extra-info {
       display: flex;
       justify-content: space-around;
       width: 100%;
-      margin-top: 30px;
-      font-size: 2.5rem;
+      margin-top: 20px;
+      font-size: 2.8rem;
+      position: relative;
+      z-index: 2;
     }
     
     .extra-info-item {
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 15px 30px;
-      border-radius: 10px;
-      min-width: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 18px 35px;
+      border-radius: 15px;
+      min-width: 220px;
       margin: 0 10px;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
     
     .timeout-indicator {
       display: flex;
       justify-content: center;
-      margin-top: 20px;
+      margin-top: 15px;
       font-size: 2.5rem;
     }
     
     .timeout-dot {
-      width: 30px;
-      height: 30px;
-      background-color: #FFC107;
+      width: 35px;
+      height: 35px;
+      background-color: #757575;
       border-radius: 50%;
-      margin: 0 10px;
-      opacity: 0.3;
+      margin: 0 8px;
+      transition: all 0.3s ease;
+      border: 2px solid rgba(255, 255, 255, 0.3);
     }
     
     .timeout-dot.active {
-      opacity: 1;
+      background-color: #FFC107;
+      transform: scale(1.2);
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
     }
     
     .center-info {
@@ -153,14 +240,33 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 4rem;
+      font-size: 8rem;
       color: #FFC107;
-      text-shadow: 0 0 30px rgba(255, 193, 7, 0.7);
-      z-index: 10;
+      text-shadow: 0 0 50px rgba(255, 193, 7, 0.9);
+      z-index: 100;
+      font-weight: 900;
+      animation: flash 2s infinite alternate;
+    }
+    
+    @keyframes flash {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
     }
     
     .center-info.half-time {
-      font-size: 8rem;
+      font-size: 10rem;
+      color: #FF5722;
+      text-shadow: 0 0 60px rgba(255, 87, 34, 0.9);
+    }
+    
+    .score-update-animation {
+      animation: scorePulse 0.5s ease-in-out;
+    }
+    
+    @keyframes scorePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
     }
   </style>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>

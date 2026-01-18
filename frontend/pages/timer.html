@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartJFB - 计时器控制</title>
+  <title>SmartJFB - 综合计时器</title>
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/dashboard.css">
@@ -17,10 +17,10 @@
         if (!window.isAuthenticated || !window.isAuthenticated()) {
           // 如果未认证，则使用requireAuth进行重定向
           if (window.requireAuth) {
-            window.requireAuth('../auth.html');
+            window.requireAuth('../pages/auth.html');
           } else {
             // 如果requireAuth不可用，直接跳转
-            window.location.href = '../auth.html';
+            window.location.href = '../pages/auth.html';
           }
         }
       }, 100);
@@ -34,7 +34,7 @@
         <div class="header-content">
           <div class="header-left">
             <a href="../nav.html" class="btn btn-secondary">返回导航</a>
-            <h1>计时器控制面板</h1>
+            <h1>综合计时器控制</h1>
           </div>
           <div class="status-bar">
             <span id="connection-status" class="status-indicator">未连接</span>
@@ -45,7 +45,7 @@
 
       <div class="dashboard-main">
         <!-- Game Selection -->
-        <section class="panel">
+        <section class="card">
           <h2>选择比赛</h2>
           <div class="form-group">
             <label for="active-games">当前比赛:</label>
@@ -57,7 +57,7 @@
         </section>
 
         <!-- Timer Controls -->
-        <section id="timer-controls" class="panel">
+        <section id="timer-controls" class="card">
           <h2>计时器控制</h2>
           
           <div class="timer-display">
@@ -113,7 +113,7 @@
         </section>
 
         <!-- Period Control -->
-        <section id="period-control" class="panel">
+        <section id="period-control" class="card">
           <h2>节数控制</h2>
           <div class="controls">
             <button id="prev-period" class="btn btn-secondary">上一节</button>
@@ -125,7 +125,7 @@
         </section>
 
         <!-- Timeout Control -->
-        <section id="timeout-control" class="panel">
+        <section id="timeout-control" class="card">
           <h2>暂停控制</h2>
           <div class="controls">
             <div class="timeout-controls">
@@ -144,7 +144,7 @@
         </section>
 
         <!-- Fouls -->
-        <section id="foul-control" class="panel">
+        <section id="foul-control" class="card">
           <h2>犯规记录</h2>
           <div class="controls">
             <div class="foul-controls">

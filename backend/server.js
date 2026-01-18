@@ -28,21 +28,25 @@ app.use(express.urlencoded({ extended: true }));
 // Import routes
 const gameRoutes = require('./routes/game');
 const timerRoutes = require('./routes/timer');
+const advancedTimerRoutes = require('./routes/advancedTimer');
+const penaltyRoutes = require('./routes/penalties');
 const scoringRoutes = require('./routes/scoring');
 const displayRoutes = require('./routes/display');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
-const advancedTimerRoutes = require('./routes/advancedTimer');
+
 const analyticsRoutes = require('./routes/analytics');
 
 // Routes
 app.use('/api/games', gameRoutes);
 app.use('/api/timers', timerRoutes);
+app.use('/api/advanced-timers', advancedTimerRoutes);
+app.use('/api/penalties', penaltyRoutes);
 app.use('/api/scores', scoringRoutes);
 app.use('/api/displays', displayRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/advanced-timers', advancedTimerRoutes);
+
 app.use('/api/analytics', analyticsRoutes);
 
 // Basic route

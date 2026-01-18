@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 创建新比赛</title>
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <div class="header-content">
+          <div class="header-left">
+            <a href="../nav.html" class="btn btn-secondary">返回导航</a>
+            <a href="create_game.html" class="btn btn-secondary">比赛管理</a>
+            <h1>创建新比赛</h1>
+          </div>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="game-status" class="status-indicator">就绪</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <section class="card">
+          <h2>比赛信息</h2>
+          <div class="form-container">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sport-type">运动类型:</label>
+                <select id="sport-type" class="form-control">
+                  <option value="basketball">篮球</option>
+                  <option value="soccer">足球</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="game-type">比赛类型:</label>
+                <select id="game-type" class="form-control">
+                  <option value="quarter">四节制(篮球)</option>
+                  <option value="half">上下半场(足球)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="home-team-name">主队名称:</label>
+                <input type="text" id="home-team-name" class="form-control" placeholder="输入主队名称">
+              </div>
+              <div class="form-group">
+                <label for="away-team-name">客队名称:</label>
+                <input type="text" id="away-team-name" class="form-control" placeholder="输入客队名称">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button id="create-game-btn" class="btn btn-primary btn-large">创建比赛</button>
+              <button id="cancel-create" class="btn btn-secondary btn-large">取消</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>比赛配置</h2>
+          <div class="form-container">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="game-duration">比赛时长(分钟):</label>
+                <input type="number" id="game-duration" class="form-control" value="48" min="1" max="120">
+              </div>
+              <div class="form-group">
+                <label for="overtime-duration">加时时长(分钟):</label>
+                <input type="number" id="overtime-duration" class="form-control" value="5" min="0" max="20">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="home-timeouts">主队暂停次数:</label>
+                <input type="number" id="home-timeouts" class="form-control" value="3" min="0" max="10">
+              </div>
+              <div class="form-group">
+                <label for="away-timeouts">客队暂停次数:</label>
+                <input type="number" id="away-timeouts" class="form-control" value="3" min="0" max="10">
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // 检查认证状态，如果没有认证则重定向到登录页面
+    document.addEventListener('DOMContentLoaded', function() {
+      // 延迟检查认证，确保utils.js完全加载
+      setTimeout(function() {
+        if (!window.isAuthenticated || !window.isAuthenticated()) {
+          // 如果未认证，则使用requireAuth进行重定向
+          if (window.requireAuth) {
+            window.requireAuth('./auth.html');
+          } else {
+            // 如果requireAuth不可用，直接跳转
+            window.location.href = './auth.html';
+          }
+        }
+      }, 100);
+      
+      initCreateNewGamePage();
+    });
+
+    function initCreateNewGamePage() {
+      // 初始化事件处理器
+      document.getElementById('create-game-btn')?.addEventListener('click', createNewGame);
+      document.getElementById('cancel-create')?.addEventListener('click', () => {
+        window.location.href = 'create_game.html'; // 返回比赛管理页面
+      });
+
+      // 更新连接状态
+      checkConnectionStatus();
+    }
+
+    // 创建新比赛
+    async function createNewGame() {
+      const sport = document.getElementById('sport-type').value;
+      const gameType = document.getElementById('game-type').value;
+      const homeTeamName = document.getElementById('home-team-name').value.trim();
+      const awayTeamName = document.getElementById('away-team-name').value.trim();
+      const gameDuration = parseInt(document.getElementById('game-duration').value);
+      const overtimeDuration = parseInt(document.getElementById('overtime-duration').value);
+      const homeTimeouts = parseInt(document.getElementById('home-timeouts').value);
+      const awayTimeouts = parseInt(document.getElementById('away-timeouts').value);
+
+      // 验证输入
+      if (!homeTeamName || !awayTeamName) {
+        alert('请输入主队和客队名称');
+        return;
+      }
+
+      try {
+        // 构建比赛配置
+        const gameConfig = {
+          duration: gameDuration * 60, // 转换为秒
+          overtimeDuration: overtimeDuration * 60, // 转换为秒
+          timeouts: {
+            home: homeTimeouts,
+            away: awayTimeouts
+          }
+        };
+
+        // 构建团队数据
+        const teams = [
+          { name: homeTeamName, score: 0 },
+          { name: awayTeamName, score: 0 }
+        ];
+
+        // 发送创建比赛请求
+        const response = await fetch(`${API_BASE_URL}/games`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sport,
+            teams,
+            gameConfig
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          console.log('Game created:', result);
+          alert('比赛创建成功！');
+          // 重定向到比赛管理页面
+          window.location.href = 'create_game.html';
+        } else {
+          throw new Error(result.error || '创建比赛失败');
+        }
+      } catch (error) {
+        console.error('Error creating game:', error);
+        alert(`创建比赛失败: ${error.message}`);
+      }
+    }
+  </script>
+</body>
+</html>

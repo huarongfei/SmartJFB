@@ -9,6 +9,7 @@ const path = require('path');
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const GAMES_FILE = path.join(DATA_DIR, 'games.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const PENALTIES_FILE = path.join(DATA_DIR, 'penalties.json');
 
 // Ensure data directory exists
 async function ensureDataDir() {
@@ -35,7 +36,8 @@ async function ensureDataDir() {
           role: 'operator',
           created_at: new Date().toISOString()
         }
-      ]}
+      ]},
+    { path: PENALTIES_FILE, default: []}
     ];
     
     for (const file of initFiles) {
@@ -129,9 +131,11 @@ class FileDB {
 // Create instances for each entity
 const gamesDB = new FileDB(GAMES_FILE);
 const usersDB = new FileDB(USERS_FILE);
+const penaltiesDB = new FileDB(PENALTIES_FILE);
 
 module.exports = {
   games: gamesDB,
   users: usersDB,
+  penalties: penaltiesDB,
   ensureDataDir
 };

@@ -122,6 +122,7 @@
 /* 2. 卡片/面板组件 */
 .card, .panel {
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 25px;
@@ -217,6 +218,7 @@
   align-items: center;
   padding: 15px 40px;
   background: rgba(15, 23, 42, 0.95);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: white;
   box-shadow: var(--box-shadow-lg);
@@ -374,6 +376,7 @@ table.data-table tr:hover {
 /* 8. 表单容器组件 */
 .form-container {
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 25px;
@@ -438,6 +441,7 @@ input:checked + .toggle-slider:before {
 
 .stat-card {
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 20px;
@@ -504,6 +508,7 @@ input:checked + .toggle-slider:before {
   font-weight: 800;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 10px;
 }
@@ -519,6 +524,7 @@ input:checked + .toggle-slider:before {
   width: 100%;
   max-width: 500px;
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: var(--border-radius-xl);
   padding: 30px;

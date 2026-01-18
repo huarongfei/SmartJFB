@@ -16,7 +16,7 @@
         <div class="header-content">
           <div class="header-left">
             <a href="../../nav.html" class="btn btn-secondary">返回导航</a>
-            <h1>暂停/超时控制</h1>
+            <h1>暂停控制</h1>
           </div>
           <div class="status-bar">
             <span id="connection-status" class="status-indicator">未连接</span>
@@ -38,40 +38,33 @@
           </div>
         </section>
 
-        <!-- Timeout Control -->
-        <section id="timeout-control" class="card">
+        <!-- Timeout Controls -->
+        <section id="timeout-controls" class="card">
           <h2>暂停控制</h2>
           
-          <div class="timer-info">
-            <div class="info-item">
-              <span>比赛类型:</span>
-              <span id="sport-type-display">篮球</span>
+          <div class="timeout-display">
+            <div class="timeout-team">
+              <h3>主队暂停</h3>
+              <div class="timeout-count">
+                <span>剩余:</span>
+                <span id="home-timeouts">3</span>
+              </div>
+              <div class="timeout-actions">
+                <button id="use-home-timeout" class="btn btn-warning">使用暂停</button>
+                <button id="add-home-timeout" class="btn btn-success">增加暂停</button>
+                <button id="reset-home-timeouts" class="btn btn-info">重置暂停</button>
+              </div>
             </div>
-          </div>
-          
-          <div class="controls">
-            <div class="control-group">
-              <h3>暂停操作</h3>
-              <div class="timeout-controls">
-                <div class="team-timeout">
-                  <h4>主队暂停</h4>
-                  <div class="timeout-info">剩余: <span id="home-timeouts">3</span></div>
-                  <div class="timeout-buttons">
-                    <button id="use-home-timeout" class="btn btn-warning btn-lg">使用暂停</button>
-                    <button id="add-home-timeout" class="btn btn-success btn-lg">增加暂停</button>
-                    <button id="reset-home-timeouts" class="btn btn-info btn-lg">重置暂停</button>
-                  </div>
-                </div>
-                
-                <div class="team-timeout">
-                  <h4>客队暂停</h4>
-                  <div class="timeout-info">剩余: <span id="away-timeouts">3</span></div>
-                  <div class="timeout-buttons">
-                    <button id="use-away-timeout" class="btn btn-warning btn-lg">使用暂停</button>
-                    <button id="add-away-timeout" class="btn btn-success btn-lg">增加暂停</button>
-                    <button id="reset-away-timeouts" class="btn btn-info btn-lg">重置暂停</button>
-                  </div>
-                </div>
+            <div class="timeout-team">
+              <h3>客队暂停</h3>
+              <div class="timeout-count">
+                <span>剩余:</span>
+                <span id="away-timeouts">3</span>
+              </div>
+              <div class="timeout-actions">
+                <button id="use-away-timeout" class="btn btn-warning">使用暂停</button>
+                <button id="add-away-timeout" class="btn btn-success">增加暂停</button>
+                <button id="reset-away-timeouts" class="btn btn-info">重置暂停</button>
               </div>
             </div>
           </div>
@@ -85,7 +78,7 @@
   <script>
     // 检查认证状态，如果没有认证则重定向到登录页面
     document.addEventListener('DOMContentLoaded', function() {
-// 延迟检查认证，确保utils.js完全加载
+      // 延迟检查认证，确保utils.js完全加载
       setTimeout(function() {
         if (!window.isAuthenticated || !window.isAuthenticated()) {
           // 如果未认证，则使用requireAuth进行重定向

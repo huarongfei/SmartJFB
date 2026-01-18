@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartJFB - 创建比赛</title>
+  <title>SmartJFB - 比赛管理</title>
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/dashboard.css">
@@ -16,7 +16,7 @@
         <div class="header-content">
           <div class="header-left">
             <a href="../nav.html" class="btn btn-secondary">返回导航</a>
-            <h1>创建新比赛</h1>
+            <h1>比赛管理系统</h1>
           </div>
           <div class="status-bar">
             <span id="connection-status" class="status-indicator">未连接</span>
@@ -26,66 +26,85 @@
       </header>
 
       <div class="dashboard-main">
-        <section class="card">
-          <h2>比赛信息</h2>
+        <section id="active-games-section" class="card">
+          <div class="section-header">
+            <h2>当前比赛</h2>
+            <div class="management-controls">
+              <button id="refresh-games" class="btn btn-info">刷新列表</button>
+              <button id="create-new-game" class="btn btn-primary">创建新比赛</button>
+            </div>
+          </div>
           <div class="form-container">
             <div class="form-row">
               <div class="form-group">
-                <label for="sport-type">运动类型:</label>
-                <select id="sport-type" class="form-control">
+                <label for="sport-filter">运动类型:</label>
+                <select id="sport-filter" class="form-control">
+                  <option value="">全部</option>
                   <option value="basketball">篮球</option>
                   <option value="soccer">足球</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="game-type">比赛类型:</label>
-                <select id="game-type" class="form-control">
-                  <option value="quarter">四节制(篮球)</option>
-                  <option value="half">上下半场(足球)</option>
+                <label for="status-filter">比赛状态:</label>
+                <select id="status-filter" class="form-control">
+                  <option value="">全部</option>
+                  <option value="active">进行中</option>
+                  <option value="completed">已完成</option>
+                  <option value="scheduled">已安排</option>
                 </select>
               </div>
             </div>
 
             <div class="form-row">
-              <div class="form-group">
-                <label for="home-team-name">主队名称:</label>
-                <input type="text" id="home-team-name" class="form-control" placeholder="输入主队名称">
-              </div>
-              <div class="form-group">
-                <label for="away-team-name">客队名称:</label>
-                <input type="text" id="away-team-name" class="form-control" placeholder="输入客队名称">
+              <div class="form-group full-width">
+                <label for="active-games">选择比赛:</label>
+                <select id="active-games" class="form-control">
+                  <option value="">请选择比赛...</option>
+                  <!-- Options will be populated dynamically -->
+                </select>
               </div>
             </div>
 
             <div class="form-actions">
-              <button id="create-game-btn" class="btn btn-primary btn-large">创建比赛</button>
-              <button id="cancel-create" class="btn btn-secondary btn-large">取消</button>
+              <button id="view-game" class="btn btn-primary btn-large">查看比赛</button>
+              <button id="manage-game" class="btn btn-info btn-large">管理比赛</button>
+              <button id="delete-game" class="btn btn-danger btn-large">删除比赛</button>
             </div>
           </div>
         </section>
 
-        <section class="card">
-          <h2>比赛配置</h2>
+        <section id="game-details-section" class="card">
+          <h2>比赛详情</h2>
           <div class="form-container">
             <div class="form-row">
               <div class="form-group">
-                <label for="game-duration">比赛时长(分钟):</label>
-                <input type="number" id="game-duration" class="form-control" value="48" min="1" max="120">
+                <label for="game-sport">运动类型:</label>
+                <input type="text" id="game-sport" class="form-control" readonly>
               </div>
               <div class="form-group">
-                <label for="overtime-duration">加时时长(分钟):</label>
-                <input type="number" id="overtime-duration" class="form-control" value="5" min="0" max="20">
+                <label for="game-status">比赛状态:</label>
+                <input type="text" id="game-status" class="form-control" readonly>
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label for="home-timeouts">主队暂停次数:</label>
-                <input type="number" id="home-timeouts" class="form-control" value="3" min="0" max="10">
+                <label for="home-team-display">主队:</label>
+                <input type="text" id="home-team-display" class="form-control" readonly>
               </div>
               <div class="form-group">
-                <label for="away-timeouts">客队暂停次数:</label>
-                <input type="number" id="away-timeouts" class="form-control" value="3" min="0" max="10">
+                <label for="away-team-display">客队:</label>
+                <input type="text" id="away-team-display" class="form-control" readonly>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="created-at">创建时间:</label>
+                <input type="text" id="created-at" class="form-control" readonly>
+              </div>
+              <div class="form-group">
+                <label for="last-updated">最后更新:</label>
+                <input type="text" id="last-updated" class="form-control" readonly>
               </div>
             </div>
           </div>
@@ -111,81 +130,194 @@
           }
         }
       }, 100);
-      initCreateGamePage();
+      initGameManagementPage();
     });
 
-    function initCreateGamePage() {
+    async function initGameManagementPage() {
       // 初始化事件处理器
-      document.getElementById('create-game-btn')?.addEventListener('click', createNewGame);
-      document.getElementById('cancel-create')?.addEventListener('click', () => {
-        window.location.href = '../nav.html';
-      });
+      document.getElementById('create-new-game')?.addEventListener('click', showCreateGameModal);
+      document.getElementById('refresh-games')?.addEventListener('click', refreshGamesList);
+      document.getElementById('view-game')?.addEventListener('click', viewSelectedGame);
+      document.getElementById('manage-game')?.addEventListener('click', manageSelectedGame);
+      document.getElementById('delete-game')?.addEventListener('click', deleteSelectedGame);
 
       // 更新连接状态
       checkConnectionStatus();
+      
+      // 初始化游戏列表
+      await refreshGamesList();
     }
 
-    // 创建新比赛
-    async function createNewGame() {
-      const sport = document.getElementById('sport-type').value;
-      const gameType = document.getElementById('game-type').value;
-      const homeTeamName = document.getElementById('home-team-name').value.trim();
-      const awayTeamName = document.getElementById('away-team-name').value.trim();
-      const gameDuration = parseInt(document.getElementById('game-duration').value);
-      const overtimeDuration = parseInt(document.getElementById('overtime-duration').value);
-      const homeTimeouts = parseInt(document.getElementById('home-timeouts').value);
-      const awayTimeouts = parseInt(document.getElementById('away-timeouts').value);
+    // 显示创建比赛模态框
+    function showCreateGameModal() {
+      window.location.href = 'create_new_game.html';
+    }
 
-      // 验证输入
-      if (!homeTeamName || !awayTeamName) {
-        alert('请输入主队和客队名称');
+    // 查看选中比赛
+    async function viewSelectedGame() {
+      const gameId = document.getElementById('active-games').value;
+      
+      if (!gameId) {
+        alert('请选择一个比赛');
         return;
       }
+      
+      // 可以在这里打开新窗口查看比赛详情或重定向到计分页面
+      alert(`正在查看比赛: ${gameId}`);
+    }
 
+    // 管理选中比赛
+    async function manageSelectedGame() {
+      const gameId = document.getElementById('active-games').value;
+      
+      if (!gameId) {
+        alert('请选择一个比赛');
+        return;
+      }
+      
+      // 重定向到比赛管理页面
+      window.location.href = `scoring.html?gameId=${encodeURIComponent(gameId)}`;
+    }
+
+    // 删除选中比赛
+    async function deleteSelectedGame() {
+      const gameId = document.getElementById('active-games').value;
+      
+      if (!gameId) {
+        alert('请选择一个比赛');
+        return;
+      }
+      
+      if (!confirm('确定要删除这个比赛吗？此操作不可撤销。')) {
+        return;
+      }
+      
       try {
-        // 构建比赛配置
-        const gameConfig = {
-          duration: gameDuration * 60, // 转换为秒
-          overtimeDuration: overtimeDuration * 60, // 转换为秒
-          timeouts: {
-            home: homeTimeouts,
-            away: awayTimeouts
-          }
-        };
-
-        // 构建团队数据
-        const teams = [
-          { name: homeTeamName, score: 0 },
-          { name: awayTeamName, score: 0 }
-        ];
-
-        // 发送创建比赛请求
-        const response = await fetch(`${API_BASE_URL}/games`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            sport,
-            teams,
-            gameConfig
-          })
+        const response = await fetch(`${API_BASE_URL}/games/${gameId}`, {
+          method: 'DELETE'
         });
-
+        
         const result = await response.json();
-
+        
         if (response.ok) {
-          console.log('Game created:', result);
-          alert('比赛创建成功！');
-          // 重定向到导航页面
-          window.location.href = '../nav.html';
+          alert('比赛删除成功');
+          await refreshGamesList();
         } else {
-          throw new Error(result.error || '创建比赛失败');
+          throw new Error(result.error || '删除比赛失败');
         }
       } catch (error) {
-        console.error('Error creating game:', error);
-        alert(`创建比赛失败: ${error.message}`);
+        console.error('Error deleting game:', error);
+        alert(`删除比赛失败: ${error.message}`);
       }
+    }
+
+    // 刷新比赛列表
+    async function refreshGamesList() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/games`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          updateGamesList(data.games || []);
+        } else {
+          throw new Error(data.error || '刷新比赛列表失败');
+        }
+      } catch (error) {
+        console.error('Error refreshing games list:', error);
+        alert(`刷新比赛列表失败: ${error.message}`);
+      }
+    }
+
+    // 更新比赛列表
+    function updateGamesList(games) {
+      const gameSelect = document.getElementById('active-games');
+      const sportFilter = document.getElementById('sport-filter').value;
+      const statusFilter = document.getElementById('status-filter').value;
+      
+      // 清空现有选项
+      gameSelect.innerHTML = '<option value="">请选择比赛...</option>';
+      
+      // 应用过滤器并添加游戏选项
+      games
+        .filter(game => {
+          // 按运动类型过滤
+          if (sportFilter && game.sport !== sportFilter) return false;
+          // 按状态过滤
+          if (statusFilter && game.status !== statusFilter) return false;
+          return true;
+        })
+        .forEach(game => {
+          const option = document.createElement('option');
+          option.value = game.id;
+          option.textContent = `${Array.isArray(game.teams) && game.teams[0]?.name || 'Home'} vs ${Array.isArray(game.teams) && game.teams[1]?.name || 'Away'} (${game.sport})`;
+          gameSelect.appendChild(option);
+        });
+    }
+
+    // 监听游戏选择变化
+    document.getElementById('active-games')?.addEventListener('change', async function() {
+      const gameId = this.value;
+      if (gameId) {
+        await loadGameDetails(gameId);
+      }
+    });
+
+    // 监听过滤器变化
+    document.getElementById('sport-filter')?.addEventListener('change', refreshGamesList);
+    document.getElementById('status-filter')?.addEventListener('change', refreshGamesList);
+
+    // 加载游戏详情
+    async function loadGameDetails(gameId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/games/${gameId}`);
+        const game = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('game-sport').value = game.sport === 'basketball' ? '篮球' : '足球';
+          document.getElementById('game-status').value = getGameStatusText(game.status);
+          document.getElementById('home-team-display').value = Array.isArray(game.teams) && game.teams[0]?.name || 'N/A';
+          document.getElementById('away-team-display').value = Array.isArray(game.teams) && game.teams[1]?.name || 'N/A';
+          document.getElementById('created-at').value = formatDate(new Date(game.createdAt));
+          document.getElementById('last-updated').value = formatDate(new Date(game.updatedAt));
+        } else {
+          throw new Error(game.error || '加载比赛详情失败');
+        }
+      } catch (error) {
+        console.error('Error loading game details:', error);
+        alert(`加载比赛详情失败: ${error.message}`);
+      }
+    }
+
+    // 获取游戏状态文本
+    function getGameStatusText(status) {
+      const statusMap = {
+        'scheduled': '已安排',
+        'active': '进行中',
+        'completed': '已完成',
+        'paused': '已暂停'
+      };
+      return statusMap[status] || status;
+    }
+
+    // 格式化日期
+    function formatDate(date) {
+      return date.toLocaleString('zh-CN');
+    }
+
+    // 初始化页面
+    async function initGameManagementPage() {
+      // 初始化事件处理器
+      document.getElementById('create-new-game')?.addEventListener('click', showCreateGameModal);
+      document.getElementById('refresh-games')?.addEventListener('click', refreshGamesList);
+      document.getElementById('view-game')?.addEventListener('click', viewSelectedGame);
+      document.getElementById('manage-game')?.addEventListener('click', manageSelectedGame);
+      document.getElementById('delete-game')?.addEventListener('click', deleteSelectedGame);
+
+      // 更新连接状态
+      checkConnectionStatus();
+      
+      // 初始化游戏列表
+      await refreshGamesList();
     }
   </script>
 </body>

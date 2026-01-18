@@ -74,7 +74,8 @@ body {
   align-items: center;
   padding: 15px 40px;
   background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   color: white;
   box-shadow: var(--box-shadow-lg);
   position: sticky;
@@ -177,7 +178,8 @@ body {
 
 .stat-card {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 20px;
   text-align: center;
@@ -286,7 +288,8 @@ table.data-table tr:hover {
 /* 表单容器 */
 .form-container {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 25px;
   margin: 20px 0;
@@ -376,7 +379,8 @@ input:checked + .toggle-slider:before {
   width: 100%;
   max-width: 500px;
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   border-radius: var(--border-radius-xl);
   padding: 30px;
   box-shadow: var(--box-shadow-xl);
@@ -431,6 +435,7 @@ input:checked + .toggle-slider:before {
 * {
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @media (max-width: 1100px) {
@@ -677,7 +682,8 @@ input:checked + .toggle-slider:before {
   align-items: center;
   padding: 15px 40px;
   background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   color: white;
   box-shadow: var(--box-shadow-lg);
   position: sticky;
@@ -780,7 +786,8 @@ input:checked + .toggle-slider:before {
 
 .stat-card {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 20px;
   text-align: center;
@@ -889,7 +896,8 @@ table.data-table tr:hover {
 /* Form Container */
 .form-container {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 25px;
   margin: 20px 0;
@@ -979,7 +987,8 @@ input:checked + .toggle-slider:before {
   width: 100%;
   max-width: 500px;
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   border-radius: var(--border-radius-xl);
   padding: 30px;
   box-shadow: var(--box-shadow-xl);
@@ -1030,6 +1039,7 @@ input:checked + .toggle-slider:before {
 * {
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @media (max-width: 1100px) {

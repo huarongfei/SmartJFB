@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
     // Create the game in the database
     const newGame = await Game.create({
       sport,
-      name: name || `${teams[0]?.name || 'Home'} vs ${teams[1]?.name || 'Away'}`,
+      name: name || `${Array.isArray(teams) && teams[0]?.name || 'Home'} vs ${Array.isArray(teams) && teams[1]?.name || 'Away'}`,
       teams: teams.map((team, index) => ({
         name: team.name,
         type: index === 0 ? 'home' : 'away'
@@ -163,6 +163,29 @@ router.post('/:id/end', async (req, res) => {
   } catch (error) {
     console.error('Error ending game:', error);
     res.status(500).json({ error: 'Failed to end game' });
+  }
+});
+
+// Delete a game
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedGame = await Game.delete(req.params.id);
+    
+    if (!deletedGame) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Emit real-time update via socket to notify all connected clients
+    const allGames = await Game.findAll();
+    req.app.get('io').emit('gamesListUpdate', { games: allGames });
+
+    res.json({
+      message: 'Game deleted successfully',
+      game: deletedGame
+    });
+  } catch (error) {
+    console.error('Error deleting game:', error);
+    res.status(500).json({ error: 'Failed to delete game' });
   }
 });
 

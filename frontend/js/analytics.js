@@ -149,9 +149,10 @@ async function refreshGamesList() {
     const result = await response.json();
     
     if (response.ok) {
-      updateGamesList(result.games || {});
+      updateGamesList(result.games || []);
     } else {
-      throw new Error(result.error || 'Failed to refresh games list');
+      console.error('Failed to refresh games list:', result.error);
+      updateGamesList([]);
     }
   } catch (error) {
     console.error('Error refreshing games list:', error);

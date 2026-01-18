@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB - 判罚管理</title>
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <div class="header-content">
+          <div class="header-left">
+            <a href="../nav.html" class="btn btn-secondary">返回导航</a>
+            <h1>判罚管理系统</h1>
+          </div>
+          <div class="status-bar">
+            <span id="connection-status" class="status-indicator">未连接</span>
+            <span id="penalty-status" class="status-indicator">就绪</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-main">
+        <!-- Active Game Selection -->
+        <section id="game-selection" class="card">
+          <h2>选择比赛</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="active-games">当前比赛:</label>
+              <select id="active-games">
+                <option value="">请选择比赛...</option>
+                <!-- Options will be populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="team-select">选择球队:</label>
+              <select id="team-select">
+                <option value="home">主队</option>
+                <option value="away">客队</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Penalty Form -->
+        <section id="penalty-form-section" class="card">
+          <h2>记录判罚</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="player-number">球员号码:</label>
+              <input type="number" id="player-number" placeholder="输入球员号码" min="0" max="99">
+            </div>
+            <div class="form-group">
+              <label for="penalty-type">判罚类型:</label>
+              <select id="penalty-type">
+                <option value="">选择判罚类型</option>
+                <option value="foul-personal">个人犯规</option>
+                <option value="foul-technical">技术犯规</option>
+                <option value="foul-flagrant">恶意犯规</option>
+                <option value="violation">违例</option>
+                <option value="ejection">驱逐出场</option>
+                <option value="warning">警告</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="penalty-time">比赛时间:</label>
+              <input type="text" id="penalty-time" placeholder="MM:SS" value="" readonly>
+            </div>
+            <div class="form-group">
+              <label for="referee">裁判:</label>
+              <input type="text" id="referee" placeholder="裁判姓名">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="penalty-notes">备注:</label>
+              <textarea id="penalty-notes" placeholder="描述判罚详情..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button id="record-penalty" class="btn btn-danger">记录判罚</button>
+            <button id="reset-form" class="btn btn-secondary">重置</button>
+          </div>
+        </section>
+
+        <!-- Penalties List -->
+        <section id="penalties-list" class="card">
+          <div class="section-header">
+            <h2>判罚记录</h2>
+            <div class="management-controls">
+              <button id="refresh-penalties" class="btn btn-info">刷新记录</button>
+              <button id="export-penalties" class="btn btn-primary">导出记录</button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>球队</th>
+                  <th>球员</th>
+                  <th>类型</th>
+                  <th>描述</th>
+                  <th>裁判</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="penalties-table-body">
+                <!-- Penalty records will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Team Statistics -->
+        <section id="team-stats" class="card">
+          <h2>球队犯规统计</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>主队犯规数</h3>
+              <div class="stat-value large" id="home-fouls">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>客队犯规数</h3>
+              <div class="stat-value large" id="away-fouls">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>总判罚数</h3>
+              <div class="stat-value large" id="total-penalties">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>当前节次</h3>
+              <div class="stat-value large" id="current-period">1</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // 检查认证状态，如果没有认证则重定向到登录页面
+    document.addEventListener('DOMContentLoaded', function() {
+      // 延迟检查认证，确保utils.js完全加载
+      setTimeout(function() {
+        if (!window.isAuthenticated || !window.isAuthenticated()) {
+          // 如果未认证，则使用requireAuth进行重定向
+          if (window.requireAuth) {
+            window.requireAuth('../pages/auth.html');
+          } else {
+            // 如果requireAuth不可用，直接跳转
+            window.location.href = '../pages/auth.html';
+          }
+        }
+      }, 100);
+    });
+  </script>
+  <script src="../js/penalty_management.js"></script>
+</body>
+</html>

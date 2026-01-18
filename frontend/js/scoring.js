@@ -49,22 +49,114 @@ function initScoringEventHandlers() {
 // Load score for selected game
 async function loadGameScore() {
   const gameId = document.getElementById('active-games').value;
-  
+
   if (!gameId) return;
-  
+
   try {
-    const response = await fetch(`${API_BASE_URL}/scores/${gameId}`);
-    const result = await response.json();
+    // Load the game details to get team names
+    const gameResponse = await fetch(`${API_BASE_URL}/games/${gameId}`);
+    const gameResult = await gameResponse.json();
     
-    if (response.ok) {
-      updateScoreDisplay(result.scores);
+    if (gameResponse.ok) {
+      // Update team names
+      if (Array.isArray(gameResult.game.teams) && gameResult.game.teams.length >= 2) {
+        document.getElementById('home-team-name').textContent = gameResult.game.teams[0].name;
+        document.getElementById('away-team-name').textContent = gameResult.game.teams[1].name;
+      }
+      
       gameState.currentGameId = gameId;
     } else {
-      throw new Error(result.error || 'Failed to load score data');
+      throw new Error(gameResult.error || 'Failed to load game data');
     }
+    
+    // Load the score data
+    const scoreResponse = await fetch(`${API_BASE_URL}/scores/${gameId}`);
+    const scoreResult = await scoreResponse.json();
+    
+    if (scoreResponse.ok) {
+      updateScoreDisplay(scoreResult.scores);
+    } else {
+      console.warn('No score data found for this game, using default values');
+      // Initialize with default scores if none exist yet
+      const defaultScores = {};
+      if (Array.isArray(gameResult.game.teams) && gameResult.game.teams.length >= 2) {
+        defaultScores[gameResult.game.teams[0].name] = 0;
+        defaultScores[gameResult.game.teams[1].name] = 0;
+      }
+      updateScoreDisplay(defaultScores);
+    }
+    
+    // Load recent events for this game
+    loadGameEvents(gameId);
   } catch (error) {
     console.error('Error loading game score:', error);
     alert(`加载计分数据失败: ${error.message}`);
+  }
+}
+
+// Load recent events for the game
+async function loadGameEvents(gameId) {
+  try {
+    // Fetch events from the server
+    const eventsResponse = await fetch(`${API_BASE_URL}/scores/${gameId}/events`);
+    const eventsResult = await eventsResponse.json();
+    
+    const eventsContainer = document.getElementById('events-list');
+    if (eventsContainer) {
+      eventsContainer.innerHTML = ''; // Clear existing events
+      
+      if (eventsResponse.ok && eventsResult.events && eventsResult.events.length > 0) {
+        // Sort events by timestamp (most recent first)
+        const sortedEvents = eventsResult.events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        // Add events to the timeline
+        sortedEvents.forEach(event => {
+          const eventElement = document.createElement('div');
+          eventElement.className = 'event-item';
+          
+          const timeString = new Date(event.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
+          let eventTypeDisplay = event.eventType || 'Event';
+          if (event.eventType === 'foul') eventTypeDisplay = '犯规';
+          else if (event.eventType === 'timeout') eventTypeDisplay = '暂停';
+          else if (event.eventType === 'substitution') eventTypeDisplay = '换人';
+          else if (event.points) eventTypeDisplay = `${event.points}分`;
+          
+          eventElement.innerHTML = `
+            <div class="event-content">
+              <div class="event-header">
+                <span class="event-time">${timeString}</span>
+                <span class="event-team ${event.team.toLowerCase()}">${event.team}</span>
+              </div>
+              <div class="event-details">
+                <span class="event-desc">${eventTypeDisplay}</span>
+                <span class="event-player">${event.player || ''}</span>
+              </div>
+            </div>
+          `;
+          
+          eventsContainer.appendChild(eventElement);
+        });
+      } else {
+        // Show message if no events
+        const noEventsElement = document.createElement('div');
+        noEventsElement.className = 'event-item';
+        noEventsElement.innerHTML = `
+          <div class="event-content">
+            <div class="event-header">
+              <span class="event-time">--:--</span>
+              <span class="event-team">系统</span>
+            </div>
+            <div class="event-details">
+              <span class="event-desc">暂无事件记录</span>
+            </div>
+          </div>
+        `;
+        eventsContainer.appendChild(noEventsElement);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading game events:', error);
   }
 }
 
@@ -75,10 +167,11 @@ async function refreshGamesList() {
     const games = await fetch(`${API_BASE_URL}/games`);
     const data = await games.json();
     
-    if (response.ok) {
+    if (games.ok) {
       updateGamesList(data.games || []);
     } else {
-      throw new Error(data.error || 'Failed to refresh games list');
+      console.error('Failed to refresh games list:', data.error);
+      updateGamesList([]);
     }
   } catch (error) {
     console.error('Error refreshing games list:', error);
@@ -96,7 +189,7 @@ function updateGamesList(games) {
     for (const game of games) {
       const option = document.createElement('option');
       option.value = game.id;
-      option.textContent = `${game.name || `${game.teams?.[0]?.name || 'Home'} vs ${game.teams?.[1]?.name || 'Away'}`} - ${game.sport}`;
+      option.textContent = `${game.name || `${Array.isArray(game.teams) && game.teams[0]?.name || 'Home'} vs ${Array.isArray(game.teams) && game.teams[1]?.name || 'Away'}`} - ${game.sport}`;
       gamesSelect.appendChild(option);
     }
   }
@@ -436,24 +529,30 @@ function updateTimeoutsDisplay(teamType) {
 function addEventToTimeline(event) {
   const eventsContainer = document.getElementById('events-list');
   if (!eventsContainer) return;
-  
+
   const eventElement = document.createElement('div');
   eventElement.className = 'event-item';
-  
+
   const timeString = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-  
+
   eventElement.innerHTML = `
-    <span class="event-time">${timeString}</span>
-    <span class="event-team ${event.team.toLowerCase()}">${event.team}</span>
-    <span class="event-desc">${event.eventType || 'Score'}</span>
-    <span class="event-player">${event.player || ''}</span>
+    <div class="event-content">
+      <div class="event-header">
+        <span class="event-time">${timeString}</span>
+        <span class="event-team ${event.team.toLowerCase()}">${event.team}</span>
+      </div>
+      <div class="event-details">
+        <span class="event-desc">${event.description || event.eventType || 'Event'}</span>
+        <span class="event-player">${event.player || ''}</span>
+      </div>
+    </div>
   `;
-  
+
   // Add to the top of the list
   eventsContainer.insertBefore(eventElement, eventsContainer.firstChild);
-  
-  // Limit to 10 events
-  if (eventsContainer.children.length > 10) {
+
+  // Limit to 20 events
+  if (eventsContainer.children.length > 20) {
     eventsContainer.removeChild(eventsContainer.lastChild);
   }
 }

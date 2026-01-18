@@ -240,8 +240,8 @@ function renderGamesTable(games) {
     row.innerHTML = `
       <td>${game.id || 'N/A'}</td>
       <td>${game.sport || 'N/A'}</td>
-      <td>${game.teams && game.teams[0] ? game.teams[0].name : 'N/A'}</td>
-      <td>${game.teams && game.teams[1] ? game.teams[1].name : 'N/A'}</td>
+      <td>${game.teams && Array.isArray(game.teams) && game.teams[0] ? game.teams[0].name : 'N/A'}</td>
+      <td>${game.teams && Array.isArray(game.teams) && game.teams[1] ? game.teams[1].name : 'N/A'}</td>
       <td>${game.score ? `${game.score.home}-${game.score.away}` : 'N/A'}</td>
       <td>${game.createdAt ? new Date(game.createdAt).toLocaleString() : 'N/A'}</td>
       <td>

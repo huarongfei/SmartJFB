@@ -503,7 +503,7 @@ function updateActiveGamesDropdown(games) {
     games.forEach(game => {
       const option = document.createElement('option');
       option.value = game.id;
-      option.textContent = `${game.teams[0]?.name || 'Home'} vs ${game.teams[1]?.name || 'Away'} (${game.sport})`;
+      option.textContent = `${Array.isArray(game.teams) && game.teams[0]?.name || 'Home'} vs ${Array.isArray(game.teams) && game.teams[1]?.name || 'Away'} (${game.sport})`;
       dropdown.appendChild(option);
     });
   } else {

@@ -32,6 +32,7 @@
       font-weight: 800;
       background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       margin: 0;
     }
@@ -42,6 +43,7 @@
       gap: 15px;
       padding: 15px 20px;
       background: rgba(255, 255, 255, 0.85);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border-radius: var(--border-radius-lg);
       box-shadow: var(--box-shadow);
@@ -56,6 +58,7 @@
     
     .nav-category {
       background: rgba(255, 255, 255, 0.85);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border-radius: var(--border-radius-xl);
       padding: 25px;
@@ -177,11 +180,13 @@
         <h2><span>⚙️</span> 控制面板</h2>
         <ul class="nav-links">
           <li><a href="./index.html"><i>🏠</i>主控制台</a></li>
-          <li><a href="./pages/create_game.html"><i>🆕</i>创建比赛</a></li>
+          <li><a href="./pages/create_game.html"><i>🎮</i>比赛管理</a></li>
           <li><a href="./pages/auth.html"><i>👤</i>用户认证</a></li>
           <li><a href="./pages/admin.html" id="admin-nav-link"><i>🔧</i>系统管理</a></li>
         </ul>
       </div>
+      
+
       
       <!-- 计时功能 -->
       <div class="nav-category">
@@ -216,6 +221,14 @@
         <h2><span>📺</span> 显示功能</h2>
         <ul class="nav-links">
           <li><a href="./pages/bigscreen_standalone.html" target="_blank"><i>🖥️</i>大屏显示</a></li>
+        </ul>
+      </div>
+      
+      <!-- 判罚管理 -->
+      <div class="nav-category">
+        <h2><span>⚖️</span> 判罚管理</h2>
+        <ul class="nav-links">
+          <li><a href="./pages/penalty_management.html"><i>🚫</i>判罚管理系统</a></li>
         </ul>
       </div>
     </div>

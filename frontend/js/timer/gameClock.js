@@ -1,16 +1,43 @@
 // Game Clock specific functionality
 
 // Using utilities from utils.js
-
-document.addEventListener('DOMContentLoaded', function() {
-  initGameClockPage();
+document.addEventListener('DOMContentLoaded', async function() {
+  await initGameClockPage();
 });
 
-function initGameClockPage() {
+async function initGameClockPage() {
   // Initialize game clock specific functionality
   initializeGameClockElements();
   initializeGameClockEventListeners();
+  await initializeGameSelection();
   connectToGameClockUpdates();
+}
+
+// Initialize game selection dropdown
+async function initializeGameSelection() {
+  try {
+    // Load games into the dropdown
+    await window.refreshGamesList();
+    
+    // Add event listener for game selection
+    document.getElementById('active-games').addEventListener('change', function() {
+      const gameId = this.value;
+      if (gameId) {
+        console.log('Selected game:', gameId);
+        // Here we would typically join the game room
+        if (window.socket) {
+          window.socket.emit('join-game', gameId);
+        }
+      }
+    });
+    
+    // Add event listener for refresh button
+    document.getElementById('refresh-games')?.addEventListener('click', async function() {
+      await window.refreshGamesList();
+    });
+  } catch (error) {
+    console.error('Error initializing game selection:', error);
+  }
 }
 
 function initializeGameClockElements() {
@@ -20,29 +47,29 @@ function initializeGameClockElements() {
 
 function initializeGameClockEventListeners() {
   // Game clock specific event listeners
-  document.getElementById('start-game-timer').addEventListener('click', startGameTimer);
-  document.getElementById('pause-game-timer').addEventListener('click', pauseGameTimer);
-  document.getElementById('stop-game-timer').addEventListener('click', stopGameTimer);
-  document.getElementById('reset-game-timer').addEventListener('click', resetGameTimer);
-  document.getElementById('set-game-clock').addEventListener('click', setGameClockTime);
+  document.getElementById('start-game-timer')?.addEventListener('click', startGameTimer);
+  document.getElementById('pause-game-timer')?.addEventListener('click', pauseGameTimer);
+  document.getElementById('stop-game-timer')?.addEventListener('click', stopGameTimer);
+  document.getElementById('reset-game-timer')?.addEventListener('click', resetGameTimer);
+  document.getElementById('set-game-clock')?.addEventListener('click', setGameClockTime);
 }
 
 function connectToGameClockUpdates() {
   // Connect to socket for game clock updates
   if (window.io) {
-    const socket = io('http://localhost:3001');
+    window.socket = io('http://localhost:3000');
     
-    socket.on('connect', function() {
+    window.socket.on('connect', function() {
       console.log('Connected to game clock updates');
       updateConnectionStatus('connected', '已连接');
     });
     
-    socket.on('disconnect', function() {
+    window.socket.on('disconnect', function() {
       updateConnectionStatus('disconnected', '未连接');
     });
     
     // Listen for game clock updates
-    socket.on('timerUpdate', function(data) {
+    window.socket.on('timerUpdate', function(data) {
       if (data.timer && data.timer.gameClock) {
         updateGameClockDisplay(data.timer.gameClock.time);
       }
@@ -50,49 +77,84 @@ function connectToGameClockUpdates() {
   }
 }
 
-function startGameTimer() {
-  console.log('Starting game timer');
+async function startGameTimer() {
+  const gameId = document.getElementById('active-games').value;
+  
+  if (!gameId) {
+    alert('请先选择比赛');
+    return;
+  }
+  
+  console.log('Starting game timer for game:', gameId);
   // Send command to backend to start game timer
-  if (window.io) {
-    const socket = io('http://localhost:3001');
-    socket.emit('control-timer', { type: 'gameClock', action: 'start' });
+  if (window.socket) {
+    window.socket.emit('control-timer', { type: 'gameClock', action: 'start', gameId });
   }
 }
 
-function pauseGameTimer() {
-  console.log('Pausing game timer');
+async function pauseGameTimer() {
+  const gameId = document.getElementById('active-games').value;
+  
+  if (!gameId) {
+    alert('请先选择比赛');
+    return;
+  }
+  
+  console.log('Pausing game timer for game:', gameId);
   // Send command to backend to pause game timer
-  if (window.io) {
-    const socket = io('http://localhost:3001');
-    socket.emit('control-timer', { type: 'gameClock', action: 'pause' });
+  if (window.socket) {
+    window.socket.emit('control-timer', { type: 'gameClock', action: 'pause', gameId });
   }
 }
 
-function stopGameTimer() {
-  console.log('Stopping game timer');
+async function stopGameTimer() {
+  const gameId = document.getElementById('active-games').value;
+  
+  if (!gameId) {
+    alert('请先选择比赛');
+    return;
+  }
+  
+  console.log('Stopping game timer for game:', gameId);
   // Send command to backend to stop game timer
-  if (window.io) {
-    const socket = io('http://localhost:3001');
-    socket.emit('control-timer', { type: 'gameClock', action: 'stop' });
+  if (window.socket) {
+    window.socket.emit('control-timer', { type: 'gameClock', action: 'stop', gameId });
   }
 }
 
-function resetGameTimer() {
-  console.log('Resetting game timer');
+async function resetGameTimer() {
+  const gameId = document.getElementById('active-games').value;
+  
+  if (!gameId) {
+    alert('请先选择比赛');
+    return;
+  }
+  
+  console.log('Resetting game timer for game:', gameId);
   // Send command to backend to reset game timer
-  if (window.io) {
-    const socket = io('http://localhost:3001');
-    socket.emit('control-timer', { type: 'gameClock', action: 'reset' });
+  if (window.socket) {
+    window.socket.emit('control-timer', { type: 'gameClock', action: 'reset', gameId });
   }
 }
 
-function setGameClockTime() {
+async function setGameClockTime() {
+  const gameId = document.getElementById('active-games').value;
   const timeInput = document.getElementById('game-clock-input').value;
-  console.log('Setting game clock time to:', timeInput);
+  
+  if (!gameId) {
+    alert('请先选择比赛');
+    return;
+  }
+  
+  if (!timeInput) {
+    alert('请输入时间 (格式: MM:SS)');
+    return;
+  }
+  
+  console.log('Setting game clock time to:', timeInput, 'for game:', gameId);
   // Send command to backend to set game clock time
-  if (window.io) {
-    const socket = io('http://localhost:3001');
-    socket.emit('control-timer', { type: 'gameClock', action: 'setTime', value: timeInput });
+  if (window.socket) {
+    window.socket.emit('control-timer', { type: 'gameClock', action: 'setTime', value: timeInput, gameId });
   }
 }
 

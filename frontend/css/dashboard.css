@@ -21,6 +21,7 @@
 .sidebar {
   width: 300px;
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: var(--border-radius-lg);
   padding: 25px;
@@ -90,6 +91,7 @@
   margin: 25px 0;
   padding: 30px;
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: var(--border-radius-xl);
   box-shadow: var(--box-shadow-lg);
@@ -140,6 +142,7 @@
   text-align: center;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   padding: 10px 0;
   border-radius: var(--border-radius);
@@ -167,6 +170,7 @@
   font-weight: 800;
   color: var(--primary-color);
   background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 25px 40px;
   border-radius: var(--border-radius-xl);
