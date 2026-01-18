@@ -1,4 +1,7 @@
 // Game Clock specific functionality
+
+// Using utilities from utils.js
+
 document.addEventListener('DOMContentLoaded', function() {
   initGameClockPage();
 });

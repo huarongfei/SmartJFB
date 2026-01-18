@@ -2,248 +2,238 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 require('dotenv').config();
-
-// Mock user database
-let users = [
-  {
-    id: 1,
-    username: 'admin',
-    email: 'admin@smartjfb.com',
-    password: '$2a$10$9c6UvYTyCXfEMvt5fXo9kedBg3C7Q/Z0yqCQZbgYvSdxR8sKFoN2O', // 'password123' hashed
-    role: 'admin',
-    createdAt: new Date()
-  },
-  {
-    id: 2,
-    username: 'operator',
-    email: 'operator@smartjfb.com',
-    password: '$2a$10$9c6UvYTyCXfEMvt5fXo9kedBg3C7Q/Z0yqCQZbgYvSdxR8sKFoN2O', // 'password123' hashed
-    role: 'operator',
-    createdAt: new Date()
-  }
-];
 
 // Login
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required' });
-  }
-
-  // Find user
-  const user = users.find(u => u.username === username || u.email === username);
-  
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  // Check password
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  
-  if (!isPasswordValid) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  // Generate JWT token
-  const token = jwt.sign(
-    { id: user.id, username: user.username, role: user.role },
-    process.env.JWT_SECRET || 'smartjfb_secret_key',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-  );
-
-  res.json({
-    message: 'Login successful',
-    token,
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
     }
-  });
+
+    // Find user
+    const user = await User.findByCredentials(username);
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Check password
+    const isPasswordValid = await User.comparePassword(password, user.password_hash);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET || 'smartjfb_secret_key',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    res.json({
+      message: 'Login successful',
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Register new user
 router.post('/register', async (req, res) => {
-  const { username, email, password, role } = req.body;
+  try {
+    const { username, email, password, role } = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: 'Username, email, and password are required' });
-  }
-
-  // Check if user already exists
-  const existingUser = users.find(u => u.username === username || u.email === email);
-  
-  if (existingUser) {
-    return res.status(409).json({ error: 'User already exists' });
-  }
-
-  // Hash password
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  // Create new user
-  const newUser = {
-    id: users.length + 1,
-    username,
-    email,
-    password: hashedPassword,
-    role: role || 'operator', // Default role is operator
-    createdAt: new Date()
-  };
-
-  users.push(newUser);
-
-  // Generate JWT token
-  const token = jwt.sign(
-    { id: newUser.id, username: newUser.username, role: newUser.role },
-    process.env.JWT_SECRET || 'smartjfb_secret_key',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-  );
-
-  res.status(201).json({
-    message: 'User registered successfully',
-    token,
-    user: {
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-      role: newUser.role
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Username, email, and password are required' });
     }
-  });
+
+    // Check if user already exists
+    const existingUser = await User.findByCredentials(username);
+    if (existingUser) {
+      // Check if it's the same user by username or email
+      if (existingUser.username === username || existingUser.email === email) {
+        return res.status(409).json({ error: 'User already exists' });
+      }
+    }
+
+    // Create new user
+    const newUser = await User.create({
+      username,
+      email,
+      password, // User model will handle hashing
+      role: role || 'operator' // Default role is operator
+    });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: newUser.id, username: newUser.username, role: newUser.role },
+      process.env.JWT_SECRET || 'smartjfb_secret_key',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      token,
+      user: {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role
+      }
+    });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ error: 'Failed to register user' });
+  }
 });
 
 // Change password
 router.put('/change-password', async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  const userId = req.headers['user-id']; // In real app, this would come from JWT middleware
+  try {
+    const { currentPassword, newPassword } = req.body;
+    // In real app, userId would come from JWT middleware
+    const userId = req.headers['user-id'] || (req.user && req.user.id);
 
-  if (!userId || !currentPassword || !newPassword) {
-    return res.status(400).json({ error: 'User ID, current password, and new password are required' });
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'User ID, current password, and new password are required' });
+    }
+
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check current password
+    const isCurrentPasswordValid = await User.comparePassword(currentPassword, user.password_hash);
+    
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash new password and update user
+    const updateUser = await User.update(userId, { password: newPassword });
+
+    res.json({
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Failed to change password' });
   }
-
-  const user = users.find(u => u.id == userId);
-  
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  // Check current password
-  const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-  
-  if (!isCurrentPasswordValid) {
-    return res.status(401).json({ error: 'Current password is incorrect' });
-  }
-
-  // Hash new password
-  const saltRounds = 10;
-  const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-
-  // Update password
-  user.password = hashedNewPassword;
-
-  res.json({
-    message: 'Password changed successfully'
-  });
 });
 
 // Forgot password
-router.post('/forgot-password', (req, res) => {
-  const { email } = req.body;
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
 
-  const user = users.find(u => u.email === email);
-  
-  if (!user) {
-    // For security, we don't reveal if email exists
-    return res.json({
+    const user = await User.findByCredentials(email);
+    
+    if (!user) {
+      // For security, we don't reveal if email exists
+      return res.json({
+        message: 'If an account with that email exists, a password reset link has been sent'
+      });
+    }
+
+    // In a real implementation, we would send a password reset email
+    // For now, we'll just return a success message
+    console.log(`Password reset requested for ${email}. In a real app, an email would be sent.`);
+
+    res.json({
       message: 'If an account with that email exists, a password reset link has been sent'
     });
+  } catch (error) {
+    console.error('Error with forgot password:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  // In a real implementation, we would send a password reset email
-  // For now, we'll just return a success message
-  console.log(`Password reset requested for ${email}. In a real app, an email would be sent.`);
-
-  res.json({
-    message: 'If an account with that email exists, a password reset link has been sent'
-  });
 });
 
 // Get user profile
-router.get('/profile', (req, res) => {
-  const userId = req.headers['user-id']; // In real app, this would come from JWT middleware
+router.get('/profile', async (req, res) => {
+  try {
+    // In real app, userId would come from JWT middleware
+    const userId = req.headers['user-id'] || (req.user && req.user.id);
 
-  if (!userId) {
-    return res.status(401).json({ error: 'User ID is required' });
-  }
-
-  const user = users.find(u => u.id == userId);
-  
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  res.json({
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID is required' });
     }
-  });
+
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        createdAt: user.created_at
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Update user profile
-router.put('/profile', (req, res) => {
-  const userId = req.headers['user-id']; // In real app, this would come from JWT middleware
-  const { email, username } = req.body;
+router.put('/profile', async (req, res) => {
+  try {
+    // In real app, userId would come from JWT middleware
+    const userId = req.headers['user-id'] || (req.user && req.user.id);
+    const { email, username } = req.body;
 
-  if (!userId) {
-    return res.status(401).json({ error: 'User ID is required' });
-  }
-
-  const user = users.find(u => u.id == userId);
-  
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  // Update fields if provided
-  if (email) {
-    // Check if email is already taken by another user
-    const existingUser = users.find(u => u.email === email && u.id != userId);
-    if (existingUser) {
-      return res.status(409).json({ error: 'Email is already in use' });
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID is required' });
     }
-    user.email = email;
-  }
 
-  if (username) {
-    // Check if username is already taken by another user
-    const existingUser = users.find(u => u.username === username && u.id != userId);
-    if (existingUser) {
-      return res.status(409).json({ error: 'Username is already in use' });
-    }
-    user.username = username;
-  }
+    // Prepare update data
+    const updateData = {};
+    if (email) updateData.email = email;
+    if (username) updateData.username = username;
 
-  res.json({
-    message: 'Profile updated successfully',
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt
+    const updatedUser = await User.update(userId, updateData);
+    
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
     }
-  });
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        createdAt: updatedUser.created_at
+      }
+    });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Middleware to verify JWT token (would be used in other routes)

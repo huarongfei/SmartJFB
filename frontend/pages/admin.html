@@ -4,16 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartJFB - 管理面板</title>
-  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+      <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/dashboard.css">
-  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 </head>
 <body>
   <div id="app">
     <div class="dashboard">
       <header class="dashboard-header">
         <div class="header-content">
-          <h1>系统管理面板</h1>
+          <div class="header-left">
+            <a href="../nav.html" class="btn btn-secondary">返回导航</a>
+            <h1>系统管理面板</h1>
+          </div>
           <div class="status-bar">
             <span id="connection-status" class="status-indicator">未连接</span>
             <span id="admin-status" class="status-indicator">就绪</span>
@@ -264,13 +268,23 @@
     </div>
   </div>
 
+  <script src="../js/utils.js"></script>
   <script src="../js/main.js"></script>
   <script>
     // 检查认证状态，如果没有认证则重定向到登录页面
     document.addEventListener('DOMContentLoaded', function() {
-      if (!requireAuth('./auth.html')) {
-        return; // requireAuth 函数会处理重定向
-      }
+// 延迟检查认证，确保utils.js完全加载
+      setTimeout(function() {
+        if (!window.isAuthenticated || !window.isAuthenticated()) {
+          // 如果未认证，则使用requireAuth进行重定向
+          if (window.requireAuth) {
+            window.requireAuth('./auth.html');
+          } else {
+            // 如果requireAuth不可用，直接跳转
+            window.location.href = './auth.html';
+          }
+        }
+      }, 100);
     });
   </script>
   <script src="../js/admin.js"></script>

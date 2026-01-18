@@ -1,151 +1,169 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-
-// Mock data storage (in production, use database)
-let games = {};
+const Game = require('../models/Game');
+const Timer = require('../models/Timer');
 
 // Create a new game
-router.post('/', (req, res) => {
-  const { sport, teams, gameConfig } = req.body;
-  
-  if (!sport || !teams) {
-    return res.status(400).json({ error: 'Sport and teams are required' });
-  }
-
-  const gameId = uuidv4();
-  const newGame = {
-    id: gameId,
-    sport,
-    teams,
-    gameConfig: gameConfig || {},
-    status: 'setup', // setup, running, paused, finished
-    createdAt: new Date(),
-    currentPeriod: 1,
-    score: {
-      [teams[0].name]: 0,
-      [teams[1].name]: 0
-    },
-    timers: {
-      gameClock: { time: sport === 'basketball' ? 720 : 2700, isRunning: false }, // Basketball: 12 min, Soccer: 45 min
-      shotClock: { time: 24, isRunning: false }, // Basketball specific
-      timeouts: {
-        [teams[0].name]: 3, // Starting timeouts
-        [teams[1].name]: 3
-      }
+router.post('/', async (req, res) => {
+  try {
+    const { sport, name, teams, gameConfig } = req.body;
+    
+    if (!sport || !teams) {
+      return res.status(400).json({ error: 'Sport and teams are required' });
     }
-  };
 
-  games[gameId] = newGame;
+    // Create the game in the database
+    const newGame = await Game.create({
+      sport,
+      name: name || `${teams[0]?.name || 'Home'} vs ${teams[1]?.name || 'Away'}`,
+      teams: teams.map((team, index) => ({
+        name: team.name,
+        type: index === 0 ? 'home' : 'away'
+      })),
+      config: gameConfig || {}
+    });
 
-  res.status(201).json({
-    message: 'Game created successfully',
-    game: newGame
-  });
+    // Emit real-time update via socket to notify all connected clients
+    req.app.get('io').emit('gameCreated', newGame);
+    
+    // Also broadcast updated games list
+    const allGames = await Game.findAll();
+    req.app.get('io').emit('gamesListUpdate', { games: allGames });
+
+    res.status(201).json({
+      message: 'Game created successfully',
+      game: newGame
+    });
+  } catch (error) {
+    console.error('Error creating game:', error);
+    res.status(500).json({ error: 'Failed to create game' });
+  }
 });
 
 // Get all games
-router.get('/', (req, res) => {
-  res.json({
-    games: Object.values(games)
-  });
+router.get('/', async (req, res) => {
+  try {
+    const games = await Game.findAll();
+    res.json({ games });
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    res.status(500).json({ error: 'Failed to fetch games' });
+  }
 });
 
 // Get a specific game
-router.get('/:id', (req, res) => {
-  const game = games[req.params.id];
-  
-  if (!game) {
-    return res.status(404).json({ error: 'Game not found' });
-  }
+router.get('/:id', async (req, res) => {
+  try {
+    const game = await Game.findById(req.params.id);
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
 
-  res.json({
-    game
-  });
+    res.json({ game });
+  } catch (error) {
+    console.error('Error fetching game:', error);
+    res.status(500).json({ error: 'Failed to fetch game' });
+  }
 });
 
 // Update game status
-router.patch('/:id/status', (req, res) => {
-  const game = games[req.params.id];
-  
-  if (!game) {
-    return res.status(404).json({ error: 'Game not found' });
+router.patch('/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    const game = await Game.updateStatus(req.params.id, status);
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Emit real-time update via socket
+    req.app.get('io').to(req.params.id).emit('gameUpdate', game);
+
+    res.json({
+      message: 'Game status updated',
+      game
+    });
+  } catch (error) {
+    console.error('Error updating game status:', error);
+    res.status(500).json({ error: 'Failed to update game status' });
   }
-
-  const { status } = req.body;
-  game.status = status;
-  game.updatedAt = new Date();
-
-  // Emit real-time update via socket
-  req.app.get('io').to(req.params.id).emit('gameUpdate', game);
-
-  res.json({
-    message: 'Game status updated',
-    game
-  });
 });
 
 // Start/Resume game
-router.post('/:id/start', (req, res) => {
-  const game = games[req.params.id];
-  
-  if (!game) {
-    return res.status(404).json({ error: 'Game not found' });
+router.post('/:id/start', async (req, res) => {
+  try {
+    const game = await Game.updateStatus(req.params.id, 'running');
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Update timer status
+    const updatedTimer = await Timer.updateStatus(req.params.id, true, false);
+
+    // Emit real-time update via socket
+    req.app.get('io').to(req.params.id).emit('gameUpdate', { ...game, timer: updatedTimer });
+
+    res.json({
+      message: 'Game started',
+      game: { ...game, timer: updatedTimer }
+    });
+  } catch (error) {
+    console.error('Error starting game:', error);
+    res.status(500).json({ error: 'Failed to start game' });
   }
-
-  game.status = 'running';
-  game.timers.gameClock.isRunning = true;
-  game.updatedAt = new Date();
-
-  // Emit real-time update via socket
-  req.app.get('io').to(req.params.id).emit('gameUpdate', game);
-
-  res.json({
-    message: 'Game started',
-    game
-  });
 });
 
 // Pause game
-router.post('/:id/pause', (req, res) => {
-  const game = games[req.params.id];
-  
-  if (!game) {
-    return res.status(404).json({ error: 'Game not found' });
+router.post('/:id/pause', async (req, res) => {
+  try {
+    const game = await Game.updateStatus(req.params.id, 'paused');
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Update timer status
+    const updatedTimer = await Timer.updateStatus(req.params.id, false, false);
+
+    // Emit real-time update via socket
+    req.app.get('io').to(req.params.id).emit('gameUpdate', { ...game, timer: updatedTimer });
+
+    res.json({
+      message: 'Game paused',
+      game: { ...game, timer: updatedTimer }
+    });
+  } catch (error) {
+    console.error('Error pausing game:', error);
+    res.status(500).json({ error: 'Failed to pause game' });
   }
-
-  game.status = 'paused';
-  game.timers.gameClock.isRunning = false;
-  game.updatedAt = new Date();
-
-  // Emit real-time update via socket
-  req.app.get('io').to(req.params.id).emit('gameUpdate', game);
-
-  res.json({
-    message: 'Game paused',
-    game
-  });
 });
 
 // End game
-router.post('/:id/end', (req, res) => {
-  const game = games[req.params.id];
-  
-  if (!game) {
-    return res.status(404).json({ error: 'Game not found' });
+router.post('/:id/end', async (req, res) => {
+  try {
+    const game = await Game.updateStatus(req.params.id, 'finished');
+    
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    // Update timer status
+    const updatedTimer = await Timer.updateStatus(req.params.id, false, false);
+
+    // Emit real-time update via socket
+    req.app.get('io').to(req.params.id).emit('gameUpdate', { ...game, timer: updatedTimer });
+
+    res.json({
+      message: 'Game ended',
+      game: { ...game, timer: updatedTimer }
+    });
+  } catch (error) {
+    console.error('Error ending game:', error);
+    res.status(500).json({ error: 'Failed to end game' });
   }
-
-  game.status = 'finished';
-  game.timers.gameClock.isRunning = false;
-  game.updatedAt = new Date();
-
-  // Emit real-time update via socket
-  req.app.get('io').to(req.params.id).emit('gameUpdate', game);
-
-  res.json({
-    message: 'Game ended',
-    game
-  });
 });
 
 module.exports = router;

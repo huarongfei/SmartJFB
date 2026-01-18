@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartJFB - 导航菜单</title>
+  <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/utils.js"></script>
   <script src="js/main.js"></script>
   <style>
     .nav-container {
@@ -232,7 +234,7 @@
         document.getElementById('admin-nav-link').addEventListener('click', function(e) {
           e.preventDefault();
           alert('请先登录');
-          window.location.href = 'pages/auth.html';
+          window.location.href = './pages/auth.html';
         });
       }
     });

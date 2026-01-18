@@ -44,6 +44,23 @@
   font-size: var(--font-size-xl);
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-left h1 {
+  margin: 0;
+}
+
 .status-bar {
   display: flex;
   align-items: center;
@@ -185,18 +202,9 @@
   padding: 15px 25px;
 }
 
-.clock.small {
-  font-size: var(--font-size-xl);
-  min-width: 80px;
-}
-
 .controls {
   text-align: center;
   margin: 20px 0;
-}
-
-.controls .btn {
-  margin: 5px;
 }
 
 /* Large Screen Scoreboard Display */

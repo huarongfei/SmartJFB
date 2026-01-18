@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartJFB 模块加载测试</title>
+  <!-- 测试组件CSS是否能正常加载 -->
+  <link rel="stylesheet" href="./frontend/css/components.css">
+  <link rel="stylesheet" href="./frontend/css/main.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>SmartJFB 模块化功能测试</h1>
+  
+  <div class="test-section">
+    <h2>CSS 组件测试</h2>
+    <p>以下按钮应该应用了 components.css 中定义的样式：</p>
+    <button class="btn btn-primary">主要按钮</button>
+    <button class="btn btn-success">成功按钮</button>
+    <button class="btn btn-warning">警告按钮</button>
+    <button class="btn btn-danger">危险按钮</button>
+    <button class="btn btn-info">信息按钮</button>
+    <br><br>
+    <div class="card">
+      <h3>卡片组件测试</h3>
+      <p>这是一个使用了 .card 样式的组件</p>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>JavaScript 工具函数测试</h2>
+    <button id="test-utils" class="btn btn-primary">测试 Utils 函数</button>
+    <div id="test-result" style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 4px;"></div>
+  </div>
+
+  <!-- 测试 JS 模块是否能正常加载 -->
+  <script src="./frontend/js/utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Utils 模块已加载');
+      
+      document.getElementById('test-utils').addEventListener('click', function() {
+        const resultDiv = document.getElementById('test-result');
+        
+        try {
+          // 测试一些工具函数
+          const time1 = formatTime(125); // 应该返回 "02:05"
+          const time2 = formatDecimalTime(125.7); // 应该返回 "2:05.7"
+          
+          // 测试认证相关函数是否存在
+          const authStatus = typeof isAuthenticated === 'function' ? '存在' : '不存在';
+          const authRedirect = typeof requireAuth === 'function' ? '存在' : '不存在';
+          
+          resultDiv.innerHTML = `
+            <h4>测试结果:</h4>
+            <p><strong>formatTime(125):</strong> ${time1}</p>
+            <p><strong>formatDecimalTime(125.7):</strong> ${time2}</p>
+            <p><strong>isAuthenticated 函数:</strong> ${authStatus}</p>
+            <p><strong>requireAuth 函数:</strong> ${authRedirect}</p>
+            <p><strong>API_BASE_URL:</strong> ${typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '未定义'}</p>
+            <p><strong>认证状态:</strong> ${is_authenticated ? '已认证' : '未认证'}</p>
+          `;
+        } catch (error) {
+          resultDiv.innerHTML = `<p style="color: red;">错误: ${error.message}</p>`;
+        }
+      });
+      
+      // 页面加载完成提示
+      console.log('SmartJFB 模块化功能测试页面已加载');
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('Socket URL:', SOCKET_URL);
+    });
+  </script>
+</body>
+</html>

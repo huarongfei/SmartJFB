@@ -7,9 +7,10 @@
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
     "test": "jest",
-    "frontend": "cd frontend && python -m http.server 3000",
+    "frontend": "cd frontend && npx http-server -p 3002 -c-1",
     "backend": "node backend/server.js",
-    "start-all": "concurrently \"npm run backend\" \"npm run frontend\""
+    "start-all": "concurrently --kill-others-on-fail \"npm run backend\" \"npm run frontend\"",
+    "dev-all": "concurrently \"npm run dev\" \"npm run frontend\""
   },
   "keywords": [
     "sports",
@@ -36,7 +37,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0",
+    "concurrently": "^8.2.2",
     "jest": "^29.6.2",
     "nodemon": "^3.0.1",
     "supertest": "^6.3.3"

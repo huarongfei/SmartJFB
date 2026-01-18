@@ -1,5 +1,7 @@
 // Big screen display functionality
 
+// Using utilities from utils.js
+
 document.addEventListener('DOMContentLoaded', function() {
   initBigScreen();
 });

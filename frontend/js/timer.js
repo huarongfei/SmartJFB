@@ -1,5 +1,7 @@
 // Timer-specific functionality
 
+// Using utilities from utils.js
+
 document.addEventListener('DOMContentLoaded', function() {
   initTimerPage();
 });
@@ -10,6 +12,9 @@ function initTimerPage() {
   
   // Update connection status
   checkConnectionStatus();
+  
+  // Load active games list
+  refreshGamesList();
 }
 
 function initTimerEventHandlers() {
@@ -65,17 +70,11 @@ async function loadGameTimer() {
   }
 }
 
-// Refresh list of active games
+// Refresh list of active games (overriding the default function)
 async function refreshGamesList() {
   try {
-    const response = await fetch(`${API_BASE_URL}/advanced-timers`);
-    const result = await response.json();
-    
-    if (response.ok) {
-      updateGamesList(result.timers);
-    } else {
-      throw new Error(result.error || 'Failed to refresh games list');
-    }
+    // Use the new function from utils.js
+    await window.refreshGamesList();
   } catch (error) {
     console.error('Error refreshing games list:', error);
     alert(`刷新比赛列表失败: ${error.message}`);

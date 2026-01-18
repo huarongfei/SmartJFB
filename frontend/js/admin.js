@@ -1,5 +1,7 @@
 // Admin-specific functionality
 
+// Using utilities from utils.js
+
 document.addEventListener('DOMContentLoaded', function() {
   initAdminPage();
 });
@@ -375,4 +377,10 @@ function renderActivityList(activityItems) {
   
   // For now, we'll just use the static HTML content
   // In a real implementation, we would update the content dynamically
+}
+
+// Update users list display when notified by socket
+function updateUsersList(users) {
+  // Reload the user table to reflect changes
+  loadUsers();
 }

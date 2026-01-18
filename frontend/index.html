@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartJFB - 主控制台</title>
+  <title>SmartJFB - 首页</title>
+  <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/utils.js"></script>
   <script src="js/main.js"></script>
   <style>
     .welcome-container {
@@ -64,6 +66,11 @@
       transform: translateY(-3px);
       box-shadow: var(--box-shadow-lg);
     }
+    .auto-redirect {
+      margin-top: 20px;
+      color: var(--gray-color);
+      font-size: var(--font-size-sm);
+    }
   </style>
 </head>
 <body>
@@ -71,7 +78,7 @@
     <div class="dashboard">
       <header class="dashboard-header">
         <div class="header-content">
-          <h1>SmartJFB 主控制台</h1>
+          <h1>SmartJFB 首页</h1>
           <div class="status-bar">
             <span id="connection-status" class="status-indicator">未连接</span>
             <span id="app-status" class="status-indicator">就绪</span>
@@ -85,17 +92,17 @@
             <div class="logo">SmartJFB</div>
             <h2>欢迎使用 SmartJFB 专业体育计分计时系统</h2>
             <p class="welcome-message">
-              选择以下功能开始使用：<br>
-              计分、计时、数据分析、比赛管理等功能一应俱全
+              专业篮球/足球计分、计时、分析一体化系统
             </p>
             
             <div class="quick-links">
-              <a href="pages/create_game.html" class="quick-link">创建比赛</a>
-              <a href="pages/scoring.html" class="quick-link">计分系统</a>
-              <a href="pages/timer.html" class="quick-link">计时控制</a>
-              <a href="pages/analytics.html" class="quick-link">数据分析</a>
-              <a href="pages/admin.html" class="quick-link">系统管理</a>
+              <a href="pages/auth.html" class="quick-link">用户登录</a>
+              <a href="nav.html" class="quick-link">系统导航</a>
             </div>
+            
+            <p class="auto-redirect">
+              系统将在 <span id="countdown">5</span> 秒后自动跳转到登录页面...
+            </p>
           </div>
         </div>
       </div>
@@ -103,10 +110,31 @@
   </div>
 
   <script>
-    // 检查认证状态，如果没有认证则重定向到登录页面
+    // 自动跳转到登录页面
+    function redirectToLogin() {
+      window.location.href = 'pages/auth.html';
+    }
+    
+    // 倒计时功能
+    let countdown = 5;
+    const countdownElement = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+      countdown--;
+      if (countdownElement) {
+        countdownElement.textContent = countdown;
+      }
+      
+      if (countdown <= 0) {
+        clearInterval(timer);
+        redirectToLogin();
+      }
+    }, 1000);
+    
+    // 检查认证状态，如果已登录则跳转到导航页面
     document.addEventListener('DOMContentLoaded', function() {
-      if (!requireAuth('./pages/auth.html')) {
-        return; // requireAuth 函数会处理重定向
+      if (isAuthenticated()) {
+        window.location.href = 'nav.html';
       }
     });
   </script>

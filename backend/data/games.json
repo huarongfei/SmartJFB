@@ -1,0 +1,32 @@
+[
+  {
+    "id": "643195fe-728d-4941-a1f7-fa36e6d317e6",
+    "sport": "basketball",
+    "name": "text1 vs text2",
+    "teams": [
+      {
+        "id": "b1def1f3-2960-4d1d-8454-ba276a4d25e9",
+        "name": "text1",
+        "type": "home",
+        "game_id": "643195fe-728d-4941-a1f7-fa36e6d317e6"
+      },
+      {
+        "id": "97c0b5d0-cdaa-42cd-9a33-3e2bb9b620c1",
+        "name": "text2",
+        "type": "away",
+        "game_id": "643195fe-728d-4941-a1f7-fa36e6d317e6"
+      }
+    ],
+    "config": {
+      "duration": 2880,
+      "overtimeDuration": 300,
+      "timeouts": {
+        "home": 3,
+        "away": 3
+      }
+    },
+    "status": "setup",
+    "created_at": "2026-01-18T06:30:18.359Z",
+    "updated_at": "2026-01-18T06:30:18.359Z"
+  }
+]

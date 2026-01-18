@@ -1,5 +1,7 @@
 // Scoring-specific functionality
 
+// Using utilities from utils.js
+
 document.addEventListener('DOMContentLoaded', function() {
   initScoringPage();
 });
@@ -10,6 +12,9 @@ function initScoringPage() {
   
   // Update connection status
   checkConnectionStatus();
+  
+  // Load active games list
+  refreshGamesList();
 }
 
 function initScoringEventHandlers() {
@@ -63,17 +68,17 @@ async function loadGameScore() {
   }
 }
 
-// Refresh list of active games
+// Refresh list of active games (overriding the default function)
 async function refreshGamesList() {
   try {
-    // Using the advanced timers endpoint to get active games
-    const response = await fetch(`${API_BASE_URL}/advanced-timers`);
-    const result = await response.json();
+    // Use the function from utils.js
+    const games = await fetch(`${API_BASE_URL}/games`);
+    const data = await games.json();
     
     if (response.ok) {
-      updateGamesList(result.timers);
+      updateGamesList(data.games || []);
     } else {
-      throw new Error(result.error || 'Failed to refresh games list');
+      throw new Error(data.error || 'Failed to refresh games list');
     }
   } catch (error) {
     console.error('Error refreshing games list:', error);
@@ -82,16 +87,18 @@ async function refreshGamesList() {
 }
 
 // Update games dropdown with active games
-function updateGamesList(timers) {
+function updateGamesList(games) {
   const gamesSelect = document.getElementById('active-games');
   // Clear existing options except the first one
   gamesSelect.innerHTML = '<option value="">请选择比赛...</option>';
   
-  for (const [gameId, timer] of Object.entries(timers)) {
-    const option = document.createElement('option');
-    option.value = gameId;
-    option.textContent = `比赛 ${gameId.substring(0, 8)} - ${timer.sport}`;
-    gamesSelect.appendChild(option);
+  if (games && Array.isArray(games)) {
+    for (const game of games) {
+      const option = document.createElement('option');
+      option.value = game.id;
+      option.textContent = `${game.name || `${game.teams?.[0]?.name || 'Home'} vs ${game.teams?.[1]?.name || 'Away'}`} - ${game.sport}`;
+      gamesSelect.appendChild(option);
+    }
   }
 }
 

@@ -12,6 +12,9 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
+// Initialize database
+const initDatabase = require('./db/init');
+
 const app = express();
 const server = http.createServer(app);
 
@@ -75,9 +78,22 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`SmartJFB server is running on port ${PORT}`);
-});
+// Initialize database and start server
+async function startServer() {
+  try {
+    // Initialize database
+    await initDatabase();
+    
+    const PORT = process.env.PORT || 3000;
+    server.listen(PORT, () => {
+      console.log(`SmartJFB server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 module.exports = server;

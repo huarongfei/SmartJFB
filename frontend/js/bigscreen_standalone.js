@@ -1,5 +1,5 @@
 // Standalone big screen display functionality
-// This file contains all necessary functionality for the big screen display without dependencies
+// Using utilities from utils.js
 
 document.addEventListener('DOMContentLoaded', function() {
   initBigScreen();
