@@ -147,9 +147,22 @@ We welcome all developers to contribute to SmartJFB!
 4. 推送到分支 (Push to the branch)
 5. 创建 Pull Request
 
-## 贡献者指南 (Contribution Guidelines)
+## 许可证与贡献 (License and Contributions)
 
-### 代码规范 (Coding Standards)
+本项目采用 MIT 许可证，这意味着您可以自由地使用、复制、修改和分发本软件。
+
+### 商业使用
+
+- ✅ 允许商业使用
+- ✅ 允许分发
+- ✅ 允许修改
+- ✅ 允许私人使用
+
+**唯一要求**：在软件和软件副本中包含原始版权通知和许可声明。
+
+### 贡献者指南 (Contribution Guidelines)
+
+#### 代码规范 (Coding Standards)
 - 使用 ESLint 进行 JavaScript 代码检查
 - CSS 类名使用 kebab-case 格式
 - 文件命名使用小写字母和连字符
@@ -179,6 +192,17 @@ We are looking for like-minded developers to jointly improve the SmartJFB system
 本项目采用 MIT 许可证 - 查看 LICENSE 文件获取详情
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+### MIT License 简介
+
+MIT 许可证是全球最广泛使用的开源许可证之一，其核心特点是：
+
+- **商业使用**：允许商业使用
+- **分发**：允许分发
+- **修改**：允许修改
+- **私人使用**：允许私有使用
+
+唯一的要求是在软件和软件副本中包含原始版权通知和许可声明。
 
 ## 路线图 (Roadmap)
 

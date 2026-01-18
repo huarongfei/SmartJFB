@@ -67,8 +67,8 @@ function connectToGameUpdates() {
     });
   }
   
-  // Simulate periodic updates for demo purposes if no socket connection
-  setInterval(simulateScoreUpdate, 10000); // Every 10 seconds
+  // 注释掉演示模式代码
+  // setInterval(simulateScoreUpdate, 10000); // Every 10 seconds
 }
 
 function setInitialDisplayValues() {
@@ -288,27 +288,9 @@ function hideCenterOverlay() {
   }
 }
 
-// Simulate score updates for demo purposes
+// 演示模式函数已移除
 function simulateScoreUpdate() {
-  // Only run if we're in demo mode and not connected
-  const statusElement = document.getElementById('connection-status');
-  if (statusElement && statusElement.classList.contains('disconnected')) {
-    const homeScoreEl = document.getElementById('home-team-score');
-    const awayScoreEl = document.getElementById('away-team-score');
-    
-    if (homeScoreEl && awayScoreEl) {
-      // Randomly increase one of the scores
-      const increment = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3 points
-      
-      if (Math.random() > 0.5) {
-        const currentScore = parseInt(homeScoreEl.textContent) || 0;
-        homeScoreEl.textContent = currentScore + increment;
-      } else {
-        const currentScore = parseInt(awayScoreEl.textContent) || 0;
-        awayScoreEl.textContent = currentScore + increment;
-      }
-    }
-  }
+  // 演示模式已禁用，仅保留空函数防止错误
 }
 
 // Format time for display (MM:SS)

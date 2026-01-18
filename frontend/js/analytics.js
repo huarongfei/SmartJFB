@@ -253,8 +253,16 @@ async function exportStats(format) {
         document.body.removeChild(a);
       } else if (format === 'pdf') {
         // For PDF, we'd normally handle the download differently
-        // For demo purposes, show an alert
-        alert('PDF导出功能已触发（实际系统中会下载PDF文件）');
+        // Actual PDF export implementation
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `game_${gameId}_stats.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       } else {
         // Full report
         alert('完整报告生成已触发（实际系统中会下载综合报告）');

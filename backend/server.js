@@ -1,3 +1,8 @@
+/**
+ * SmartJFB - Professional Basketball/Football Scoreboard and Timer System
+ * Copyright (c) 2023 SmartJFB Development Team
+ * Licensed under the MIT License
+ */
 const express = require('express');
 const http = require('http');
 const cors = require('cors');

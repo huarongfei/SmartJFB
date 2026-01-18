@@ -1,4 +1,5 @@
 const express = require('express');
+const PDFDocument = require('pdfkit');
 const router = express.Router();
 
 // Mock data storage for game events and statistics
@@ -529,12 +530,47 @@ router.get('/games/:gameId/export/:format', (req, res) => {
     
     return res.send(csvContent);
   } else if (format === 'pdf') {
-    // In a real implementation, this would generate a PDF
-    // For now, we'll return a message
-    return res.status(501).json({ 
-      error: 'PDF export not implemented in this demo', 
-      stats: stats 
-    });
+    // Generate a basic PDF using pdfkit
+    const doc = new PDFDocument();
+    
+    // Set up response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=game_${gameId}_stats.pdf`);
+    
+    // Pipe the PDF document to the response
+    doc.pipe(res);
+    
+    // Add content to the PDF
+    doc.fontSize(20).text('比赛统计数据报告', { align: 'center' });
+    doc.moveDown();
+    
+    doc.fontSize(14).text(`比赛ID: ${gameId}`);
+    doc.moveDown();
+    
+    doc.fontSize(12).text('基本统计数据:', { underline: true });
+    doc.moveDown();
+    
+    doc.text(`主队得分: ${stats.basic.scores.home.points}`);
+    doc.text(`客队得分: ${stats.basic.scores.away.points}`);
+    doc.text(`主队篮板: ${stats.basic.rebounds.home || 0}`);
+    doc.text(`客队篮板: ${stats.basic.rebounds.away || 0}`);
+    doc.text(`主队助攻: ${stats.basic.assists.home || 0}`);
+    doc.text(`客队助攻: ${stats.basic.assists.away || 0}`);
+    doc.text(`主队抢断: ${stats.basic.steals.home || 0}`);
+    doc.text(`客队抢断: ${stats.basic.steals.away || 0}`);
+    doc.text(`主队盖帽: ${stats.basic.blocks.home || 0}`);
+    doc.text(`客队盖帽: ${stats.basic.blocks.away || 0}`);
+    doc.moveDown();
+    
+    doc.text('高级统计数据:', { underline: true });
+    doc.moveDown();
+    
+    doc.text(`主队效率值: ${stats.advanced.efficiency.home}`);
+    doc.text(`客队效率值: ${stats.advanced.efficiency.away}`);
+    
+    // Finalize the PDF
+    doc.end();
+    return;
   }
   
   // Default to JSON
