@@ -7,6 +7,24 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/dashboard.css">
   <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+  
+  <script>
+    // 检查认证状态，如果没有认证则重定向到登录页面
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = './auth.html';
+        return false;
+      }
+      return true;
+    }
+
+    // 页面加载时检查认证
+    if (!checkAuth()) {
+      // 如果未认证，不再继续加载页面内容
+      throw new Error("Authentication required");
+    }
+  </script>
 </head>
 <body>
   <div id="app">

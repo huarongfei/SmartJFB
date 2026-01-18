@@ -142,9 +142,26 @@ function getUserRole() {
 }
 
 // Function to redirect to login page if not authenticated
-function requireAuth(redirectUrl = './pages/auth.html') {
+function requireAuth(redirectUrl = './auth.html') {
   if (!isAuthenticated()) {
-    window.location.href = redirectUrl;
+    // 获取当前页面路径并尝试构建正确的登录页面路径
+    const currentPath = window.location.pathname;
+    let loginPath;
+    
+    // 如果当前路径包含 '/pages/'，那么登录页面应该在同一级
+    if (currentPath.includes('/pages/')) {
+      loginPath = './auth.html';
+    } else {
+      // 否则可能是嵌套的路径，尝试向上几级
+      if (currentPath.includes('/timer/')) {
+        loginPath = './auth.html';
+      } else {
+        loginPath = redirectUrl;
+      }
+    }
+    
+    // 最终重定向到登录页面
+    window.location.href = loginPath;
     return false;
   }
   return true;

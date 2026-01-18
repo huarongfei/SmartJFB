@@ -74,6 +74,14 @@
   </div>
 
   <script src="../../js/main.js"></script>
+  <script>
+    // 检查认证状态，如果没有认证则重定向到登录页面
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!requireAuth('../../pages/auth.html')) {
+        return; // requireAuth 函数会处理重定向
+      }
+    });
+  </script>
   <script src="../../js/timer/shotClock.js"></script>
 </body>
 </html>
